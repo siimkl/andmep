@@ -312,7 +312,9 @@ function updateImpact() {
     const dominant = Object.entries(labelNames).map(([key, label]) => [key, label, metrics[key]]).sort((a, b) => b[2] - a[2])[0];
     distributionText = dominant[2] >= 3
       ? `Märgend „${dominant[1]}” esineb ${dominant[2]}/${labelCases.length} näites. Seetõttu kipub mudel seda sarnastes olukordades sagedamini soovitama. Juhendile vastas ${metrics.aligned}/${labelCases.length} märgendit.`
-      : `Andmestikus on ${metrics.categories} erinevat märgendit. Juhendile vastas ${metrics.aligned}/${labelCases.length} märgendit. Mudel õpib siiski ka ekslikest märgenditest.`;
+      : metrics.aligned === labelCases.length
+        ? `Andmestikus on ${metrics.categories} erinevat märgendit. Kõik ${labelCases.length} märgendit vastavad juhendile ja moodustavad järjepidevad treeningnäited.`
+        : `Andmestikus on ${metrics.categories} erinevat märgendit. Juhendile vastab ${metrics.aligned}/${labelCases.length} märgendit. Mudel kasutab treeningul ka juhisega vastuolus olevaid näiteid.`;
   }
   $("#distributionSummary").textContent = distributionText;
 
@@ -492,7 +494,7 @@ function renderOutputCase() {
     const { index, choice } = state.pendingReview;
     const item = outputCases[index];
     const suggestion = simulatedSuggestion(item, index);
-    container.innerHTML = `<div class="case-top"><span>${item.id} · ${index + 1}/${outputCases.length}</span><b>${reviewNames[choice]}</b></div><h4>${item.title}</h4><p>${outputText(item)}</p><div class="output-recommendation"><span>MUDELI SOOVITUS · OTSUSTUSTUGI, MITTE TEENUSEOTSUS</span><strong>${suggestion}</strong><div class="confidence-ring"><small>MUDELI KINDLUS</small><b>${item.confidence}%</b></div></div><div class="quality-result"><small>KVALITEEDIMÄRGE</small><b>${reviewNames[choice]}</b><span>Sinu hinnang mudeli väljundile</span></div>`;
+    container.innerHTML = `<div class="case-top"><span>${item.id} · ${index + 1}/${outputCases.length}</span><b>${reviewNames[choice]}</b></div><h4>${item.title}</h4><p>${outputText(item)}</p><div class="output-recommendation"><span>MUDELI SOOVITUS</span><strong>${suggestion}</strong><div class="confidence-ring"><small>MUDELI KINDLUS</small><b>${item.confidence}%</b></div></div><div class="quality-result"><small>KVALITEEDIMÄRGE</small><b>${reviewNames[choice]}</b><span>Sinu hinnang mudeli väljundile</span></div>`;
     actions.hidden = true;
     qualityPrompt.hidden = true;
     explanation.hidden = false;
@@ -515,7 +517,7 @@ function renderOutputCase() {
   } else {
     const item = outputCases[state.reviews.length];
     const suggestion = simulatedSuggestion(item, state.reviews.length);
-    container.innerHTML = `<div class="case-top"><span>${item.id} · ${state.reviews.length + 1}/${outputCases.length}</span><b>KONTROLLKIRJE</b></div><h4>${item.title}</h4><p>${outputText(item)}</p><div class="output-recommendation"><span>MUDELI SOOVITUS · OTSUSTUSTUGI, MITTE TEENUSEOTSUS</span><strong>${suggestion}</strong><div class="confidence-ring"><small>MUDELI KINDLUS</small><b>${item.confidence}%</b></div></div><div class="impact-label"><b>MIKS SEE ON ARENDUSELE OLULINE?</b><span>${item.impact}</span></div>`;
+    container.innerHTML = `<div class="case-top"><span>${item.id} · ${state.reviews.length + 1}/${outputCases.length}</span><b>KONTROLLKIRJE</b></div><h4>${item.title}</h4><p>${outputText(item)}</p><div class="output-recommendation"><span>MUDELI SOOVITUS</span><strong>${suggestion}</strong><div class="confidence-ring"><small>MUDELI KINDLUS</small><b>${item.confidence}%</b></div></div><div class="impact-label"><b>MIKS SEE ON ARENDUSELE OLULINE?</b><span>${item.impact}</span></div>`;
     actions.hidden = false;
     qualityPrompt.hidden = false;
     explanation.hidden = true;

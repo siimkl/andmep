@@ -293,7 +293,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert stage3["impactKicker"] == "MUDELI VÄLJUNDITE HINDAMINE" and stage3["impactTitle"] == "Mida tuleb järgmises mudeliversioonis parandada?" and stage3["impactStatusLabel"] == "HINDAMISE SEIS", stage3
                 assert "kvaliteedimärge jõuab arendusmeeskonnani" in stage3["cue"] and "arendajale ja tooteomanikule" in stage3["cue"], stage3
                 assert stage3["policyLabel"] == "Kuidas jõuab kvaliteedimärge arendusmeeskonnani?" and len(stage3["policyOptions"]) == 5 and stage3["policyOptions"][1] == "Iga soovitus saab kvaliteedimärke ja põhjenduse", stage3
-                assert "OTSUSTUSTUGI, MITTE TEENUSEOTSUS" in stage3["recommendationLabel"] and stage3["confidenceLabel"] == "MUDELI KINDLUS" and "Hinda mudeli väljundit, mitte tööotsijat." in stage3["qualityPrompt"], stage3
+                assert stage3["recommendationLabel"] == "MUDELI SOOVITUS" and stage3["confidenceLabel"] == "MUDELI KINDLUS" and "Hinda mudeli väljundit, mitte tööotsijat." in stage3["qualityPrompt"], stage3
                 assert stage3["modelVizHidden"] and "VÄLJUNDITE VÕRDLUS POLE VEEL AVATUD" in stage3["latestImpact"] and "Kinnita kvaliteedihinnangud" in stage3["latestImpact"], stage3
                 assert stage3["buttons"] == ["Kasutatav", "Vajab parandamist", "Hinnanguks pole piisavalt infot"] and stage3["complete"] == "Kinnita kvaliteedihinnangud", stage3
                 evaluate("document.querySelector('[data-stage=\"3\"] .labeling-instruction-intro').scrollIntoView({block:'center'})")
