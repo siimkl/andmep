@@ -272,6 +272,7 @@ function labelPatternRows() {
 function updateImpact() {
   const metrics = calculateLabelMetrics();
   const total = state.labels.length;
+  $("#impactNextStep").hidden = !(state.currentStage === 2 && state.completed.has(2));
   if (state.currentStage === 3) {
     $("#impactKicker").textContent = "MUDELI VÄLJUNDITE HINDAMINE";
     $("#impactTitle").textContent = "Mida tuleb järgmises mudeliversioonis parandada?";
@@ -794,7 +795,11 @@ function completeStage(stage) {
   $("#dialogMiddle").textContent = message.middle;
   $("#dialogEnd").textContent = message.end;
   $("#dialogInsight").textContent = message.insight;
-  $("#dialogContinue span").textContent = stage === 4 ? "Vaata mudeli paranduskava" : "Jätka järgmise etapiga";
+  $("#dialogContinue span").textContent = stage === 2
+    ? "Vaata märgenduse mõju"
+    : stage === 4
+      ? "Vaata mudeli paranduskava"
+      : "Jätka järgmise etapiga";
   $("#impactDialog").dataset.completedStage = stage;
   $("#impactDialog").showModal();
   if (stage === 4) renderResults();
@@ -994,11 +999,15 @@ $$('[data-complete]').forEach(button => button.addEventListener("click", () => c
 $$('.step').forEach(button => button.addEventListener("click", () => showStage(Number(button.dataset.step))));
 $("#previousStage").addEventListener("click", () => showStage(Math.max(1, state.currentStage - 1)));
 $("#nextStage").addEventListener("click", () => showStage(Math.min(state.maxUnlocked, state.currentStage + 1)));
+$("#continueFromImpact").addEventListener("click", () => showStage(3));
 
 $("#dialogContinue").addEventListener("click", () => {
   const stage = Number($("#impactDialog").dataset.completedStage);
   $("#impactDialog").close();
-  if (stage < 4) showStage(stage + 1);
+  if (stage === 2) {
+    $("#impactCard").scrollIntoView({ behavior: "smooth", block: "start" });
+    $("#impactCard").focus({ preventScroll: true });
+  } else if (stage < 4) showStage(stage + 1);
   else $("#resultSection").scrollIntoView({ behavior: "smooth", block: "start" });
 });
 

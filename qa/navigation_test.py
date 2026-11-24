@@ -268,9 +268,14 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 screenshot("ai-andmetoo-before-label-confirmation.png")
                 evaluate("document.querySelector('[data-complete=\"2\"]').click()")
                 time.sleep(0.25)
-                after_confirmation = json.loads(evaluate("JSON.stringify({impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),dialogOpen:impactDialog.open})"))
-                assert after_confirmation == {"impactHidden": False, "pending": False, "dialogOpen": True}, after_confirmation
+                after_confirmation = json.loads(evaluate("JSON.stringify({impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),dialogOpen:impactDialog.open,dialogAction:dialogContinue.textContent.trim()})"))
+                assert after_confirmation == {"impactHidden": False, "pending": False, "dialogOpen": True, "dialogAction": "Vaata märgenduse mõju"}, after_confirmation
                 evaluate("dialogContinue.click()")
+                time.sleep(0.25)
+                impact_transition = json.loads(evaluate("JSON.stringify({stage:state.currentStage,dialogOpen:impactDialog.open,impactHidden:impactCard.hidden,impactTitle:impactTitle.textContent,nextHidden:impactNextStep.hidden,nextText:continueFromImpact.textContent.trim(),focused:document.activeElement===impactCard})"))
+                assert impact_transition == {"stage": 2, "dialogOpen": False, "impactHidden": False, "impactTitle": "Mida mudel sinu märgenditest õpib?", "nextHidden": False, "nextText": "Jätka mudeli väljundite hindamisega", "focused": True}, impact_transition
+                screenshot("ai-andmetoo-label-impact-transition.png")
+                evaluate("continueFromImpact.click()")
                 time.sleep(0.25)
                 stage3 = json.loads(evaluate("""JSON.stringify({
                   stepTitle: document.querySelector('[data-step="3"] b').textContent,
