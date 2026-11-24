@@ -827,18 +827,6 @@ function renderResults() {
     ["4", "Parandus jõuab treeningandmetesse", state.appeal === "owned" ? "Vaidlustatud soovituse põhjus jõuab seirelogisse ning võib muuta juhist, testprofiile ja andmestiku järgmist versiooni." : "Üksik viga võib saada lahenduse, kuid selle põhjus ei pruugi järgmisse märgendusvooru jõuda."]
   ];
   $("#tradeoffList").innerHTML = tradeoffs.map(([index, heading, text]) => `<article><span>${index}</span><div><b>${heading}</b><p>${text}</p></div></article>`).join("");
-  const interventionNames = { every: "iga soovituse kvaliteedimärge ja põhjendus", sample: "regulaarne esinduslik hindamisvalim", confidence: "ainult madala kindlusega väljundite tagasiside", complaint: "ainult vaidlustustest või kaebustest tekkiv tagasiside" };
-  const appealNames = { helpdesk: "üldine infokanal", vendor: "arenduspartnerile saadetav veateade", owned: "ameti vaidlustamise ja parandamise kord" };
-  const disagreementNames = { first: "esimese märgendaja valik", both: "kaks vastukäivat märgendit", expert: "valdkonnaspetsialisti põhjendatud lõppotsus" };
-  const missingNames = { drop: "puudulik registrikirje saadetakse andmete täiendamisele", average: "puuduliku info korral kasutatakse vaikimisi tavaplaani", guess: "puuduliku info põhjal valitakse tõenäolisim märgend" };
-  const auditNames = { overall: "ainult treeningkirjete koguarv", technical: "ainult täidetud lahtrid", coverage: "piirkonna, keele, kanali ja puuduvate andmete kontroll" };
-  const internalOwners = Object.values(state.ownership).filter(value => value === "internal" || value === "shared").length;
-  $("#traceFlow").innerHTML = [
-    ["1 · ANDMED + JUHIS", selectedFieldNames().join(", "), `Märgendid: ${Object.keys(labelNames).filter(key => state.availableLabels.has(key)).map(key => labelNames[key]).join(", ")}; ${missingNames[state.missingPolicy]}; ${ruleNames[state.labelRule]}`],
-    ["2 · MÄRGENDAMISTÖÖ", `${metrics.aligned}/${labelCases.length} juhisega kooskõlas`, `${state.labels.length} treeningandmetesse lisatud registrikirjet; ${disagreementNames[state.disagreement]}`],
-    ["3 · MUDELI HINDAMINE", interventionNames[state.intervention], `${state.reviews.length} kvaliteedimärget; parandamist vajab ${state.reviews.filter(value => value === "correct").length} ja lisainfot ${state.reviews.filter(value => value === "human").length}`],
-    ["4 · EDASIARENDUS", `Amet osaleb ${internalOwners}/4 vastutusala töös`, appealNames[state.appeal]]
-  ].map(([step, heading, detail]) => `<article><span>${step}</span><b>${heading}</b><small>${detail}</small></article>`).join("");
   $("#resultSection").hidden = false;
 }
 
