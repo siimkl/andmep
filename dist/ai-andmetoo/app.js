@@ -438,7 +438,6 @@ function renderLabelCase() {
     const labelingReady = Boolean(state.labelRule && state.disagreement);
     $$("#labelActions button").forEach(button => { button.disabled = !labelingReady; button.classList.remove("selected"); });
   }
-  $('[data-complete="2"]').disabled = !stageValid(2);
 }
 
 function simulatedSuggestion(item, index) {
@@ -663,7 +662,12 @@ function updateControls() {
 }
 
 function updateFocusState() {
-  const impactLocked = !state.completed.has(2);
+  const labelingConfirmed = state.completed.has(2);
+  const confirmLabeling = $('[data-complete="2"]');
+  confirmLabeling.disabled = labelingConfirmed || !stageValid(2);
+  confirmLabeling.querySelector("span").textContent = labelingConfirmed ? "Märgendus kinnitatud" : "Kinnita märgendus";
+
+  const impactLocked = !labelingConfirmed;
   const impactCard = $("#impactCard");
   const impactPending = state.currentStage === 1
     || (state.currentStage === 2 && !state.completed.has(2))

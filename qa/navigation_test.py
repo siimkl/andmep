@@ -287,6 +287,8 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 time.sleep(0.25)
                 impact_transition = json.loads(evaluate("JSON.stringify({stage:state.currentStage,dialogOpen:impactDialog.open,impactHidden:impactCard.hidden,impactTitle:impactTitle.textContent,nextHidden:impactNextStep.hidden,nextText:continueFromImpact.textContent.trim(),focused:document.activeElement===impactCard})"))
                 assert impact_transition == {"stage": 2, "dialogOpen": False, "impactHidden": False, "impactTitle": "Mida mudel sinu märgenditest õpib?", "nextHidden": False, "nextText": "Jätka mudeli väljundite hindamisega", "focused": True}, impact_transition
+                assert evaluate("document.querySelector('[data-complete=\"2\"]').disabled")
+                assert evaluate("document.querySelector('[data-complete=\"2\"]').textContent.trim()") == "Märgendus kinnitatud"
                 screenshot("ai-andmetoo-label-impact-transition.png")
                 evaluate("continueFromImpact.click()")
                 time.sleep(0.25)
@@ -362,6 +364,17 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 time.sleep(0.25)
                 after_plan_confirmation = json.loads(evaluate("JSON.stringify({dialogOpen:impactDialog.open,completed:state.completed.has(4),completedCount:completedCount.textContent,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),impactTitle:document.querySelector('#impactTitle').textContent})"))
                 assert after_plan_confirmation == {"dialogOpen": True, "completed": True, "completedCount": "4", "impactHidden": False, "pending": False, "impactTitle": "Kuidas jõuavad parandused järgmisse versiooni?"}, after_plan_confirmation
+                evaluate("dialogContinue.click(); document.querySelector('[data-step=\"2\"]').click()")
+                assert evaluate("document.querySelector('[data-complete=\"2\"]').disabled")
+                evaluate("""(() => {
+                  document.querySelector('[data-relabel]').click();
+                  for (const label of ['fast', 'standard', 'supplement', 'self', 'review']) {
+                    document.querySelector('#labelActions button[data-label="' + label + '"]').click();
+                    nextLabelCase.click();
+                  }
+                })()""")
+                assert not evaluate("document.querySelector('[data-complete=\"2\"]').disabled")
+                assert evaluate("document.querySelector('[data-complete=\"2\"]').textContent.trim()") == "Kinnita märgendus"
 
         command("Page.navigate", {"url": URL + "kraapimine/"})
         wait_for_path("/kraapimine/")
