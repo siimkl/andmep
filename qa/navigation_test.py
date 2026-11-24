@@ -231,12 +231,15 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 time.sleep(0.25)
                 evaluate("dialogContinue.click()")
                 time.sleep(0.25)
-                five_case_start = json.loads(evaluate("JSON.stringify({total:labelCases.length,progress:labelProgress.textContent,step:document.querySelector('[data-step=\"2\"] small').textContent,caseId:document.querySelector('#labelCase .case-top span').textContent,caseTitle:document.querySelector('#labelCase h4').textContent,trainingIds:labelCases.map(item=>item.id),trainingTitles:labelCases.map(item=>item.title),outputIds:outputCases.map(item=>item.id),outputTitles:outputCases.map(item=>item.title),briefing:document.querySelector('.briefing-copy p').textContent})"))
+                five_case_start = json.loads(evaluate("JSON.stringify({total:labelCases.length,progress:labelProgress.textContent,step:document.querySelector('[data-step=\"2\"] small').textContent,caseId:document.querySelector('#labelCase .case-top span').textContent,caseTitle:document.querySelector('#labelCase h4').textContent,trainingIds:labelCases.map(item=>item.id),trainingTitles:labelCases.map(item=>item.title),outputIds:outputCases.map(item=>item.id),outputTitles:outputCases.map(item=>item.title),briefing:document.querySelector('.briefing-copy').textContent})"))
                 assert five_case_start["total"] == 5 and five_case_start["progress"] == "0 / 5 märgendatud", five_case_start
                 assert five_case_start["step"] == "5 registrikirjet · valik, põhjendus ja parandus" and five_case_start["caseId"] == "T-101 · 1/5" and five_case_start["caseTitle"] == "Tööotsija T-101", five_case_start
                 assert five_case_start["trainingIds"] == ["T-101", "T-102", "T-103", "T-104", "T-105"] and five_case_start["trainingTitles"] == ["Tööotsija T-101", "Tööotsija T-102", "Tööotsija T-103", "Tööotsija T-104", "Tööotsija T-105"], five_case_start
                 assert five_case_start["outputIds"] == ["T-201", "T-202", "T-203", "T-204"] and five_case_start["outputTitles"] == ["Tööotsija T-201", "Tööotsija T-202", "Tööotsija T-203", "Tööotsija T-204"], five_case_start
-                assert "kõigile registris olevatele tööotsijatele" in five_case_start["briefing"] and "kvaliteedimärke" in five_case_start["briefing"] and "arendajale ning tooteomanikule" in five_case_start["briefing"], five_case_start
+                briefing = five_case_start["briefing"]
+                assert "igale registreeritud tööotsijale" in briefing, briefing
+                assert "Ametnik otsustab" in briefing and "arendusmeeskonnal mudelit parandada" in briefing, briefing
+                assert "märgenda viis anonüümset tööotsija kirjet" in briefing and ".csv" not in briefing, briefing
                 assert not evaluate("Boolean(document.querySelector('.case-rule-hint'))"), "Kinnitatud reegli plokk on alles"
                 evaluate("document.querySelector('#labelActions button[data-label=\"supplement\"]').click()")
                 label_feedback = json.loads(evaluate("JSON.stringify({result:labelExplanation.dataset.result,status:labelExplanationStatus.textContent,title:labelExplanationTitle.textContent,text:labelExplanationText.textContent,summary:stage2Feedback.textContent,summaryHidden:stage2Feedback.hidden})"))
