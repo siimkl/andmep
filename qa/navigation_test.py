@@ -231,7 +231,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert five_case_start["step"] == "5 registrikirjet · valik, põhjendus ja parandus" and five_case_start["caseId"] == "T-101 · 1/5" and five_case_start["caseTitle"] == "Tööotsija T-101", five_case_start
                 assert five_case_start["trainingIds"] == ["T-101", "T-102", "T-103", "T-104", "T-105"] and five_case_start["trainingTitles"] == ["Tööotsija T-101", "Tööotsija T-102", "Tööotsija T-103", "Tööotsija T-104", "Tööotsija T-105"], five_case_start
                 assert five_case_start["outputIds"] == ["T-201", "T-202", "T-203", "T-204"] and five_case_start["outputTitles"] == ["Tööotsija T-201", "Tööotsija T-202", "Tööotsija T-203", "Tööotsija T-204"], five_case_start
-                assert "kõigile registris olevatele tööotsijatele" in five_case_start["briefing"], five_case_start
+                assert "kõigile registris olevatele tööotsijatele" in five_case_start["briefing"] and "kvaliteedimärke" in five_case_start["briefing"] and "arendajale ning tooteomanikule" in five_case_start["briefing"], five_case_start
                 assert not evaluate("Boolean(document.querySelector('.case-rule-hint'))"), "Kinnitatud reegli plokk on alles"
                 evaluate("document.querySelector('#labelActions button[data-label=\"supplement\"]').click()")
                 label_feedback = json.loads(evaluate("JSON.stringify({result:labelExplanation.dataset.result,status:labelExplanationStatus.textContent,title:labelExplanationTitle.textContent,text:labelExplanationText.textContent,summary:stage2Feedback.textContent,summaryHidden:stage2Feedback.hidden})"))
@@ -271,21 +271,37 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                   stepTitle: document.querySelector('[data-step="3"] b').textContent,
                   stepDetail: document.querySelector('[data-step="3"] small').textContent,
                   stageTitle: document.querySelector('[data-stage="3"] .control-title h3').textContent,
+                  stageLead: document.querySelector('[data-stage="3"] .control-title p').textContent,
                   transition: document.querySelector('[data-stage="3"] .labeling-instruction-intro').textContent,
                   cue: activeTaskCue.textContent,
                   impactKicker: impactKicker.textContent,
                   impactTitle: document.querySelector('#impactTitle').textContent,
                   impactStatusLabel: document.querySelector('#impactStatusLabel').textContent,
+                  policyLabel: document.querySelector('label[for="interventionRule"] span').textContent,
+                  policyOptions: [...interventionRule.options].map(option => option.textContent),
+                  recommendationLabel: document.querySelector('#outputCase .output-recommendation span').textContent,
+                  confidenceLabel: document.querySelector('#outputCase .confidence-ring small').textContent,
+                  qualityPrompt: qualityReviewPrompt.textContent,
                   buttons: [...document.querySelectorAll('#reviewActions button')].map(button => button.textContent),
                   complete: document.querySelector('[data-complete="3"] span').textContent
                 })"""))
-                assert stage3["stepTitle"] == "Hinda mudeli väljundeid" and "järgmise mudeliversiooni" in stage3["stepDetail"], stage3
-                assert stage3["stageTitle"] == "Kas mudeli väljundid sobivad kasutamiseks?" and "Märgendamistöö on lõppenud." in stage3["transition"] and "ei ole uued treeningmärgendid" in stage3["transition"], stage3
+                assert stage3["stepTitle"] == "Hinda mudeli väljundeid" and "kvaliteedimärge" in stage3["stepDetail"] and "arendusmeeskonnale" in stage3["stepDetail"], stage3
+                assert stage3["stageTitle"] == "Kui kvaliteetsed on mudeli soovitused?" and "vastutab teenuseotsuse eest" in stage3["stageLead"] and "arendajale ning tooteomanikule" in stage3["stageLead"], stage3
+                assert "Märgendamistöö on lõppenud." in stage3["transition"] and "ei ole uus treeningmärgend ega teenuseotsus" in stage3["transition"], stage3
                 assert stage3["impactKicker"] == "MUDELI VÄLJUNDITE HINDAMINE" and stage3["impactTitle"] == "Mida tuleb järgmises mudeliversioonis parandada?" and stage3["impactStatusLabel"] == "HINDAMISE SEIS", stage3
-                assert "mitte uute registrikirjete märgendamine" in stage3["cue"] and stage3["buttons"] == ["Väljund sobib", "Väljund vajab parandamist", "Vajab ametniku hinnangut"] and stage3["complete"] == "Kinnita väljundite hindamine", stage3
+                assert "kvaliteedimärge jõuab arendusmeeskonnani" in stage3["cue"] and "arendajale ja tooteomanikule" in stage3["cue"], stage3
+                assert stage3["policyLabel"] == "Kuidas jõuab kvaliteedimärge arendusmeeskonnani?" and len(stage3["policyOptions"]) == 5 and stage3["policyOptions"][1] == "Iga soovitus saab kvaliteedimärke ja põhjenduse", stage3
+                assert "OTSUSTUSTUGI, MITTE TEENUSEOTSUS" in stage3["recommendationLabel"] and stage3["confidenceLabel"] == "MUDELI KINDLUS" and "Hinda mudeli väljundit, mitte tööotsijat." in stage3["qualityPrompt"], stage3
+                assert stage3["buttons"] == ["Kasutatav", "Vajab parandamist", "Hinnanguks pole piisavalt infot"] and stage3["complete"] == "Kinnita kvaliteedihinnangud", stage3
                 evaluate("document.querySelector('[data-stage=\"3\"] .labeling-instruction-intro').scrollIntoView({block:'center'})")
                 time.sleep(0.25)
                 screenshot("ai-andmetoo-model-evaluation.png")
+                evaluate("interventionRule.value='every'; interventionRule.dispatchEvent(new Event('change',{bubbles:true})); document.querySelector('#reviewActions button[data-review=\"correct\"]').click()")
+                time.sleep(0.25)
+                quality_feedback = json.loads(evaluate("JSON.stringify({mark:document.querySelector('#outputCase .quality-result b').textContent,title:reviewExplanationTitle.textContent,text:reviewExplanationText.textContent,result:reviewExplanation.dataset.result,feedback:stage3Feedback.textContent})"))
+                assert quality_feedback["mark"] == "Vajab parandamist" and quality_feedback["title"] == "Vajab parandamist" and quality_feedback["result"] == "correct", quality_feedback
+                assert "Arendaja ja tooteomanik" in quality_feedback["text"] and "hindamislogisse" in quality_feedback["feedback"], quality_feedback
+                screenshot("ai-andmetoo-quality-feedback.png")
 
         command("Page.navigate", {"url": URL + "kraapimine/"})
         wait_for_path("/kraapimine/")

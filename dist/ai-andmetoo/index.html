@@ -36,7 +36,7 @@
       <div class="briefing-mark">AI</div>
       <div class="briefing-copy">
         <span>ARENDUSPROJEKTI MEESKONNA LIIGE / Valdkonnaspetsialist</span>
-        <p><b>Kujuteldav Riiklik Tööhõiveamet arendab soovitussüsteemi kõigile registris olevatele tööotsijatele.</b> Mudel töötleb iga tööotsija registriandmeid sama loogika järgi ja annab ühe toe soovituse. Soovitus ei ole automaatne teenuseotsus: ametnik vastutab selle kasutamise eest. Sina valid faili <code>toootsijate_register.csv</code> väljad, määrad märgendite tähenduse ja märgendad viis anonüümset treeningkirjet. Nende põhjal õpitud seoseid rakendab mudel kogu registrile.</p>
+        <p><b>Kujuteldav Riiklik Tööhõiveamet arendab soovitussüsteemi kõigile registris olevatele tööotsijatele.</b> Mudel töötleb iga tööotsija registriandmeid sama loogika järgi ja annab ühe toe soovituse. Soovitus ei ole automaatne teenuseotsus: ametnik vastutab selle kasutamise eest. Ametnik lisab kasutatud soovitusele ka kvaliteedimärke ja põhjenduse, mille koondvaade annab arendajale ning tooteomanikule sisendi mudeli parandamiseks. Sina valid faili <code>toootsijate_register.csv</code> väljad, määrad märgendite tähenduse ja märgendad viis anonüümset treeningkirjet. Nende põhjal õpitud seoseid rakendab mudel kogu registrile.</p>
       </div>
       <div class="briefing-question"><small>LÄBIV KÜSIMUS</small><strong>Kes otsustab, mida mudel õpib?</strong></div>
     </section>
@@ -44,7 +44,7 @@
     <nav class="stepper" aria-label="Simulatsiooni etapid">
       <button class="step active" type="button" data-step="1" aria-current="step"><span>1</span><div><b>Vali andmed ja määra nõuded</b><small>Mida märgendaja näeb ja millist juhist järgib?</small></div></button>
       <button class="step" type="button" data-step="2" disabled><span>2</span><div><b>Märgenda tööotsijate kirjed</b><small>5 registrikirjet · valik, põhjendus ja parandus</small></div></button>
-      <button class="step" type="button" data-step="3" disabled><span>3</span><div><b>Hinda mudeli väljundeid</b><small>Leia vead järgmise mudeliversiooni parandamiseks</small></div></button>
+      <button class="step" type="button" data-step="3" disabled><span>3</span><div><b>Hinda mudeli väljundeid</b><small>Lisa kvaliteedimärge ja anna arendusmeeskonnale tagasisidet</small></div></button>
       <button class="step" type="button" data-step="4" disabled><span>4</span><div><b>Paranda mudeli arendusprotsessi</b><small>Vead, andmed ja järgmine mudeliversioon</small></div></button>
     </nav>
 
@@ -147,17 +147,18 @@
         </section>
 
         <section class="decision-stage" data-stage="3" hidden>
-          <div class="control-title"><span>03</span><div><h3>Kas mudeli väljundid sobivad kasutamiseks?</h3><p>Mudel annab soovituse igale registris olevale tööotsijale. Hinda neljal kontrollkirjel, kas väljund sobib, vajab parandamist või tuleb suunata ametnikule.</p></div></div>
-          <div class="labeling-instruction-intro"><span>MÄRGENDAMISEST MUDELI HINDAMISSE</span><p><b>Märgendamistöö on lõppenud.</b> Nüüd hinnatakse eraldi kontrollandmestikul mudeli väljundeid. Need hinnangud ei ole uued treeningmärgendid: nende abil leitakse korduvad vead ning otsustatakse, mida tuleb andmetes, reeglites või mudeli järgmises versioonis parandada.</p></div>
-          <label class="select-label" for="interventionRule"><span>Millal peab ametnik soovituse üle vaatama?</span><select id="interventionRule"><option value="">Vali ülevaatuse reegel</option><option value="low">Ainult siis, kui mudeli kindlus on alla 50%</option><option value="medium">Kui kindlus on alla 70% või andmed on vastuolus</option><option value="group">Kui kindlus on alla 70%, andmed on vastuolus või ilmneb rühmapõhine veamuster</option><option value="none">Soovitust ei kontrollita enne kasutamist</option></select></label>
-          <div class="case-progress"><span>VÄLJUNDID</span><b id="reviewProgress">0 / 4 hinnatud</b></div>
+          <div class="control-title"><span>03</span><div><h3>Kui kvaliteetsed on mudeli soovitused?</h3><p>Mudel annab igale registris olevale tööotsijale ühe toe soovituse. Ametnik kasutab seda otsustustoena ja vastutab teenuseotsuse eest. Hinda neljal kontrollkirjel mudeli soovituse kvaliteeti: sinu märge ja põhjendus annavad arendajale ning tooteomanikule sisendi järgmise versiooni parandamiseks.</p></div></div>
+          <div class="labeling-instruction-intro"><span>MÄRGENDAMISEST MUDELI KVALITEEDI HINDAMISSE</span><p><b>Märgendamistöö on lõppenud.</b> Nüüd hinnatakse eraldi kontrollandmestikul mudeli väljundeid. Kvaliteedihinnang ei ole uus treeningmärgend ega teenuseotsus: see on struktureeritud tagasiside, mille põhjal otsitakse korduvaid vigu ning parandatakse andmeid, reegleid või mudeli järgmist versiooni.</p></div>
+          <label class="select-label" for="interventionRule"><span>Kuidas jõuab kvaliteedimärge arendusmeeskonnani?</span><select id="interventionRule"><option value="">Vali tagasiside kogumise viis</option><option value="every">Iga soovitus saab kvaliteedimärke ja põhjenduse</option><option value="sample">Esindusliku valimi regulaarne hindamine</option><option value="confidence">Ainult madala kindlusega soovituste hindamine</option><option value="complaint">Tagasiside ainult vaidlustest või kaebustest</option></select></label>
+          <div class="case-progress"><span>VÄLJUNDID</span><b id="reviewProgress">0 / 4 kvaliteedimärget</b></div>
           <div class="output-card" id="outputCase"></div>
-          <div class="review-actions" id="reviewActions" aria-label="Hinda mudeli soovitust">
-            <button type="button" data-review="accept">Väljund sobib</button><button type="button" data-review="correct">Väljund vajab parandamist</button><button type="button" data-review="human">Vajab ametniku hinnangut</button>
+          <div class="quality-review-prompt" id="qualityReviewPrompt"><span>LISA KVALITEEDIMÄRGE</span><p><b>Hinda mudeli väljundit, mitte tööotsijat.</b> Märge koos põhjendusega läheb arendajale ja tooteomanikule.</p></div>
+          <div class="review-actions" id="reviewActions" aria-label="Lisa mudeli soovitusele kvaliteedimärge">
+            <button type="button" data-review="accept">Kasutatav</button><button type="button" data-review="correct">Vajab parandamist</button><button type="button" data-review="human">Hinnanguks pole piisavalt infot</button>
           </div>
-          <div class="choice-explanation" id="reviewExplanation" hidden aria-live="polite"><span>MIDA SELLE HINNANGUGA TEHAKSE?</span><h4 id="reviewExplanationTitle"></h4><p id="reviewExplanationText"></p><button class="explanation-next" id="nextReviewCase" type="button">Jätka järgmise väljundiga</button></div>
-          <div class="decision-feedback" id="stage3Feedback" aria-live="polite">Kindlusprotsent ei tõesta väljundi õigsust. Hinda soovituse sisulist sobivust, alust ja mõju ning säilita tulemus mudeli järgmise versiooni arendamiseks.</div>
-          <div class="next-action-guide contextual"><span class="next-action-label" aria-hidden="true">JÄRGMISENA <i>↓</i></span><button class="primary-button orange" type="button" data-complete="3" disabled><span>Kinnita väljundite hindamine</span></button></div>
+          <div class="choice-explanation" id="reviewExplanation" hidden aria-live="polite"><span>MIDA SELLE TAGASISIDEGA TEHAKSE?</span><h4 id="reviewExplanationTitle"></h4><p id="reviewExplanationText"></p><button class="explanation-next" id="nextReviewCase" type="button">Jätka järgmise väljundiga</button></div>
+          <div class="decision-feedback" id="stage3Feedback" aria-live="polite">Mudeli kindlusprotsent ei ole kvaliteedihinnang. Hinda soovituse sisulist sobivust ja põhjenda märget, et arendusmeeskond saaks korduva vea põhjuse üles leida.</div>
+          <div class="next-action-guide contextual"><span class="next-action-label" aria-hidden="true">JÄRGMISENA <i>↓</i></span><button class="primary-button orange" type="button" data-complete="3" disabled><span>Kinnita kvaliteedihinnangud</span></button></div>
         </section>
 
         <section class="decision-stage" data-stage="4" hidden>
@@ -165,7 +166,7 @@
           <div class="ownership-grid" id="ownershipGrid">
             <label><span>Märgendusjuhise mõisted ja näited</span><select data-owner="data"><option value="">Määra vastutaja</option><option value="internal">Ameti valdkonnaeksperdid</option><option value="shared">Amet ja arenduspartner ühiselt</option><option value="vendor">Ainult arenduspartner</option><option value="none">Vastutaja puudub</option></select></label>
             <label><span>Vaidlustatud märgendite lõplik lahendamine</span><select data-owner="rules"><option value="">Määra vastutaja</option><option value="internal">Ameti vanemekspert</option><option value="shared">Amet ja arenduspartner ühiselt</option><option value="vendor">Ainult arenduspartner</option><option value="none">Vastutaja puudub</option></select></label>
-            <label><span>Märgendi- ja mudelivigade jälgimine</span><select data-owner="monitor"><option value="">Määra vastutaja</option><option value="internal">Ameti kvaliteeditiim</option><option value="shared">Amet ja arenduspartner ühiselt</option><option value="vendor">Ainult arenduspartner</option><option value="none">Vastutaja puudub</option></select></label>
+            <label><span>Kvaliteedihinnangute ja korduvate mudelivigade jälgimine</span><select data-owner="monitor"><option value="">Määra vastutaja</option><option value="internal">Ameti kvaliteeditiim</option><option value="shared">Amet ja arenduspartner ühiselt</option><option value="vendor">Ainult arenduspartner</option><option value="none">Vastutaja puudub</option></select></label>
             <label><span>Andmestiku versioonid ja muudatuslogi</span><select data-owner="docs"><option value="">Määra vastutaja</option><option value="internal">Ameti andmeomanik</option><option value="shared">Amet ja arenduspartner ühiselt</option><option value="vendor">Ainult arenduspartner</option><option value="none">Vastutaja puudub</option></select></label>
           </div>
           <label class="select-label" for="maintenanceCadence"><span>Kui sageli juhis ja näited üle vaadatakse?</span><select id="maintenanceCadence"><option value="">Vali ülevaatamise sagedus</option><option value="complaint">Alles pärast kaebust või avastatud viga</option><option value="annual">Kord aastas</option><option value="quarterly">Kord kvartalis ja pärast olulist teenusemuudatust</option></select></label>
@@ -222,6 +223,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=34"></script>
+  <script src="app.js?v=35"></script>
 </body>
 </html>

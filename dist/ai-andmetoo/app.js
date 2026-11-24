@@ -10,7 +10,7 @@ const metricMeta = {
 };
 
 const labelNames = { fast: "Kiire tugi", standard: "Tavaplaan", self: "Iseseisev jätkamine", supplement: "Andmete täiendamine", review: "Inimese ülevaatus" };
-const reviewNames = { accept: "Väljund sobib", correct: "Väljund vajab parandamist", human: "Vajab ametniku hinnangut" };
+const reviewNames = { accept: "Kasutatav", correct: "Vajab parandamist", human: "Hinnanguks pole piisavalt infot" };
 
 const labelCases = [
   { id: "T-101", title: "Tööotsija T-101", pattern: "hiljutine töökaotus", fields: { profile: "Registris on aktiivne tööotsija. Töösuhe lõppes kaks nädalat tagasi.", notes: "Töötuna registreerimine vajab lõpuleviimist.", barriers: "Registreerimine ja toetuste taotlemine on pooleli.", activity: "Pärast töösuhte lõppu pole iseteeninduses tegevust." }, expected: "fast", currentReason: "Hiljutine töökaotus ning pooleli olev registreerimine takistavad tööotsingu alustamist ja vajavad ametniku sihitud abi." },
@@ -21,10 +21,10 @@ const labelCases = [
 ];
 
 const outputCases = [
-  { id: "T-201", title: "Tööotsija T-201", trainingIndex: 0, text: "Registriprofiili põhiandmed on aegunud, kuid nõustaja lisas hiljutise töökaotuse.", confidence: 62, expected: "human", impact: "Kui mudel õppis sarnase registrikirje valest märgendist, võib sama viga korduda paljude tööotsijate soovitustes.", baseline: "Tavaplaan" },
+  { id: "T-201", title: "Tööotsija T-201", trainingIndex: 0, text: "Ajakohaste registriandmete järgi alustas tööotsija uuel töökohal ja tema registrikirje ootab sulgemist.", confidence: 62, expected: "correct", impact: "Kui mudel seostab varasema töökaotuse alati kiire toe vajadusega, võib sama viga korduda paljude tööotsijate soovitustes.", baseline: "Tavaplaan" },
   { id: "T-202", title: "Tööotsija T-202", trainingIndex: 2, text: "Takistuste väli on tühi ja registrikirjeldus ei ütle, millist abi tööotsija vajab.", confidence: 81, expected: "accept", impact: "Kui puuduliku infoga treeningkirje sai märgendi „Andmete täiendamine”, oskab mudel küsida lisainfot ega anna põhjendamatult kindlat teenusesoovitust.", baseline: "Tavaplaan" },
   { id: "T-203", title: "Tööotsija T-203", trainingIndex: 1, text: "Registriinfo on täielik, ajakohane ja kooskõlaline ning kiireks sekkumiseks pole põhjust.", confidence: 89, expected: "accept", impact: "Hea tavaplaani treeningnäide aitab mudelil vältida registri kõigi tööotsijate põhjendamatut suunamist kiiresse sekkumisse.", baseline: "Tavaplaan" },
-  { id: "T-204", title: "Tööotsija T-204", trainingIndex: 4, text: "Kaks eksperdimärkust annavad erineva soovituse ja takistuse mõju pole registris üheselt kirjeldatud.", confidence: 74, expected: "human", impact: "Kui eriarvamus muudeti treeningandmetes kunstlikult kindlaks märgendiks, hakkab mudel sama ebakindlust kogu registris varjama.", baseline: "Kiire tugi" }
+  { id: "T-204", title: "Tööotsija T-204", trainingIndex: 4, text: "Kontrollkirjes puudub valdkonnaeksperdi kinnitatud võrdlusotsus. Kaks märkust on vastuolus ja nende ajakohasust ei saa tuvastada.", confidence: 74, expected: "human", impact: "Kui kontrollandmetes puudub usaldusväärne võrdlusotsus, ei saa arendusmeeskond veel otsustada, kas parandada mudelit või hindamisandmeid.", baseline: "Kiire tugi" }
 ];
 
 const fieldNames = {
@@ -75,7 +75,7 @@ function outputText(item) { return item.text; }
 const stageCopy = {
   1: { title: "Vali andmed ja määra nõuded", story: "<b>Andmete valik eelneb märgendamisele.</b> Valitud väljad ja juhis määravad, mida märgendaja saab põhjendatult otsustada ning mida mudel hiljem õppida saab." },
   2: { title: "Märgenda tööotsijate kirjed", story: "<b>Iga märgendatud registrikirje lisatakse mudeli treeningandmetesse.</b> Hästi põhjendatud märgend tugineb nähtavale infole ja ühtsele juhisele. Kui kindlat soovitust ei saa teha, peab ebakindlus jääma nähtavaks." },
-  3: { title: "Hinda mudeli väljundeid", story: "<b>See ei ole enam märgendamistöö.</b> Mudeli edasiarendamisel hinnatakse väljundeid eraldi kontrollandmestikul. Tulemused näitavad, milliseid vigu tuleb järgmises mudeliversioonis parandada." },
+  3: { title: "Hinda mudeli väljundeid", story: "<b>Ametnik vastutab teenuseotsuse eest.</b> Selles etapis lisad mudeli väljundile eraldi kvaliteedimärke. Märge ja põhjendus annavad arendajale ning tooteomanikule sisendi järgmise mudeliversiooni parandamiseks." },
   4: { title: "Paranda mudeli arendusprotsessi", story: "<b>Mudeli väljundite hindamine loob parandussisendi.</b> Korduv viga peab jõudma tagasi märgendusjuhisesse, treeningandmetesse, hindamiskriteeriumidesse või mudeli järgmisse versiooni." }
 };
 
@@ -146,10 +146,10 @@ function calculateScores() {
   }
 
   const interventionEffects = {
-    low: { output: 2, bias: -2, labor: 1 },
-    medium: { output: 10, bias: 7, labor: 8 },
-    group: { output: 14, bias: 16, labor: 13 },
-    none: { output: -12, bias: -18, labor: -10 }
+    every: { output: 14, bias: 12, labor: 12 },
+    sample: { output: 9, bias: 8, labor: 6 },
+    confidence: { output: 1, bias: -4, labor: 2 },
+    complaint: { output: -8, bias: -10, labor: -2 }
   };
   if (interventionEffects[state.intervention]) Object.entries(interventionEffects[state.intervention]).forEach(([metric, value]) => { s[metric] += value; });
   state.reviews.forEach((review, index) => {
@@ -193,8 +193,10 @@ function calculateWorkload() {
   if (state.audit === "coverage") hours += 5;
   if (state.missingPolicy === "drop") hours += 3;
   if (state.disagreement === "expert") hours += 4;
-  if (state.intervention === "medium") hours += 4;
-  if (state.intervention === "group") hours += 7;
+  if (state.intervention === "every") hours += 7;
+  if (state.intervention === "sample") hours += 4;
+  if (state.intervention === "confidence") hours += 2;
+  if (state.intervention === "complaint") hours += 1;
   if (state.appeal === "owned") hours += 3;
   if (state.appeal === "vendor") hours += 1;
   hours += state.reviews.filter(value => value === "human").length * 2;
@@ -227,9 +229,11 @@ function consequences(scores) {
   else if (state.disagreement === "expert") list.push(["KATEGOORIAD", "Eriarvamus lahendatakse põhjendatud eksperdiotsusega ja juhise ebaselgus dokumenteeritakse."]);
   else list.push(["KATEGOORIAD", "Praegust vajadust arvestav reegel lisab konteksti, kuid vajab dokumenteeritud eksperditööd."]);
 
-  if (!state.intervention) list.push(["VÄLJUND", "Inimese sekkumise piir on veel määramata."]);
-  else if (state.intervention === "none") list.push(["VÄLJUND", "Automaatne rakendamine vähendab nähtavat tööd, kuid jätab vea avastamise teenuse kasutajale."]);
-  else list.push(["VÄLJUND", `Ülevaatusreegel kasvatab töökoormust, kuid loob koha vigade ja ebakindluse avastamiseks.`]);
+  if (!state.intervention) list.push(["VÄLJUND", "Kvaliteedimärke talletamise viis on veel määramata."]);
+  else if (state.intervention === "every") list.push(["VÄLJUND", "Iga kasutatud soovitus saab kvaliteedimärke ja põhjenduse, millest tekib arendusmeeskonnale pidev tagasisidevoog."]);
+  else if (state.intervention === "sample") list.push(["VÄLJUND", "Esinduslik valim aitab leida korduvaid vigu, kuid ei anna tagasisidet iga üksiku soovituse kohta."]);
+  else if (state.intervention === "confidence") list.push(["VÄLJUND", "Mudeli kindlus ei võrdu kvaliteediga: ainult madala kindlusega väljundite hindamine jätab enesekindlad vead nähtamatuks."]);
+  else list.push(["VÄLJUND", "Ainult kaebustest tekkiv tagasiside jõuab arendusmeeskonnani hilja ega näita vigade tegelikku ulatust."]);
 
   if (state.currentStage === 4 || state.completed.has(4)) {
     const vendorCount = Object.values(state.ownership).filter(value => value === "vendor" || value === "none").length;
@@ -276,12 +280,12 @@ function updateImpact() {
     $("#impactKicker").textContent = "MUDELI VÄLJUNDITE HINDAMINE";
     $("#impactTitle").textContent = "Mida tuleb järgmises mudeliversioonis parandada?";
     $("#impactStatusLabel").textContent = "HINDAMISE SEIS";
-    $("#impactStatus").textContent = `${state.reviews.length} / ${outputCases.length} hinnatud`;
+    $("#impactStatus").textContent = `${state.reviews.length} / ${outputCases.length} kvaliteedimärget`;
   } else if (state.currentStage === 4) {
     $("#impactKicker").textContent = "MUDELI EDASIARENDUS";
     $("#impactTitle").textContent = "Kuidas jõuavad parandused järgmisse versiooni?";
     $("#impactStatusLabel").textContent = "HINDAMISTULEMUS";
-    $("#impactStatus").textContent = `${state.reviews.length} / ${outputCases.length} väljundit hinnatud`;
+    $("#impactStatus").textContent = `${state.reviews.length} / ${outputCases.length} kvaliteedimärget`;
   } else {
     $("#impactKicker").textContent = "MÄRGENDUSE MÕJU";
     $("#impactTitle").textContent = "Mida mudel sinu märgenditest õpib?";
@@ -321,7 +325,7 @@ function updateImpact() {
         const before = baselineSuggestion(item);
         const after = simulatedSuggestion(item, index);
         const changed = before !== after;
-        const humanDecision = state.reviews[index] ? `<p><b>Inimese kontroll:</b> ${reviewNames[state.reviews[index]]}</p>` : "";
+        const humanDecision = state.reviews[index] ? `<p><b>Kvaliteedimärge:</b> ${reviewNames[state.reviews[index]]}</p>` : "";
         return `<article class="model-impact-card"><div class="model-case-head"><span>${item.id}</span><b>${item.title}</b></div><div class="model-comparison"><div><small>VARASEM MUDEL</small><strong>${before}</strong></div><div class="${changed ? "changed" : ""}"><small>SINU TREENINGANDMETEGA</small><strong>${after}</strong></div></div><p>${state.labels[item.trainingIndex] ? `Selles õppesimulatsioonis peegeldab soovitus seotud treeningkirje ${labelCases[item.trainingIndex].id} märgendit.` : "Seotud treeningkirjet pole veel märgendatud, seega kuvatakse varasema mudeli soovitus."}</p>${humanDecision}</article>`;
       }).join("")
     : '<article class="model-impact-card waiting">Mudeli soovituste võrdlus avaneb pärast esimest märgendit.</article>';
@@ -477,33 +481,38 @@ function renderOutputCase() {
   const container = $("#outputCase");
   const actions = $("#reviewActions");
   const explanation = $("#reviewExplanation");
-  $("#reviewProgress").textContent = `${state.reviews.length} / ${outputCases.length} hinnatud`;
+  const qualityPrompt = $("#qualityReviewPrompt");
+  $("#reviewProgress").textContent = `${state.reviews.length} / ${outputCases.length} kvaliteedimärget`;
   if (state.pendingReview) {
     const { index, choice } = state.pendingReview;
     const item = outputCases[index];
     const suggestion = simulatedSuggestion(item, index);
-    container.innerHTML = `<div class="case-top"><span>${item.id} · ${index + 1}/${outputCases.length}</span><b>${reviewNames[choice]}</b></div><h4>${item.title}</h4><p>${outputText(item)}</p><div class="output-recommendation"><span>MUDELI SOOVITUS · SINU MÄRGENDITE PÕHJAL</span><strong>${suggestion}</strong><div class="confidence-ring">${item.confidence}%</div></div>`;
+    container.innerHTML = `<div class="case-top"><span>${item.id} · ${index + 1}/${outputCases.length}</span><b>${reviewNames[choice]}</b></div><h4>${item.title}</h4><p>${outputText(item)}</p><div class="output-recommendation"><span>MUDELI SOOVITUS · OTSUSTUSTUGI, MITTE TEENUSEOTSUS</span><strong>${suggestion}</strong><div class="confidence-ring"><small>MUDELI KINDLUS</small><b>${item.confidence}%</b></div></div><div class="quality-result"><small>KVALITEEDIMÄRGE</small><b>${reviewNames[choice]}</b><span>Sinu hinnang mudeli väljundile</span></div>`;
     actions.hidden = true;
+    qualityPrompt.hidden = true;
     explanation.hidden = false;
     const actionMeaning = {
-      accept: "Hindamistulemus näitab, et väljund sobib kontrollkriteeriumidega. See ei tõesta veel kogu mudeli kvaliteeti.",
-      correct: "Hindamistulemus märgib väljundi veaks. Lisa vea põhjus seirelogisse, et seda saaks järgmises mudeliversioonis parandada.",
-      human: "Hindamistulemus näitab, et automaatseks otsuseks ei piisa infost. Enne mudeli muutmist on vaja eksperdi analüüsi."
+      accept: "Märge lisatakse hindamislogisse kui kontrollkriteeriumidele vastav väljund. Koondvaade aitab tooteomanikul jälgida kasutatavate soovituste osakaalu.",
+      correct: "Märge lisatakse hindamislogisse veana. Arendaja ja tooteomanik peavad kontrollima, kas põhjus on treeningandmetes, reeglis või mudelis.",
+      human: "Märge näitab hindamisandmete puudujääki. Enne mudeli muutmist peab tooteomanik täpsustama võrdlusotsust või kaasama valdkonnaeksperdi."
     };
+    const alignmentText = choice === item.expected ? "" : ` Kontrollkriteeriumi järgi sobib siia kvaliteedimärge „${reviewNames[item.expected]}”.`;
     $("#reviewExplanationTitle").textContent = reviewNames[choice];
-    $("#reviewExplanationText").textContent = `${actionMeaning[choice]} ${item.impact}`;
-    $("#nextReviewCase").textContent = state.reviews.length === outputCases.length ? "Vaata hindamise kokkuvõtet" : "Jätka järgmise väljundiga";
+    $("#reviewExplanationText").textContent = `${actionMeaning[choice]}${alignmentText} ${item.impact}`;
+    $("#nextReviewCase").textContent = state.reviews.length === outputCases.length ? "Vaata kvaliteedihinnangute kokkuvõtet" : "Jätka järgmise väljundiga";
   } else if (state.reviews.length === outputCases.length) {
     const summary = Object.keys(reviewNames).map(key => `${reviewNames[key]}: ${state.reviews.filter(value => value === key).length}`).join(" · ");
     container.innerHTML = `<div class="case-top"><span>HINDAMINE VALMIS</span><b>4 väljundit</b></div><h4>Mudeli väljundite hinnangud</h4><p>${summary}</p><div class="case-meta"><button class="inline-reset" type="button" data-rereview>Hinda väljundeid uuesti</button></div>`;
     actions.hidden = true;
+    qualityPrompt.hidden = true;
     explanation.hidden = true;
     $$("#reviewActions button").forEach(button => { button.disabled = true; button.classList.remove("selected"); });
   } else {
     const item = outputCases[state.reviews.length];
     const suggestion = simulatedSuggestion(item, state.reviews.length);
-    container.innerHTML = `<div class="case-top"><span>${item.id} · ${state.reviews.length + 1}/${outputCases.length}</span><b>KONTROLLKIRJE</b></div><h4>${item.title}</h4><p>${outputText(item)}</p><div class="output-recommendation"><span>MUDELI SOOVITUS · SINU MÄRGENDITE PÕHJAL</span><strong>${suggestion}</strong><div class="confidence-ring">${item.confidence}%</div></div><div class="impact-label"><b>KEDA MÕJUTAB?</b><span>${item.impact}</span></div>`;
+    container.innerHTML = `<div class="case-top"><span>${item.id} · ${state.reviews.length + 1}/${outputCases.length}</span><b>KONTROLLKIRJE</b></div><h4>${item.title}</h4><p>${outputText(item)}</p><div class="output-recommendation"><span>MUDELI SOOVITUS · OTSUSTUSTUGI, MITTE TEENUSEOTSUS</span><strong>${suggestion}</strong><div class="confidence-ring"><small>MUDELI KINDLUS</small><b>${item.confidence}%</b></div></div><div class="impact-label"><b>MIKS SEE ON ARENDUSELE OLULINE?</b><span>${item.impact}</span></div>`;
     actions.hidden = false;
+    qualityPrompt.hidden = false;
     explanation.hidden = true;
     $$("#reviewActions button").forEach(button => { button.disabled = false; button.classList.remove("selected"); });
   }
@@ -674,7 +683,7 @@ function updateControls() {
   $("#stage2Feedback").className = stageValid(2) ? "decision-feedback good" : "decision-feedback";
   if (stageValid(2)) $("#stage2Feedback").textContent = `${calculateLabelMetrics().aligned}/${labelCases.length} märgendit vastab kinnitatud juhendile. Mudel õpib siiski kõigist viiest märgendist, ka ekslikest.`;
   $("#stage3Feedback").className = stageValid(3) ? "decision-feedback good" : "decision-feedback";
-  if (stageValid(3)) $("#stage3Feedback").textContent = "Neli väljundit on hinnatud. Koondtulemus näitab arendusmeeskonnale, millised soovitused, reeglid või andmed vajavad järgmises mudeliversioonis parandamist.";
+  if (stageValid(3)) $("#stage3Feedback").textContent = "Neli väljundit said kvaliteedimärke. Koondvaade näitab arendajale ja tooteomanikule, millised soovitused, reeglid või andmed vajavad järgmises mudeliversioonis parandamist.";
   renderLabelCase();
   renderOutputCase();
   updateStage4();
@@ -736,11 +745,11 @@ function updateFocusState() {
       ? "Kõik viis registrikirjet on märgendatud. Vajuta „Kinnita märgendus”, et avada mõjuvaade."
       : "Kasuta ainult kirjel nähtavat registriinfot ja kinnitatud juhist. Mõjuvaade avaneb pärast märgenduse kinnitamist.";
   } else if (state.currentStage === 3) {
-    if (!state.intervention) title = "Määra, millal mudeli väljund vajab inimese ülevaatust";
+    if (!state.intervention) title = "Vali, kuidas kvaliteedimärge jõuab arendusmeeskonnani";
     else if (state.pendingReview) title = "Vaata tagasisidet ja jätka järgmise väljundiga";
-    else if (state.reviews.length === outputCases.length) title = "Kinnita mudeli väljundite hindamine";
-    else title = `Hinda mudeli väljundit ${state.reviews.length + 1}/${outputCases.length}`;
-    detail = "See on mudeli väljundite hindamine, mitte uute registrikirjete märgendamine.";
+    else if (state.reviews.length === outputCases.length) title = "Kinnita neli kvaliteedihinnangut";
+    else title = `Lisa väljundile kvaliteedimärge ${state.reviews.length + 1}/${outputCases.length}`;
+    detail = "Ametnik vastutab teenuseotsuse eest. Kvaliteedimärge annab arendajale ja tooteomanikule tagasisidet mudeli väljundi kohta.";
   } else if (state.currentStage === 4) {
     const unassigned = Object.values(state.ownership).filter(value => !value).length;
     if (unassigned) title = `Määra veel ${unassigned} vastutusala`;
@@ -790,7 +799,7 @@ function showStage(stage, shouldScroll = true) {
 const dialogMessages = {
   1: { start: "Valis märgendid, andmed ja reegli", middle: "Valikutest sai märgendaja lähteülesanne", end: "Õpib nende põhjal loodud treeningandmetest", insight: "" },
   2: { start: "Märgendas viis registrikirjet", middle: "Märgendatud kirjetest said treeningandmed", end: "Rakendab õpitud seoseid kogu registrile", insight: "Mudel ei tea, milline märgend oli ekslik. Ta õpib kõigist treeningandmetesse lisatud kirjetest, mistõttu märgendaja järjepidevus mõjutab kõigile tööotsijatele antavaid soovitusi." },
-  3: { start: "Hindas mudeli nelja väljundit", middle: "Hinnangutest sai mudeli parandussisend", end: "Korduvad vead muutusid arendusmeeskonnale nähtavaks", insight: "Hindamistulemused ei ole uued treeningmärgendid. Need näitavad, milliseid andmeid, reegleid või mudeli omadusi tuleb järgmises versioonis parandada." },
+  3: { start: "Lisas neljale väljundile kvaliteedimärke", middle: "Märgetest ja põhjendustest sai struktureeritud tagasiside", end: "Arendaja ja tooteomanik näevad korduvaid vigu", insight: "Kvaliteedimärge ei ole uus treeningmärgend ega teenuseotsus. See näitab, kas väljund on kasutatav, vajab parandamist või kas usaldusväärseks hindamiseks on vaja paremaid kontrollandmeid." },
   4: { start: "Määras vastutajad ja parandamise korra", middle: "Hindamisel leitud vead seoti juhise ja treeningandmetega", end: "Järgmist mudeliversiooni saab kontrollitult parandada", insight: "Juhise versioon, vaidlustatud näidete põhjendused, hindamistulemused ja kontrollitud testprofiilid aitavad sama vea järgmises mudeliversioonis uuesti üles leida." }
 };
 
@@ -848,7 +857,7 @@ function renderResults() {
     ["4", "Parandus jõuab treeningandmetesse", state.appeal === "owned" ? "Vaidlustatud soovituse põhjus jõuab seirelogisse ning võib muuta juhist, testprofiile ja andmestiku järgmist versiooni." : "Üksik viga võib saada lahenduse, kuid selle põhjus ei pruugi järgmisse märgendusvooru jõuda."]
   ];
   $("#tradeoffList").innerHTML = tradeoffs.map(([index, heading, text]) => `<article><span>${index}</span><div><b>${heading}</b><p>${text}</p></div></article>`).join("");
-  const interventionNames = { low: "kindlus alla 50%", medium: "kindlus või vastuolu", group: "kindlus, vastuolu või rühmapõhine veamuster", none: "soovituse kasutamine ilma eelkontrollita" };
+  const interventionNames = { every: "iga soovituse kvaliteedimärge ja põhjendus", sample: "regulaarne esinduslik hindamisvalim", confidence: "ainult madala kindlusega väljundite tagasiside", complaint: "ainult vaidlustustest või kaebustest tekkiv tagasiside" };
   const appealNames = { helpdesk: "üldine infokanal", vendor: "arenduspartnerile saadetav veateade", owned: "ameti vaidlustamise ja parandamise kord" };
   const disagreementNames = { first: "esimese märgendaja valik", both: "kaks vastukäivat märgendit", expert: "valdkonnaspetsialisti põhjendatud lõppotsus" };
   const missingNames = { drop: "puudulik registrikirje saadetakse andmete täiendamisele", average: "puuduliku info korral kasutatakse vaikimisi tavaplaani", guess: "puuduliku info põhjal valitakse tõenäolisim märgend" };
@@ -857,7 +866,7 @@ function renderResults() {
   $("#traceFlow").innerHTML = [
     ["1 · ANDMED + JUHIS", selectedFieldNames().join(", "), `Märgendid: ${Object.keys(labelNames).filter(key => state.availableLabels.has(key)).map(key => labelNames[key]).join(", ")}; ${missingNames[state.missingPolicy]}; ${ruleNames[state.labelRule]}`],
     ["2 · MÄRGENDAMISTÖÖ", `${metrics.aligned}/${labelCases.length} juhisega kooskõlas`, `${state.labels.length} treeningandmetesse lisatud registrikirjet; ${disagreementNames[state.disagreement]}`],
-    ["3 · MUDELI HINDAMINE", interventionNames[state.intervention], `${state.reviews.length} väljundit hinnatud; eksperdi analüüsi vajab ${state.reviews.filter(value => value === "human").length}`],
+    ["3 · MUDELI HINDAMINE", interventionNames[state.intervention], `${state.reviews.length} kvaliteedimärget; parandamist vajab ${state.reviews.filter(value => value === "correct").length} ja lisainfot ${state.reviews.filter(value => value === "human").length}`],
     ["4 · EDASIARENDUS", `Amet osaleb ${internalOwners}/4 vastutusala töös`, appealNames[state.appeal]]
   ].map(([step, heading, detail]) => `<article><span>${step}</span><b>${heading}</b><small>${detail}</small></article>`).join("");
   $("#resultSection").hidden = false;
@@ -918,7 +927,25 @@ $("#labelRule").addEventListener("change", () => {
 $("#disagreementPolicy").addEventListener("change", () => {
   state.labels = []; state.pendingLabel = null; invalidateFrom(1); updateControls();
 });
-$("#interventionRule").addEventListener("change", () => { invalidateFrom(3); updateControls(); });
+$("#interventionRule").addEventListener("change", () => {
+  invalidateFrom(3);
+  updateControls();
+  const policy = state.intervention;
+  const feedback = $("#stage3Feedback");
+  if (policy === "every") {
+    feedback.className = "decision-feedback good";
+    feedback.textContent = "Iga kasutatud soovitus saab kvaliteedimärke ja põhjenduse. Arendaja ning tooteomanik saavad nii jälgida ka kõrge mudelikindlusega vigu.";
+  } else if (policy === "sample") {
+    feedback.className = "decision-feedback good";
+    feedback.textContent = "Esinduslik hindamisvalim aitab leida korduvaid vigu väiksema töömahuga, kuid ei anna tagasisidet iga soovituse kohta.";
+  } else if (policy === "confidence") {
+    feedback.className = "decision-feedback warn";
+    feedback.textContent = "Mudeli kindlus ei võrdu kvaliteediga. Ainult madala kindlusega väljundite hindamine jätab enesekindlad vead arendusmeeskonna eest varju.";
+  } else if (policy === "complaint") {
+    feedback.className = "decision-feedback warn";
+    feedback.textContent = "Ainult kaebustest tekkiv tagasiside on hiline ja valikuline. Paljud korduvad vead ei pruugi arendaja ega tooteomanikuni jõuda.";
+  }
+});
 [$("#maintenanceCadence"), $("#appealPolicy")].forEach(select => select.addEventListener("change", () => { invalidateFrom(4); updateControls(); }));
 
 $("#labelActions").addEventListener("click", event => {
@@ -969,9 +996,14 @@ $("#reviewActions").addEventListener("click", event => {
   const choice = button.dataset.review;
   state.reviews.push(choice);
   state.pendingReview = { index, choice };
-  const ideal = outputCases[index].expected;
-  $("#stage3Feedback").textContent = choice === ideal ? "Hinnang vastab kontrollkirje peamisele ülevaatusvajadusele ja lisatakse mudeli hindamistulemustesse." : choice === "human" ? "Ametniku hinnang jätab ebakindluse nähtavaks. Korduv vajadus näitab, mida mudelis või andmetes parandada." : "Säilita hinnang ja põhjendus. Kui sama viga kordub, tuleb selle põhjus järgmise mudeliversiooni arendamisel parandada.";
   updateControls();
+  const ideal = outputCases[index].expected;
+  const correct = choice === ideal;
+  $("#reviewExplanation").dataset.result = correct ? "correct" : "incorrect";
+  $("#stage3Feedback").className = correct ? "decision-feedback good" : "decision-feedback warn";
+  $("#stage3Feedback").textContent = correct
+    ? "Kvaliteedimärge vastab kontrollkirje hindamiskriteeriumile ja lisatakse mudeli hindamislogisse."
+    : `Kontrollkriteeriumi järgi sobib kvaliteedimärge „${reviewNames[ideal]}”. Vastuolu tuleb enne mudeli muutmist lahendada.`;
 });
 
 $("#nextReviewCase").addEventListener("click", () => {
