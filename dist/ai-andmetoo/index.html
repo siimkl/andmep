@@ -7,7 +7,7 @@
   <title>AI andmetöö · Kes õpetab tehisaru?</title>
   <link rel="stylesheet" href="api1-base.css?v=1">
   <link rel="stylesheet" href="../api-common.css?v=11">
-  <link rel="stylesheet" href="simulator.css?v=29">
+  <link rel="stylesheet" href="simulator.css?v=30">
   <link rel="stylesheet" href="../readability.css?v=1">
 </head>
 <body>
@@ -64,11 +64,11 @@
           <p id="storyText"><b>Mudeli teadmiste piirid algavad andmevalikust.</b> Suur andmemaht ei taga, et eri inimrühmad oleksid esindatud.</p>
         </div>
 
-        <div class="label-learning-flow" aria-label="Andmete valikust mudeli soovituseni">
+        <div class="label-learning-flow" id="trainingFlow" aria-label="Andmete valikust mudeli soovituseni">
           <div><span>1</span><small>ANDMED</small><b>Nähtavad väljad</b></div><i aria-hidden="true"></i><div><span>2</span><small>NÕUDED</small><b>Märgendi tähendus</b></div><i aria-hidden="true"></i><div><span>3</span><small>MÄRGENDAMINE</small><b>Inimese märgend</b></div><i aria-hidden="true"></i><div><span>4</span><small>MUDEL</small><b>Õpitud muster</b></div><i aria-hidden="true"></i><div><span>5</span><small>SOOVITUS</small><b>Uus otsustustugi</b></div>
         </div>
 
-        <div class="label-impact-grid">
+        <div class="label-impact-grid" id="trainingImpact">
           <section class="label-distribution-panel" aria-labelledby="distributionTitle">
             <div class="panel-heading"><span class="section-kicker">MUDELI ÕPPEANDMED</span><h3 id="distributionTitle">Sinu märgendite jaotus</h3><p id="distributionSummary">Märgendeid pole veel. Mudelil ei ole sinu otsustest õppimiseks näiteid.</p></div>
             <div class="label-bars" id="labelBars">
@@ -86,6 +86,11 @@
             <div class="learned-patterns" id="learnedPatterns" aria-live="polite"></div>
           </section>
         </div>
+
+        <section class="label-distribution-panel review-impact-summary" id="reviewImpactSummary" aria-labelledby="reviewImpactTitle" hidden>
+          <div class="panel-heading"><h3 id="reviewImpactTitle">Mida nelja soovituse kontroll näitas?</h3><p id="reviewImpactCounts"></p></div>
+          <ul id="reviewImpactDetails"></ul>
+        </section>
 
         <div class="impact-next-step" id="impactNextStep" hidden>
           <div><span>JÄRGMINE ETAPP</span><b>Uuri esmalt märgendite jaotust ja mudeli õpitud seoseid.</b><p>Kui oled valmis, liigu eraldi kontrollandmestikul mudeli soovitusi hindama.</p></div>
@@ -147,16 +152,16 @@
         </section>
 
         <section class="decision-stage" data-stage="3" hidden>
-          <div class="control-title"><span>03</span><div><h3>Kui kvaliteetsed on mudeli soovitused?</h3><p>Mudel annab igale registris olevale tööotsijale ühe toe soovituse. Ametnik kasutab seda otsustustoena ja vastutab teenuseotsuse eest. Hinda neljal kontrollkirjel mudeli soovituse kvaliteeti: sinu märge ja põhjendus annavad arendajale ning tooteomanikule sisendi järgmise versiooni parandamiseks.</p></div></div>
-          <div class="labeling-instruction-intro"><span>MÄRGENDAMISEST MUDELI KVALITEEDI HINDAMISSE</span><p><b>Märgendamistöö on lõppenud.</b> Nüüd hinnatakse eraldi kontrollandmestikul mudeli väljundeid. Kvaliteedihinnang ei ole uus treeningmärgend ega teenuseotsus: see on struktureeritud tagasiside, mille põhjal otsitakse korduvaid vigu ning parandatakse andmeid, reegleid või mudeli järgmist versiooni.</p></div>
-          <label class="select-label" for="interventionRule"><span>Kuidas jõuab kvaliteedimärge arendusmeeskonnani?</span><select id="interventionRule"><option value="">Vali tagasiside kogumise viis</option><option value="every">Iga soovitus saab kvaliteedimärke ja põhjenduse</option><option value="sample">Esindusliku valimi regulaarne hindamine</option><option value="confidence">Ainult madala kindlusega soovituste hindamine</option><option value="complaint">Tagasiside ainult vaidlustest või kaebustest</option></select></label>
+          <div class="control-title"><span>03</span><div><h3>Kui kvaliteetsed on mudeli soovitused?</h3><p>Vaata nelja kontrollkirjet ja hinda igaühe juures kuvatud soovitust. Sinu varem valitud märgendid mõjutavad seda, mida mudel soovitab. Teenuseotsuse eest vastutab ametnik.</p></div></div>
+          <div class="labeling-instruction-intro"><span>MÄRGENDAMISEST HINDAMISENI</span><p><b>Märgendamistöö on lõppenud.</b> Nüüd kontrollid mudeli soovitusi uute registrikirjete põhjal. Sinu hinnangud aitavad arendajal ja tooteomanikul leida, mida mudeli järgmises versioonis parandada.</p></div>
+          <label class="select-label" for="interventionRule"><span>Kuidas peaks amet mudeli kohta tagasisidet koguma?</span><select id="interventionRule"><option value="">Vali tagasiside kogumise viis</option><option value="every">Hinda iga kasutatud soovitust</option><option value="sample">Hinda regulaarselt esinduslikku valimit</option><option value="confidence">Hinda ainult madala kindlusega soovitusi</option><option value="complaint">Kogu tagasisidet ainult vaidlustest ja kaebustest</option></select></label>
+          <div class="decision-feedback" id="stage3Feedback" aria-live="polite" hidden></div>
           <div class="case-progress"><span>AI-MUDELI VÄLJUNDID</span><b id="reviewProgress">0 / 4 kvaliteedimärget</b></div>
           <div class="output-card" id="outputCase"></div>
           <div class="review-actions" id="reviewActions" aria-label="Lisa mudeli soovitusele kvaliteedimärge">
             <button type="button" data-review="accept">Kasutatav</button><button type="button" data-review="correct">Vajab parandamist</button><button type="button" data-review="human">Hinnanguks pole piisavalt infot</button>
           </div>
-          <div class="choice-explanation" id="reviewExplanation" hidden aria-live="polite"><span>MIDA SELLE TAGASISIDEGA TEHAKSE?</span><h4 id="reviewExplanationTitle"></h4><p id="reviewExplanationText"></p><button class="explanation-next" id="nextReviewCase" type="button">Jätka järgmise väljundiga</button></div>
-          <div class="decision-feedback" id="stage3Feedback" aria-live="polite">Mudeli kindlusprotsent ei ole kvaliteedihinnang. Hinda soovituse sisulist sobivust ja põhjenda märget, et arendusmeeskond saaks korduva vea põhjuse üles leida.</div>
+          <div class="choice-explanation" id="reviewExplanation" hidden aria-live="polite"><span id="reviewExplanationStatus"></span><h4 id="reviewExplanationTitle"></h4><p id="reviewExplanationText"></p><div class="explanation-actions"><button class="explanation-retry" id="undoReviewChoice" type="button">Muuda hinnangut</button><button class="explanation-next" id="nextReviewCase" type="button">Jätka järgmise väljundiga</button></div></div>
           <div class="next-action-guide contextual"><span class="next-action-label" aria-hidden="true">JÄRGMISENA <i>↓</i></span><button class="primary-button orange" type="button" data-complete="3" disabled><span>Kinnita kvaliteedihinnangud</span></button></div>
         </section>
 
@@ -222,6 +227,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=47"></script>
+  <script src="app.js?v=48"></script>
 </body>
 </html>

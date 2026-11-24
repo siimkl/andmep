@@ -127,5 +127,18 @@ button,select{font-size:1rem}
 .label-bars [data-label-bar="self"] i span{background:#07979a}
 .label-bars [data-label-bar="supplement"] i span{background:#d69218}
 .label-bars [data-label-bar="review"] i span{background:#7654a8}
+#trainingFlow[hidden], #trainingImpact[hidden], #reviewImpactSummary[hidden] {
+  display: none;
+}
+.review-impact-summary {
+  margin-top: 16px;
+}
+.review-impact-summary ul {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 0;
+  padding-inline-start: 1.5rem;
+  line-height: 1.55;
+}
 @media(max-width:900px){.lab-grid.impact-pending{grid-template-columns:1fr}.lab-grid.impact-pending .control-card{max-width:none}}
 @media(max-width:680px){.label-actions{grid-template-columns:1fr}}
