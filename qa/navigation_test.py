@@ -237,6 +237,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 evaluate("dialogContinue.click()")
                 time.sleep(0.25)
                 five_case_start = json.loads(evaluate("JSON.stringify({total:labelCases.length,progress:labelProgress.textContent,step:document.querySelector('[data-step=\"2\"] small').textContent,caseId:document.querySelector('#labelCase .case-top span').textContent,caseTitle:document.querySelector('#labelCase h4').textContent,trainingIds:labelCases.map(item=>item.id),trainingTitles:labelCases.map(item=>item.title),outputIds:outputCases.map(item=>item.id),outputTitles:outputCases.map(item=>item.title),briefing:document.querySelector('.briefing-copy').textContent})"))
+                assert evaluate("parseFloat(getComputedStyle(activeTaskCue.querySelector('small')).fontSize)") >= 16
                 assert five_case_start["total"] == 5 and five_case_start["progress"] == "0 / 5 märgendatud", five_case_start
                 assert five_case_start["step"] == "5 registrikirjet · valik, põhjendus ja parandus" and five_case_start["caseId"] == "T-101 · 1/5" and five_case_start["caseTitle"] == "Tööotsija T-101", five_case_start
                 assert five_case_start["trainingIds"] == ["T-101", "T-102", "T-103", "T-104", "T-105"] and five_case_start["trainingTitles"] == ["Tööotsija T-101", "Tööotsija T-102", "Tööotsija T-103", "Tööotsija T-104", "Tööotsija T-105"], five_case_start
@@ -401,6 +402,11 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
               options: document.querySelectorAll('.api-version-select option').length
             })"""))
             assert state == {"overflow": False, "homeFits": True, "selectFits": True, "options": 5}, {route: state}
+            reading_sizes = evaluate("""[
+              parseFloat(getComputedStyle(document.querySelector('.hero-description')).fontSize),
+              parseFloat(getComputedStyle(document.querySelector('.footer-note > span')).fontSize)
+            ]""")
+            assert reading_sizes[0] >= 16 and reading_sizes[1] >= 14, {route: reading_sizes}
             mobile_modules[route] = state
         screenshot("ai-andmetoo-header-mobile.png")
 

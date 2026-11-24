@@ -1,0 +1,228 @@
+/* Shared reading sizes for the landing page and all five practicums. */
+:root {
+  --reading-text: 1rem;
+  --reading-label: .875rem;
+  --reading-meta: .8125rem;
+}
+
+/* Explanations and feedback need the same size as regular body text. */
+body :is(.shell, .launcher, dialog) p:where(:not(.hero-subtitle, .kicker)),
+body :is(.shell, dialog) :is(
+  .hero-copy .hero-description, .active-task-cue small, .active-task-cue b, .decision-feedback,
+  .case-data-grid > div p, .decision-stage .case-prompt,
+  .test-feedback, .method-feedback, .practice-feedback, .selection-feedback,
+  .feedback, .source-choice small, .source-choice b, .source-choice .provenance,
+  .scrape-checklist label small, .scrape-checklist label b,
+  .validation-link small, .inspector-help-link small, .agent-warning,
+  .choice-explanation p, .impact-next-step b, .learned-pattern small,
+  .inspector-help-body .inspect-guide p, .learned-patterns .empty-pattern
+),
+body .launcher :is(.intro, .card-body small) {
+  font-size: var(--reading-text);
+  line-height: 1.5;
+}
+
+body :is(.shell, .launcher, dialog) :is(small, legend, label > span, summary) {
+  font-size: var(--reading-label);
+}
+
+body :is(.shell, dialog) :is(
+  .active-task-cue small, .source-choice small, .scrape-checklist label small,
+  .validation-link small, .inspector-help-link small, .learned-pattern small
+) {
+  font-size: var(--reading-text);
+  line-height: 1.5;
+}
+
+/* Keep labels easy to scan, including those that are drawn in diagrams. */
+body :is(.shell, .launcher, dialog) :is(
+  .section-kicker, .kicker, .step-label, .level, .brand, .card-body em,
+  .path-heading b, .start-panel > div span, .mission-label, .progress-meta, .progress-value span,
+  .briefing-card > div > span, .briefing-mark, .briefing-question small, .briefing-target small,
+  .step b, .flow-status span, .flow-status b, .status-chip, .status-chip b, .exercise-state,
+  .stage-counter, .active-task-cue > span, .labeling-instruction-intro > span,
+  .labeling-brief > span, .label-guide > span, .choice-explanation > span,
+  .impact-next-step > div > span, .case-progress, .case-top span, .case-top b,
+  .case-meta span, .source-choice em, .label-bars > div > div, .learned-pattern b,
+  .label-guide article b, .output-recommendation > span, .reflection-card > span,
+  .label-dataset-facts small, .label-dataset-facts b,
+  .next-action-label, .request-line b, .request-part-label, .json-preview summary,
+  .period-label, .period-group > span, .period-year > b, .selection-math b, .check-pills span,
+  .test-score b, .validation-score small, .practice-summary > span,
+  .learning-goal > span, .test-feedback :is(strong, span:not(.feedback-icon)),
+  .method-scenarios :is(b, small), .concept-options button span,
+  button[data-open-test] b, .decoder-options button span,
+  .terminal-head, .terminal-header, .terminal-bar :is(b, em), .terminal-file, .tooltip,
+  .dialog-node em, .flow-node em, .flow-node b, .node em,
+  .label-learning-flow b, .label-learning-flow small,
+  .inspector-help-link :is(span, b), .inspect-guide article > div > b,
+  .inspector-check :is(span, b), .table-head > b, .comparison-columns :is(b, span),
+  .result-summary span, .quality-results b, .quality-score :is(small, span),
+  .quality-dimensions :is(span, strong), .sequence-feedback b, .sequence-block-title b,
+  .sequence-brief b, .workflow-diagram li > span, .planner-fields-grid .planner-field > span,
+  .result-viz .chart-label, .result-viz .chart-value, .chart-insight,
+  .response-context > span, .quality-result > b, .quality-result > span,
+  .response-next-cue > span, .impact-lock-note > span
+) {
+  font-size: var(--reading-label);
+  line-height: 1.4;
+}
+
+body :is(.shell, .launcher, dialog) :is(
+  .case-data-grid small, .confidence-ring small,
+  .label-dataset-facts small, .dialog-route-label, .route-label,
+  .dialog-response-path > span, .response-path > span, .flow-route > span
+) {
+  font-size: var(--reading-meta);
+  letter-spacing: .05em;
+}
+
+body .shell .decision-stage :is(.case-prompt, .case-data-grid > div p) {
+  font-size: var(--reading-text) !important;
+  line-height: 1.5 !important;
+}
+
+body :is(.shell, dialog) :is(button, select, input:not([type="checkbox"], [type="radio"])) {
+  font-size: var(--reading-label);
+}
+
+body :is(.shell, dialog) :is(.primary-button, .label-actions button, .review-actions button),
+body .shell :is(.planner-field, .select-label, .ownership-grid, .selector-grid, .decision-inputs, .sequence-block, .stress-lab) select {
+  font-size: var(--reading-text);
+  line-height: 1.4;
+}
+
+body :is(.shell, dialog) :is(pre, code, kbd, th, td) {
+  font-size: var(--reading-label);
+  line-height: 1.5;
+}
+
+body :is(.shell, dialog) pre code {
+  font-size: inherit;
+}
+
+body :is(.shell, dialog) :is(.request-line, .request-part, .story-strip, .label-dataset-facts, .flow-node, .dialog-node, .comparison-columns, .source-choice em) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+body .shell .table-scroll {
+  max-height: none;
+}
+
+body .shell .table-scroll table {
+  min-width: 0;
+  table-layout: fixed;
+  overflow-wrap: anywhere;
+}
+
+body .shell .table-scroll th:first-child {
+  width: 36%;
+}
+
+body .shell .table-scroll th:last-child {
+  width: 14%;
+}
+
+body .shell .table-scroll th,
+body .shell .table-scroll td {
+  padding-inline: .65rem;
+}
+
+body .site-footer .footer-note {
+  flex-wrap: wrap;
+}
+
+body .site-footer .footer-note > span {
+  flex: 1 1 18rem;
+}
+
+body .site-footer :is(.footer-author, .footer-details, .footer-note) :is(small, span, strong, code):not(.footer-monogram) {
+  font-size: var(--reading-label);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.api-eyebrow .api-home-link,
+.launcher .brand .api-home-link {
+  font-size: var(--reading-label);
+  letter-spacing: .09em;
+}
+
+.api-eyebrow .api-home-link::after,
+.api-eyebrow .api-version-switch::before {
+  font-size: var(--reading-meta);
+  letter-spacing: .07em;
+}
+
+.api-eyebrow .api-version-switch select {
+  min-height: 3.5rem;
+  padding-top: 1.3rem;
+  font-size: var(--reading-text);
+}
+
+.launcher .api-card input:checked + .card-body::after,
+.site-footer .footer-monogram,
+.shell .step.active::before,
+.shell .step.active::after {
+  font-size: var(--reading-meta);
+}
+
+body .shell .next-action-guide .next-action-label,
+body .shell .next-action-guide.contextual.next-target .next-action-label {
+  font-size: var(--reading-label);
+  letter-spacing: .07em;
+}
+
+body .shell .next-action-guide.contextual.next-target .next-action-label {
+  top: auto;
+  bottom: 100%;
+}
+
+body .shell .stress-lab > div:first-child > p {
+  font-size: var(--reading-text);
+}
+
+body .shell .quality-score small {
+  font-size: var(--reading-meta);
+  letter-spacing: .03em;
+}
+
+body .shell .quality-dimensions > div {
+  grid-template-columns: 6.1rem minmax(12px, 1fr) 1.7rem;
+}
+
+@media (max-width: 680px) {
+  body .shell .active-task-cue {
+    position: relative;
+  }
+
+  body .impact-dialog .dialog-head .flow-status {
+    flex: 0 0 auto;
+    text-align: left;
+  }
+
+  body .shell .api-eyebrow .api-version-switch select {
+    max-width: 100%;
+  }
+
+  body .shell .api-version-switch {
+    max-width: 100%;
+  }
+
+  body .shell .table-scroll th,
+  body .shell .table-scroll td {
+    padding-inline: .35rem;
+  }
+
+  body .shell :is(.case-progress, .case-top, .table-head) {
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+}
+
+@media (max-width: 430px) {
+  body .shell .quality-dashboard {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
