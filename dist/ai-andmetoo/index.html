@@ -7,7 +7,7 @@
   <title>AI andmetöö · Kes õpetab tehisaru?</title>
   <link rel="stylesheet" href="api1-base.css?v=1">
   <link rel="stylesheet" href="../api-common.css?v=11">
-  <link rel="stylesheet" href="simulator.css?v=26">
+  <link rel="stylesheet" href="simulator.css?v=27">
 </head>
 <body>
   <main class="shell" id="app">
@@ -84,13 +84,6 @@
             <div class="learned-patterns" id="learnedPatterns" aria-live="polite"></div>
           </section>
         </div>
-
-        <section class="model-output-viz" id="modelOutputViz" aria-labelledby="modelVizTitle" hidden>
-          <div class="model-viz-head"><div><span class="section-kicker">MÄRGENDUS → MUDELI SOOVITUS</span><h3 id="modelVizTitle">Kuidas muutuvad tööotsijatele antavad soovitused?</h3><p>Mudel kasutab sama soovitusloogikat kõigi registris olevate tööotsijate jaoks. Võrdle neljal kontrollkirjel varasema mudeli väljundit sinu treeningandmetest õpitud väljundiga.</p></div><b id="changedOutputCount">0 / 4 muutunud</b></div>
-          <div class="model-output-grid" id="modelOutputGrid" aria-live="polite"></div>
-        </section>
-
-        <div class="latest-label-impact" id="latestLabelImpact" aria-live="polite"><span>ALUSTA MÄRGENDAMISEST</span><p>Kui märgendad esimese registrikirje, näed siin, millise seose see treeningandmetesse lisab ja kuidas seos kontrollsoovitusi muudab.</p></div>
 
       </section>
 
@@ -194,7 +187,7 @@
         <div class="trace-flow" id="traceFlow"></div>
       </div>
       <div class="reflection-card"><span>PEA MEELES</span><p><b>Mudel õpib ainult seda, mida märgendatud näited talle näitavad.</b> Halb soovitus võib tuleneda mudelist, valest märgendist, puuduvast kontekstist või ebaselgest juhisest. Enne parandamist tuleb põhjus välja selgitada.</p></div>
-      <div class="reflection-questions card"><span class="section-kicker">KOLM KÜSIMUST ARUTELUKS</span><div><article><b>1</b><p>Milline sinu märgendusotsus muutis mudeli kontrollsoovitusi kõige rohkem ja miks?</p></article><article><b>2</b><p>Millise puuduva või vastuolulise registritunnuse puhul peab soovitus jõudma ametniku ülevaatusele?</p></article><article><b>3</b><p>Kuidas märkaksid, et märgendusjuhis ei sobi enam registriandmete või muutunud teenusega?</p></article></div></div>
+      <div class="reflection-questions card"><span class="section-kicker">KOLM KÜSIMUST ARUTELUKS</span><div><article><b>1</b><p>Milline märgendamisotsus kujundas mudeli õpitavat seost kõige rohkem ja miks?</p></article><article><b>2</b><p>Millise puuduva või vastuolulise registritunnuse puhul peab soovitus jõudma ametniku ülevaatusele?</p></article><article><b>3</b><p>Kuidas märkaksid, et märgendusjuhis ei sobi enam registriandmete või muutunud teenusega?</p></article></div></div>
     </section>
 
     <footer class="site-footer">
@@ -222,6 +215,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=39"></script>
+  <script src="app.js?v=40"></script>
 </body>
 </html>

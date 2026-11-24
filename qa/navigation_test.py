@@ -283,8 +283,8 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                   confidenceLabel: document.querySelector('#outputCase .confidence-ring small').textContent,
                   qualityPromptExists: Boolean(document.querySelector('#qualityReviewPrompt')),
                   impactLabelExists: Boolean(document.querySelector('#outputCase .impact-label')),
-                  modelVizHidden: modelOutputViz.hidden,
-                  latestImpact: latestLabelImpact.textContent,
+                  modelComparisonExists: Boolean(document.querySelector('#modelOutputViz')),
+                  latestImpactExists: Boolean(document.querySelector('#latestLabelImpact')),
                   buttons: [...document.querySelectorAll('#reviewActions button')].map(button => button.textContent),
                   complete: document.querySelector('[data-complete="3"] span').textContent
                 })"""))
@@ -295,16 +295,16 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert "kvaliteedimärge jõuab arendusmeeskonnani" in stage3["cue"] and "arendajale ja tooteomanikule" in stage3["cue"], stage3
                 assert stage3["policyLabel"] == "Kuidas jõuab kvaliteedimärge arendusmeeskonnani?" and len(stage3["policyOptions"]) == 5 and stage3["policyOptions"][1] == "Iga soovitus saab kvaliteedimärke ja põhjenduse", stage3
                 assert stage3["recommendationLabel"] == "MUDELI SOOVITUS" and stage3["confidenceLabel"] == "MUDELI KINDLUS" and not stage3["qualityPromptExists"] and not stage3["impactLabelExists"], stage3
-                assert stage3["modelVizHidden"] and "VÄLJUNDITE VÕRDLUS POLE VEEL AVATUD" in stage3["latestImpact"] and "Kinnita kvaliteedihinnangud" in stage3["latestImpact"], stage3
+                assert not stage3["modelComparisonExists"] and not stage3["latestImpactExists"], stage3
                 assert stage3["buttons"] == ["Kasutatav", "Vajab parandamist", "Hinnanguks pole piisavalt infot"] and stage3["complete"] == "Kinnita kvaliteedihinnangud", stage3
                 evaluate("document.querySelector('[data-stage=\"3\"] .labeling-instruction-intro').scrollIntoView({block:'center'})")
                 time.sleep(0.25)
                 screenshot("ai-andmetoo-model-evaluation.png")
                 evaluate("interventionRule.value='every'; interventionRule.dispatchEvent(new Event('change',{bubbles:true})); document.querySelector('#reviewActions button[data-review=\"correct\"]').click()")
                 time.sleep(0.25)
-                quality_feedback = json.loads(evaluate("JSON.stringify({mark:document.querySelector('#outputCase .quality-result b').textContent,title:reviewExplanationTitle.textContent,text:reviewExplanationText.textContent,result:reviewExplanation.dataset.result,feedback:stage3Feedback.textContent,modelVizHidden:modelOutputViz.hidden})"))
+                quality_feedback = json.loads(evaluate("JSON.stringify({mark:document.querySelector('#outputCase .quality-result b').textContent,title:reviewExplanationTitle.textContent,text:reviewExplanationText.textContent,result:reviewExplanation.dataset.result,feedback:stage3Feedback.textContent})"))
                 assert quality_feedback["mark"] == "Vajab parandamist" and quality_feedback["title"] == "Vajab parandamist" and quality_feedback["result"] == "correct", quality_feedback
-                assert "Arendaja ja tooteomanik" in quality_feedback["text"] and "hindamislogisse" in quality_feedback["feedback"] and quality_feedback["modelVizHidden"], quality_feedback
+                assert "Arendaja ja tooteomanik" in quality_feedback["text"] and "hindamislogisse" in quality_feedback["feedback"], quality_feedback
                 screenshot("ai-andmetoo-quality-feedback.png")
                 evaluate("""(() => {
                   nextReviewCase.click();
@@ -314,16 +314,14 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                   });
                 })()""")
                 time.sleep(0.25)
-                before_quality_confirmation = json.loads(evaluate("JSON.stringify({modelVizHidden:modelOutputViz.hidden,completeDisabled:document.querySelector('[data-complete=\"3\"]').disabled,latestImpact:latestLabelImpact.textContent,reviews:state.reviews.length})"))
-                assert before_quality_confirmation["modelVizHidden"] and not before_quality_confirmation["completeDisabled"] and before_quality_confirmation["reviews"] == 4 and "VÄLJUNDITE VÕRDLUS POLE VEEL AVATUD" in before_quality_confirmation["latestImpact"], before_quality_confirmation
+                before_quality_confirmation = json.loads(evaluate("JSON.stringify({completeDisabled:document.querySelector('[data-complete=\"3\"]').disabled,reviews:state.reviews.length})"))
+                assert not before_quality_confirmation["completeDisabled"] and before_quality_confirmation["reviews"] == 4, before_quality_confirmation
                 screenshot("ai-andmetoo-before-quality-confirmation.png")
                 evaluate("document.querySelector('[data-complete=\"3\"]').click()")
                 time.sleep(0.25)
-                after_quality_confirmation = json.loads(evaluate("JSON.stringify({modelVizHidden:modelOutputViz.hidden,dialogOpen:impactDialog.open,completed:state.completed.has(3)})"))
-                assert after_quality_confirmation == {"modelVizHidden": False, "dialogOpen": True, "completed": True}, after_quality_confirmation
-                evaluate("dialogContinue.click(); modelOutputViz.scrollIntoView({block:'start'})")
-                time.sleep(0.25)
-                screenshot("ai-andmetoo-output-comparison-unlocked.png")
+                after_quality_confirmation = json.loads(evaluate("JSON.stringify({dialogOpen:impactDialog.open,completed:state.completed.has(3)})"))
+                assert after_quality_confirmation == {"dialogOpen": True, "completed": True}, after_quality_confirmation
+                evaluate("dialogContinue.click()")
 
         command("Page.navigate", {"url": URL + "kraapimine/"})
         wait_for_path("/kraapimine/")

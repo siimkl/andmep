@@ -250,12 +250,8 @@ function baselineSuggestion(item) {
 
 function calculateLabelMetrics() {
   const counts = Object.fromEntries(Object.keys(labelNames).map(key => [key, state.labels.filter(value => value === key).length]));
-  const changedOutputs = state.labels.length
-    ? outputCases.filter((item, index) => baselineSuggestion(item) !== simulatedSuggestion(item, index)).length
-    : 0;
   return {
     ...counts,
-    changedOutputs,
     humanActions: state.reviews.filter(value => value === "human" || value === "correct").length,
     categories: new Set(state.labels).size,
     aligned: state.labels.filter((value, index) => value === idealLabel(labelCases[index])).length
@@ -276,8 +272,6 @@ function labelPatternRows() {
 function updateImpact() {
   const metrics = calculateLabelMetrics();
   const total = state.labels.length;
-  const outputsUnlocked = state.completed.has(3);
-  $("#modelOutputViz").hidden = !outputsUnlocked;
   if (state.currentStage === 3) {
     $("#impactKicker").textContent = "MUDELI VÄLJUNDITE HINDAMINE";
     $("#impactTitle").textContent = "Mida tuleb järgmises mudeliversioonis parandada?";
@@ -323,38 +317,6 @@ function updateImpact() {
     ? `${patterns.join("")}<article class="learned-pattern warn"><span>!</span><div><b>Seos ei tõesta põhjust</b><small>Mudel näeb koos esinevaid tunnuseid ja märgendeid, mitte inimese tegelikku vajadust.</small></div></article>`
     : '<div class="empty-pattern">Märgenda esimene registrikirje. Siin näed, millise seose loob mudel registritunnuste ja sinu valitud märgendi vahel.</div>';
 
-  $("#changedOutputCount").textContent = `${metrics.changedOutputs} / ${outputCases.length} muutunud`;
-  $("#modelOutputGrid").innerHTML = total
-    ? outputCases.map((item, index) => {
-        const before = baselineSuggestion(item);
-        const after = simulatedSuggestion(item, index);
-        const changed = before !== after;
-        const humanDecision = state.reviews[index] ? `<p><b>Kvaliteedimärge:</b> ${reviewNames[state.reviews[index]]}</p>` : "";
-        return `<article class="model-impact-card"><div class="model-case-head"><span>${item.id}</span><b>${item.title}</b></div><div class="model-comparison"><div><small>VARASEM MUDEL</small><strong>${before}</strong></div><div class="${changed ? "changed" : ""}"><small>SINU TREENINGANDMETEGA</small><strong>${after}</strong></div></div><p>${state.labels[item.trainingIndex] ? `Selles õppesimulatsioonis peegeldab soovitus seotud treeningkirje ${labelCases[item.trainingIndex].id} märgendit.` : "Seotud treeningkirjet pole veel märgendatud, seega kuvatakse varasema mudeli soovitus."}</p>${humanDecision}</article>`;
-      }).join("")
-    : '<article class="model-impact-card waiting">Mudeli soovituste võrdlus avaneb pärast esimest märgendit.</article>';
-
-  if (!total) {
-    $("#latestLabelImpact").classList.remove("active");
-    $("#latestLabelImpact").innerHTML = "<span>ALUSTA MÄRGENDAMISEST</span><p>Kui märgendad esimese registrikirje, näed siin, millise seose see treeningandmetesse lisab ja kuidas seos kontrollsoovitusi muudab.</p>";
-  } else if (!outputsUnlocked) {
-    $("#latestLabelImpact").classList.add("active");
-    $("#latestLabelImpact").innerHTML = `<span>VÄLJUNDITE VÕRDLUS POLE VEEL AVATUD</span><p>Treeningandmed on loodud, kuid mudeli soovituste muutusi veel ei näidata. Lisa neljale väljundile kvaliteedimärge ja vajuta „Kinnita kvaliteedihinnangud”.</p>`;
-  } else {
-    const index = total - 1;
-    const item = labelCases[index];
-    const changedList = outputCases.map((output, outputIndex) => baselineSuggestion(output) !== simulatedSuggestion(output, outputIndex) ? output.id : null).filter(Boolean);
-    $("#latestLabelImpact").classList.add("active");
-    const ideal = idealLabel(item);
-    const aligned = state.labels[index] === ideal;
-    const unavailable = !state.availableLabels.has(ideal);
-    const alignmentText = aligned
-      ? "Märgend vastab kinnitatud juhisele."
-      : unavailable
-        ? `Selle registrikirje jaoks vajalik märgend „${labelNames[ideal]}” puudub juhisest, seega lisati treeningandmetesse kompromissmärgend.`
-        : `Kinnitatud juhise järgi sobiks märgend „${labelNames[ideal]}”. Praegune valik õpetab mudelile teistsuguse seose.`;
-    $("#latestLabelImpact").innerHTML = `<span>VIIMASE MÄRGENDI MÕJU · ${item.id}</span><p>Registrikirje ${item.id} sai märgendi <b>${labelNames[state.labels[index]]}</b> ja lisati mudeli treeningandmetesse. ${alignmentText} ${changedList.length ? `Mõju on juba näha kontrollkirjetes ${changedList.join(", ")}.` : "Ükski kontrollsoovitus pole veel muutunud."}</p>`;
-  }
 }
 
 function invalidateFrom(stage) {
@@ -847,12 +809,12 @@ function renderResults() {
   const selectedCounts = Object.keys(labelNames)
     .filter(key => state.availableLabels.has(key))
     .map(key => `${metrics[key]} „${labelNames[key]}”`);
-  $("#profileText").textContent = `Märgendasid viis registrikirjet: ${selectedCounts.join(", ")}. Kinnitatud juhendile vastas ${metrics.aligned}/${labelCases.length} märgendit. Sinu loodud treeningandmed muutsid varasema mudeliga võrreldes ${metrics.changedOutputs}/4 kontrollsoovitust.`;
+  $("#profileText").textContent = `Märgendasid viis registrikirjet: ${selectedCounts.join(", ")}. Kinnitatud juhendile vastas ${metrics.aligned}/${labelCases.length} märgendit. Mudeli soovitused põhinevad nendest näidetest õpitud seostel.`;
   const tags = [
     `${labelCases.length} treeningandmetesse lisatud registrikirjet`,
     `${state.availableLabels.size} kasutatavat märgendit`,
     `${metrics.aligned}/${labelCases.length} juhisega kooskõlas`,
-    `${metrics.changedOutputs}/4 mudeli soovitust muutus`,
+    `${metrics.categories} erinevat märgendit õppeandmestikus`,
     `${metrics.review} ülevaatusele ja ${metrics.supplement} täiendamisele`,
     state.appeal === "owned" ? "parandus jõuab seirelogisse" : "tagasisideahel vajab täpsustamist"
   ];
@@ -861,7 +823,7 @@ function renderResults() {
   const tradeoffs = [
     ["1", "Juhise järjepidevus", metrics.aligned === labelCases.length ? "Kasutasid kinnitatud juhist kõigi registrikirjete puhul järjepidevalt. See ei tõesta, et juhis ise on hea, kuid teeb andmestiku tähenduse kontrollitavaks." : `${labelCases.length - metrics.aligned} märgendit erines kinnitatud juhendist. Mudel ei oska neid eksimuseks pidada, vaid õpib neist samamoodi nagu teistest näidetest.`],
     ["2", "Ebakindluse säilitamine", attentionCount ? `${metrics.supplement} registrikirjet vajab andmete täiendamist ja ${metrics.review} soovitust ametniku ülevaatust. Nii ei muutu puudulik või vastuoluline info põhjendamatult kindlaks väljundiks.` : "Kõik registrikirjed said kindla toe märgendi. See teeb andmestiku lihtsamaks, kuid peidab puuduliku ja vastuolulise info."],
-    ["3", "Märgendist soovituseni", `${metrics.changedOutputs}/4 kontrollsoovitust muutus sinu märgendite mõjul. See näitab, kuidas väike treeningvalim võib muuta kogu registrile rakendatavat soovitusloogikat.`],
+    ["3", "Märgendist soovituseni", "Mudel rakendab treeningandmetest õpitud seoseid uutele registrikirjetele. Seetõttu võib märgendusviga korduda paljudes soovitustes."],
     ["4", "Parandus jõuab treeningandmetesse", state.appeal === "owned" ? "Vaidlustatud soovituse põhjus jõuab seirelogisse ning võib muuta juhist, testprofiile ja andmestiku järgmist versiooni." : "Üksik viga võib saada lahenduse, kuid selle põhjus ei pruugi järgmisse märgendusvooru jõuda."]
   ];
   $("#tradeoffList").innerHTML = tradeoffs.map(([index, heading, text]) => `<article><span>${index}</span><div><b>${heading}</b><p>${text}</p></div></article>`).join("");
