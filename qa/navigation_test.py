@@ -279,9 +279,9 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                   stageLead: document.querySelector('[data-stage="3"] .control-title p').textContent,
                   transition: document.querySelector('[data-stage="3"] .labeling-instruction-intro').textContent,
                   cue: activeTaskCue.textContent,
-                  impactKicker: impactKicker.textContent,
-                  impactTitle: document.querySelector('#impactTitle').textContent,
-                  impactStatusLabel: document.querySelector('#impactStatusLabel').textContent,
+                  impactHidden: impactCard.hidden,
+                  pending: document.querySelector('.lab-grid').classList.contains('impact-pending'),
+                  centerDelta: Math.round(Math.abs((document.querySelector('.control-card').getBoundingClientRect().left+document.querySelector('.control-card').getBoundingClientRect().width/2)-innerWidth/2)),
                   policyLabel: document.querySelector('label[for="interventionRule"] span').textContent,
                   policyOptions: [...interventionRule.options].map(option => option.textContent),
                   recommendationLabel: document.querySelector('#outputCase .output-recommendation span').textContent,
@@ -296,7 +296,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert stage3["stepTitle"] == "Hinda mudeli väljundeid" and "kvaliteedimärge" in stage3["stepDetail"] and "arendusmeeskonnale" in stage3["stepDetail"], stage3
                 assert stage3["stageTitle"] == "Kui kvaliteetsed on mudeli soovitused?" and "vastutab teenuseotsuse eest" in stage3["stageLead"] and "arendajale ning tooteomanikule" in stage3["stageLead"], stage3
                 assert "Märgendamistöö on lõppenud." in stage3["transition"] and "ei ole uus treeningmärgend ega teenuseotsus" in stage3["transition"], stage3
-                assert stage3["impactKicker"] == "MUDELI VÄLJUNDITE HINDAMINE" and stage3["impactTitle"] == "Mida tuleb järgmises mudeliversioonis parandada?" and stage3["impactStatusLabel"] == "HINDAMISE SEIS", stage3
+                assert stage3["impactHidden"] and stage3["pending"] and stage3["centerDelta"] <= 10, stage3
                 assert "kvaliteedimärge jõuab arendusmeeskonnani" in stage3["cue"] and "arendajale ja tooteomanikule" in stage3["cue"], stage3
                 assert stage3["policyLabel"] == "Kuidas jõuab kvaliteedimärge arendusmeeskonnani?" and len(stage3["policyOptions"]) == 5 and stage3["policyOptions"][1] == "Iga soovitus saab kvaliteedimärke ja põhjenduse", stage3
                 assert stage3["recommendationLabel"] == "MUDELI SOOVITUS" and stage3["confidenceLabel"] == "MUDELI KINDLUS" and not stage3["qualityPromptExists"] and not stage3["impactLabelExists"], stage3
@@ -307,9 +307,9 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 screenshot("ai-andmetoo-model-evaluation.png")
                 evaluate("interventionRule.value='every'; interventionRule.dispatchEvent(new Event('change',{bubbles:true})); document.querySelector('#reviewActions button[data-review=\"correct\"]').click()")
                 time.sleep(0.25)
-                quality_feedback = json.loads(evaluate("JSON.stringify({mark:document.querySelector('#outputCase .quality-result b').textContent,title:reviewExplanationTitle.textContent,text:reviewExplanationText.textContent,result:reviewExplanation.dataset.result,feedback:stage3Feedback.textContent})"))
+                quality_feedback = json.loads(evaluate("JSON.stringify({mark:document.querySelector('#outputCase .quality-result b').textContent,title:reviewExplanationTitle.textContent,text:reviewExplanationText.textContent,result:reviewExplanation.dataset.result,feedback:stage3Feedback.textContent,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending')})"))
                 assert quality_feedback["mark"] == "Vajab parandamist" and quality_feedback["title"] == "Vajab parandamist" and quality_feedback["result"] == "correct", quality_feedback
-                assert "Arendaja ja tooteomanik" in quality_feedback["text"] and "hindamislogisse" in quality_feedback["feedback"], quality_feedback
+                assert "Arendaja ja tooteomanik" in quality_feedback["text"] and "hindamislogisse" in quality_feedback["feedback"] and quality_feedback["impactHidden"] and quality_feedback["pending"], quality_feedback
                 screenshot("ai-andmetoo-quality-feedback.png")
                 evaluate("""(() => {
                   nextReviewCase.click();
@@ -319,13 +319,13 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                   });
                 })()""")
                 time.sleep(0.25)
-                before_quality_confirmation = json.loads(evaluate("JSON.stringify({completeDisabled:document.querySelector('[data-complete=\"3\"]').disabled,reviews:state.reviews.length})"))
-                assert not before_quality_confirmation["completeDisabled"] and before_quality_confirmation["reviews"] == 4, before_quality_confirmation
+                before_quality_confirmation = json.loads(evaluate("JSON.stringify({completeDisabled:document.querySelector('[data-complete=\"3\"]').disabled,reviews:state.reviews.length,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending')})"))
+                assert not before_quality_confirmation["completeDisabled"] and before_quality_confirmation["reviews"] == 4 and before_quality_confirmation["impactHidden"] and before_quality_confirmation["pending"], before_quality_confirmation
                 screenshot("ai-andmetoo-before-quality-confirmation.png")
                 evaluate("document.querySelector('[data-complete=\"3\"]').click()")
                 time.sleep(0.25)
-                after_quality_confirmation = json.loads(evaluate("JSON.stringify({dialogOpen:impactDialog.open,completed:state.completed.has(3)})"))
-                assert after_quality_confirmation == {"dialogOpen": True, "completed": True}, after_quality_confirmation
+                after_quality_confirmation = json.loads(evaluate("JSON.stringify({dialogOpen:impactDialog.open,completed:state.completed.has(3),completedCount:completedCount.textContent,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),impactTitle:document.querySelector('#impactTitle').textContent})"))
+                assert after_quality_confirmation == {"dialogOpen": True, "completed": True, "completedCount": "3", "impactHidden": False, "pending": False, "impactTitle": "Mida tuleb järgmises mudeliversioonis parandada?"}, after_quality_confirmation
                 evaluate("dialogContinue.click()")
 
         command("Page.navigate", {"url": URL + "kraapimine/"})
