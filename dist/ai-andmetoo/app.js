@@ -683,9 +683,9 @@ function updateControls() {
 }
 
 function updateFocusState() {
-  const impactLocked = state.labels.length < labelCases.length || Boolean(state.pendingLabel);
+  const impactLocked = !state.completed.has(2);
   const impactCard = $("#impactCard");
-  const impactPending = state.currentStage === 1 || (state.currentStage === 2 && impactLocked);
+  const impactPending = state.currentStage === 1 || (state.currentStage === 2 && !state.completed.has(2));
   impactCard.hidden = impactPending;
   $(".lab-grid").classList.toggle("impact-pending", impactPending);
   impactCard.classList.toggle("is-muted", impactLocked);
@@ -696,10 +696,10 @@ function updateFocusState() {
   if (impactLocked) {
     const labelingStarted = state.completed.has(1);
     impactLockedNotice.querySelector("span").textContent = labelingStarted
-      ? "MÕJUVADE AVANEB PÄRAST 5 MÄRGENDIT"
+      ? "MÕJUVADE AVANEB PÄRAST MÄRGENDUSE KINNITAMIST"
       : "MÕJUVADE POLE VEEL AVATUD";
     impactLockedNotice.querySelector("p").textContent = labelingStarted
-      ? `Märgendasid ${state.labels.length}/${labelCases.length} registrikirjet. Pärast viiendat märgendit näed, milliseid seoseid mudel sinu loodud treeningandmetest õpib ja kuidas kontrollsoovitused muutuvad.`
+      ? `Märgendasid ${state.labels.length}/${labelCases.length} registrikirjet. Mõjuvaade avaneb alles pärast seda, kui kõik viis kirjet on märgendatud ja vajutad „Kinnita märgendus”.`
       : "Kinnita esmalt andmed ja märgendusjuhis. Seejärel märgenda viis tööotsija registrikirjet.";
   }
 
@@ -727,14 +727,14 @@ function updateFocusState() {
     else if (!state.audit) title = "Vali märgendusvalimi kontroll";
     else if (state.audit !== "coverage") title = "Vali kontroll, mis näitab valimi katvust ja puuduvaid andmeid";
     else title = "Kinnita andmed ja märgendusjuhis";
-    if (impactLocked && state.availableLabels.size >= 2) detail = "Mõjuvaade avaneb pärast viie registrikirje märgendamist.";
+    if (impactLocked && state.availableLabels.size >= 2) detail = "Mõjuvaade avaneb pärast viie registrikirje märgendamist ja märgenduse kinnitamist.";
   } else if (state.currentStage === 2) {
     if (state.pendingLabel) title = "Vaata tagasisidet ja jätka järgmise kirjega";
     else if (state.labels.length === labelCases.length) title = "Kinnita viie registrikirje märgendus";
     else title = `Märgenda registrikirje ${state.labels.length + 1}/${labelCases.length}`;
-    detail = impactLocked
-      ? "Kasuta ainult kirjel nähtavat registriinfot ja kinnitatud juhist. Mõjuvaade avaneb pärast viiendat märgendit."
-      : "Kõik viis registrikirjet on märgendatud. Vaata nüüd mõjuvaadet ja kinnita märgendus.";
+    detail = state.labels.length === labelCases.length && !state.pendingLabel
+      ? "Kõik viis registrikirjet on märgendatud. Vajuta „Kinnita märgendus”, et avada mõjuvaade."
+      : "Kasuta ainult kirjel nähtavat registriinfot ja kinnitatud juhist. Mõjuvaade avaneb pärast märgenduse kinnitamist.";
   } else if (state.currentStage === 3) {
     if (!state.intervention) title = "Määra, millal mudeli väljund vajab inimese ülevaatust";
     else if (state.pendingReview) title = "Vaata tagasisidet ja jätka järgmise väljundiga";

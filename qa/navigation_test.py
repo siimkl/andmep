@@ -257,10 +257,14 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert before_summary["impactHidden"] and before_summary["pending"] and before_summary["centerDelta"] <= 10, before_summary
                 evaluate("nextLabelCase.click()")
                 time.sleep(0.25)
-                five_case_end = json.loads(evaluate("JSON.stringify({progress:labelProgress.textContent,summary:document.querySelector('#labelCase .case-top b').textContent,completeDisabled:document.querySelector('[data-complete=\"2\"]').disabled,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),fact:labeledFact.textContent})"))
-                assert five_case_end == {"progress": "5 / 5 märgendatud", "summary": "5 registrikirjet", "completeDisabled": False, "impactHidden": False, "pending": False, "fact": "5 / 5"}, five_case_end
+                five_case_end = json.loads(evaluate("JSON.stringify({progress:labelProgress.textContent,summary:document.querySelector('#labelCase .case-top b').textContent,completeDisabled:document.querySelector('[data-complete=\"2\"]').disabled,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),fact:labeledFact.textContent,centerDelta:Math.round(Math.abs((document.querySelector('.control-card').getBoundingClientRect().left+document.querySelector('.control-card').getBoundingClientRect().width/2)-innerWidth/2)),cue:activeTaskCue.textContent})"))
+                assert five_case_end["progress"] == "5 / 5 märgendatud" and five_case_end["summary"] == "5 registrikirjet" and not five_case_end["completeDisabled"], five_case_end
+                assert five_case_end["impactHidden"] and five_case_end["pending"] and five_case_end["centerDelta"] <= 10 and "Kinnita märgendus" in five_case_end["cue"], five_case_end
+                screenshot("ai-andmetoo-before-label-confirmation.png")
                 evaluate("document.querySelector('[data-complete=\"2\"]').click()")
                 time.sleep(0.25)
+                after_confirmation = json.loads(evaluate("JSON.stringify({impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),dialogOpen:impactDialog.open})"))
+                assert after_confirmation == {"impactHidden": False, "pending": False, "dialogOpen": True}, after_confirmation
                 evaluate("dialogContinue.click()")
                 time.sleep(0.25)
                 stage3 = json.loads(evaluate("""JSON.stringify({
