@@ -21,10 +21,10 @@ const labelCases = [
 ];
 
 const outputCases = [
-  { id: "T-201", title: "Tööotsija T-201", trainingIndex: 0, text: "Ajakohaste registriandmete järgi alustas tööotsija uuel töökohal ja tema registrikirje ootab sulgemist.", confidence: 62, expected: "correct", impact: "Kui mudel seostab varasema töökaotuse alati kiire toe vajadusega, võib sama viga korduda paljude tööotsijate soovitustes.", baseline: "Tavaplaan" },
-  { id: "T-202", title: "Tööotsija T-202", trainingIndex: 2, text: "Takistuste väli on tühi ja registrikirjeldus ei ütle, millist abi tööotsija vajab.", confidence: 81, expected: "accept", impact: "Kui puuduliku infoga treeningkirje sai märgendi „Andmete täiendamine”, oskab mudel küsida lisainfot ega anna põhjendamatult kindlat teenusesoovitust.", baseline: "Tavaplaan" },
-  { id: "T-203", title: "Tööotsija T-203", trainingIndex: 1, text: "Registriinfo on täielik, ajakohane ja kooskõlaline ning kiireks sekkumiseks pole põhjust.", confidence: 89, expected: "accept", impact: "Hea tavaplaani treeningnäide aitab mudelil vältida registri kõigi tööotsijate põhjendamatut suunamist kiiresse sekkumisse.", baseline: "Tavaplaan" },
-  { id: "T-204", title: "Tööotsija T-204", trainingIndex: 4, text: "Kontrollkirjes puudub valdkonnaeksperdi kinnitatud võrdlusotsus. Kaks märkust on vastuolus ja nende ajakohasust ei saa tuvastada.", confidence: 74, expected: "human", impact: "Kui kontrollandmetes puudub usaldusväärne võrdlusotsus, ei saa arendusmeeskond veel otsustada, kas parandada mudelit või hindamisandmeid.", baseline: "Kiire tugi" }
+  { id: "T-201", title: "Tööotsija T-201", trainingIndex: 0, text: "Ajakohaste registriandmete järgi alustas tööotsija uuel töökohal ja tema registrikirje ootab sulgemist.", confidence: 62, expected: "correct", baseline: "Tavaplaan" },
+  { id: "T-202", title: "Tööotsija T-202", trainingIndex: 2, text: "Takistuste väli on tühi ja registrikirjeldus ei ütle, millist abi tööotsija vajab.", confidence: 81, expected: "accept", baseline: "Tavaplaan" },
+  { id: "T-203", title: "Tööotsija T-203", trainingIndex: 1, text: "Registriinfo on täielik, ajakohane ja kooskõlaline ning kiireks sekkumiseks pole põhjust.", confidence: 89, expected: "accept", baseline: "Tavaplaan" },
+  { id: "T-204", title: "Tööotsija T-204", trainingIndex: 4, text: "Kontrollkirjes puudub valdkonnaeksperdi kinnitatud võrdlusotsus. Kaks märkust on vastuolus ja nende ajakohasust ei saa tuvastada.", confidence: 74, expected: "human", baseline: "Kiire tugi" }
 ];
 
 const fieldNames = {
@@ -488,7 +488,6 @@ function renderOutputCase() {
   const container = $("#outputCase");
   const actions = $("#reviewActions");
   const explanation = $("#reviewExplanation");
-  const qualityPrompt = $("#qualityReviewPrompt");
   $("#reviewProgress").textContent = `${state.reviews.length} / ${outputCases.length} kvaliteedimärget`;
   if (state.pendingReview) {
     const { index, choice } = state.pendingReview;
@@ -496,7 +495,6 @@ function renderOutputCase() {
     const suggestion = simulatedSuggestion(item, index);
     container.innerHTML = `<div class="case-top"><span>${item.id} · ${index + 1}/${outputCases.length}</span><b>${reviewNames[choice]}</b></div><h4>${item.title}</h4><p>${outputText(item)}</p><div class="output-recommendation"><span>MUDELI SOOVITUS</span><strong>${suggestion}</strong><div class="confidence-ring"><small>MUDELI KINDLUS</small><b>${item.confidence}%</b></div></div><div class="quality-result"><small>KVALITEEDIMÄRGE</small><b>${reviewNames[choice]}</b><span>Sinu hinnang mudeli väljundile</span></div>`;
     actions.hidden = true;
-    qualityPrompt.hidden = true;
     explanation.hidden = false;
     const actionMeaning = {
       accept: "Märge lisatakse hindamislogisse kui kontrollkriteeriumidele vastav väljund. Koondvaade aitab tooteomanikul jälgida kasutatavate soovituste osakaalu.",
@@ -505,21 +503,19 @@ function renderOutputCase() {
     };
     const alignmentText = choice === item.expected ? "" : ` Kontrollkriteeriumi järgi sobib siia kvaliteedimärge „${reviewNames[item.expected]}”.`;
     $("#reviewExplanationTitle").textContent = reviewNames[choice];
-    $("#reviewExplanationText").textContent = `${actionMeaning[choice]}${alignmentText} ${item.impact}`;
+    $("#reviewExplanationText").textContent = `${actionMeaning[choice]}${alignmentText}`;
     $("#nextReviewCase").textContent = state.reviews.length === outputCases.length ? "Vaata kvaliteedihinnangute kokkuvõtet" : "Jätka järgmise väljundiga";
   } else if (state.reviews.length === outputCases.length) {
     const summary = Object.keys(reviewNames).map(key => `${reviewNames[key]}: ${state.reviews.filter(value => value === key).length}`).join(" · ");
     container.innerHTML = `<div class="case-top"><span>HINDAMINE VALMIS</span><b>4 väljundit</b></div><h4>Mudeli väljundite hinnangud</h4><p>${summary}</p><div class="case-meta"><button class="inline-reset" type="button" data-rereview>Hinda väljundeid uuesti</button></div>`;
     actions.hidden = true;
-    qualityPrompt.hidden = true;
     explanation.hidden = true;
     $$("#reviewActions button").forEach(button => { button.disabled = true; button.classList.remove("selected"); });
   } else {
     const item = outputCases[state.reviews.length];
     const suggestion = simulatedSuggestion(item, state.reviews.length);
-    container.innerHTML = `<div class="case-top"><span>${item.id} · ${state.reviews.length + 1}/${outputCases.length}</span><b>KONTROLLKIRJE</b></div><h4>${item.title}</h4><p>${outputText(item)}</p><div class="output-recommendation"><span>MUDELI SOOVITUS</span><strong>${suggestion}</strong><div class="confidence-ring"><small>MUDELI KINDLUS</small><b>${item.confidence}%</b></div></div><div class="impact-label"><b>MIKS SEE ON ARENDUSELE OLULINE?</b><span>${item.impact}</span></div>`;
+    container.innerHTML = `<div class="case-top"><span>${item.id} · ${state.reviews.length + 1}/${outputCases.length}</span><b>KONTROLLKIRJE</b></div><h4>${item.title}</h4><p>${outputText(item)}</p><div class="output-recommendation"><span>MUDELI SOOVITUS</span><strong>${suggestion}</strong><div class="confidence-ring"><small>MUDELI KINDLUS</small><b>${item.confidence}%</b></div></div>`;
     actions.hidden = false;
-    qualityPrompt.hidden = false;
     explanation.hidden = true;
     $$("#reviewActions button").forEach(button => { button.disabled = false; button.classList.remove("selected"); });
   }

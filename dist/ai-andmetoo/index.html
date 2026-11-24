@@ -7,7 +7,7 @@
   <title>AI andmetöö · Kes õpetab tehisaru?</title>
   <link rel="stylesheet" href="api1-base.css?v=1">
   <link rel="stylesheet" href="../api-common.css?v=11">
-  <link rel="stylesheet" href="simulator.css?v=25">
+  <link rel="stylesheet" href="simulator.css?v=26">
 </head>
 <body>
   <main class="shell" id="app">
@@ -152,7 +152,6 @@
           <label class="select-label" for="interventionRule"><span>Kuidas jõuab kvaliteedimärge arendusmeeskonnani?</span><select id="interventionRule"><option value="">Vali tagasiside kogumise viis</option><option value="every">Iga soovitus saab kvaliteedimärke ja põhjenduse</option><option value="sample">Esindusliku valimi regulaarne hindamine</option><option value="confidence">Ainult madala kindlusega soovituste hindamine</option><option value="complaint">Tagasiside ainult vaidlustest või kaebustest</option></select></label>
           <div class="case-progress"><span>VÄLJUNDID</span><b id="reviewProgress">0 / 4 kvaliteedimärget</b></div>
           <div class="output-card" id="outputCase"></div>
-          <div class="quality-review-prompt" id="qualityReviewPrompt"><span>LISA KVALITEEDIMÄRGE</span><p><b>Hinda mudeli väljundit, mitte tööotsijat.</b> Märge koos põhjendusega läheb arendajale ja tooteomanikule.</p></div>
           <div class="review-actions" id="reviewActions" aria-label="Lisa mudeli soovitusele kvaliteedimärge">
             <button type="button" data-review="accept">Kasutatav</button><button type="button" data-review="correct">Vajab parandamist</button><button type="button" data-review="human">Hinnanguks pole piisavalt infot</button>
           </div>
@@ -223,6 +222,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=38"></script>
+  <script src="app.js?v=39"></script>
 </body>
 </html>
