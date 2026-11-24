@@ -771,10 +771,40 @@ function showStage(stage, shouldScroll = true) {
 }
 
 const dialogMessages = {
-  1: { start: "Valis märgendid, andmed ja reegli", middle: "Valikutest sai märgendaja lähteülesanne", end: "Õpib nende põhjal loodud treeningandmetest", insight: "" },
-  2: { start: "Märgendas viis registrikirjet", middle: "Märgendatud kirjetest said treeningandmed", end: "Rakendab õpitud seoseid kogu registrile", insight: "Mudel ei tea, milline märgend oli ekslik. Ta õpib kõigist treeningandmetesse lisatud kirjetest, mistõttu märgendaja järjepidevus mõjutab kõigile tööotsijatele antavaid soovitusi." },
-  3: { start: "Lisas neljale väljundile kvaliteedimärke", middle: "Märgetest ja põhjendustest sai struktureeritud tagasiside", end: "Arendaja ja tooteomanik näevad korduvaid vigu", insight: "Kvaliteedimärge ei ole uus treeningmärgend ega teenuseotsus. See näitab, kas väljund on kasutatav, vajab parandamist või kas usaldusväärseks hindamiseks on vaja paremaid kontrollandmeid." },
-  4: { start: "Määras vastutajad ja parandamise korra", middle: "Hindamisel leitud vead seoti juhise ja treeningandmetega", end: "Järgmist mudeliversiooni saab kontrollitult parandada", insight: "Juhise versioon, vaidlustatud näidete põhjendused, hindamistulemused ja kontrollitud testprofiilid aitavad sama vea järgmises mudeliversioonis uuesti üles leida." }
+  1: {
+    startLabel: "ANDMED JA JUHIS",
+    start: "Valisid andmeväljad ja märgendid ning kinnitasid juhise",
+    middleLabel: "MÄRGENDAMINE",
+    endLabel: "MUDELI ÕPPIMINE",
+    end: "Mudel õpib märgendatud kirjetest"
+  },
+  2: {
+    startLabel: "MÄRGENDAMINE",
+    start: "Märgendasid viis registrikirjet",
+    middleLabel: "TREENINGANDMED",
+    middle: "Märgendatud kirjetest said treeningandmed",
+    endLabel: "MUDELI SOOVITUSED",
+    end: "Mudel rakendab õpitud seoseid kogu registrile",
+    insight: "Mudel ei tea, milline märgend oli ekslik. Ta õpib kõigist treeningandmetesse lisatud kirjetest, mistõttu märgendaja järjepidevus mõjutab kõigile tööotsijatele antavaid soovitusi."
+  },
+  3: {
+    startLabel: "VÄLJUNDITE HINDAMINE",
+    start: "Hindasid mudeli nelja väljundit",
+    middleLabel: "TAGASISIDE",
+    middle: "Märgetest ja põhjendustest sai struktureeritud tagasiside",
+    endLabel: "VIGADE ANALÜÜS",
+    end: "Arendaja ja tooteomanik näevad korduvaid vigu",
+    insight: "Kvaliteedimärge ei ole uus treeningmärgend ega teenuseotsus. See näitab, kas väljund on kasutatav, vajab parandamist või kas usaldusväärseks hindamiseks on vaja paremaid kontrollandmeid."
+  },
+  4: {
+    startLabel: "VASTUTUS",
+    start: "Määrasid vastutajad ja parandamise korra",
+    middleLabel: "PARANDUSKAVA",
+    middle: "Hindamisel leitud vead seoti juhise ja treeningandmetega",
+    endLabel: "JÄRGMINE MUDELIVERSIOON",
+    end: "Järgmist mudeliversiooni saab kontrollitult parandada",
+    insight: "Juhise versioon, vaidlustatud näidete põhjendused, hindamistulemused ja kontrollitud testprofiilid aitavad sama vea järgmises mudeliversioonis uuesti üles leida."
+  }
 };
 
 function completeStage(stage) {
@@ -787,12 +817,15 @@ function completeStage(stage) {
   if (stage === 1) {
     const fields = selectedFieldNames();
     const labels = Object.keys(labelNames).filter(key => state.availableLabels.has(key)).map(key => labelNames[key]);
-    message.middle = `Märgendaja saab kasutada ${labels.length} märgendit ja ${fields.length} andmevälja`;
+    message.middle = `Kirjeid märgendades saad kasutada ${labels.length} märgendit ja ${fields.length} andmevälja`;
     message.insight = `Valisid märgendid: ${labels.join(", ")}. Märgendajale kuvatakse väljad: ${fields.join(", ")}. Ta peab järgima reeglit „${ruleNames[state.labelRule]}”. Puuduvat märgendit ega treeningkirjest välja jäetud registriinfot ei saa mudel hiljem õppida.`;
   }
   $("#dialogStage").textContent = `${stage} / 4`;
+  $("#dialogStartLabel").textContent = message.startLabel;
   $("#dialogStart").textContent = message.start;
+  $("#dialogMiddleLabel").textContent = message.middleLabel;
   $("#dialogMiddle").textContent = message.middle;
+  $("#dialogEndLabel").textContent = message.endLabel;
   $("#dialogEnd").textContent = message.end;
   $("#dialogInsight").textContent = message.insight;
   $("#dialogContinue span").textContent = stage === 2

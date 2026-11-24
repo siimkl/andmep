@@ -229,6 +229,11 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 screenshot("ai-andmetoo-stage1-choices.png")
                 evaluate("document.querySelector('[data-complete=\"1\"]').click()")
                 time.sleep(0.25)
+                stage1_captions = json.loads(evaluate("""JSON.stringify(
+                    [...document.querySelectorAll('#impactDialog .flow-node small')].map(node => node.textContent)
+                )"""))
+                assert stage1_captions == ["ANDMED JA JUHIS", "MÄRGENDAMINE", "MUDELI ÕPPIMINE"], stage1_captions
+                assert evaluate("dialogMiddle.textContent") == "Kirjeid märgendades saad kasutada 5 märgendit ja 3 andmevälja"
                 evaluate("dialogContinue.click()")
                 time.sleep(0.25)
                 five_case_start = json.loads(evaluate("JSON.stringify({total:labelCases.length,progress:labelProgress.textContent,step:document.querySelector('[data-step=\"2\"] small').textContent,caseId:document.querySelector('#labelCase .case-top span').textContent,caseTitle:document.querySelector('#labelCase h4').textContent,trainingIds:labelCases.map(item=>item.id),trainingTitles:labelCases.map(item=>item.title),outputIds:outputCases.map(item=>item.id),outputTitles:outputCases.map(item=>item.title),briefing:document.querySelector('.briefing-copy').textContent})"))
@@ -273,6 +278,10 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 time.sleep(0.25)
                 after_confirmation = json.loads(evaluate("JSON.stringify({impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),dialogOpen:impactDialog.open,dialogAction:dialogContinue.textContent.trim()})"))
                 assert after_confirmation == {"impactHidden": False, "pending": False, "dialogOpen": True, "dialogAction": "Vaata märgenduse mõju"}, after_confirmation
+                stage2_captions = json.loads(evaluate("""JSON.stringify(
+                    [...document.querySelectorAll('#impactDialog .flow-node small')].map(node => node.textContent)
+                )"""))
+                assert stage2_captions == ["MÄRGENDAMINE", "TREENINGANDMED", "MUDELI SOOVITUSED"], stage2_captions
                 evaluate("dialogContinue.click()")
                 time.sleep(0.25)
                 impact_transition = json.loads(evaluate("JSON.stringify({stage:state.currentStage,dialogOpen:impactDialog.open,impactHidden:impactCard.hidden,impactTitle:impactTitle.textContent,nextHidden:impactNextStep.hidden,nextText:continueFromImpact.textContent.trim(),focused:document.activeElement===impactCard})"))

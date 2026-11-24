@@ -207,8 +207,12 @@
   <dialog class="impact-dialog" id="impactDialog" aria-labelledby="dialogTitle">
     <div class="impact-dialog-shell">
       <div class="dialog-head"><div><span class="section-kicker">SINU VALIKU MÕJU</span><h2 id="dialogTitle">Mida sinu valik muutis?</h2></div><div class="flow-status"><span>ETAPP LÕPETATUD</span><b id="dialogStage">1 / 4</b></div></div>
-      <div class="decision-flow" aria-label="Inimese otsus mõjutab andmeid, süsteemi ja teenust">
-        <div class="flow-node"><span>1</span><small>INIMENE</small><b id="dialogStart">Valis andmed ja reegli</b></div><i></i><div class="flow-node"><span>2</span><small>ANDMETÖÖ</small><b id="dialogMiddle">Valikutest sai märgendaja lähteülesanne</b></div><i></i><div class="flow-node"><span>3</span><small>MUDEL</small><b id="dialogEnd">Õpib valitud info põhjal loodud märgenditest</b></div>
+      <div class="decision-flow" role="group" aria-label="Etapi kokkuvõte">
+        <div class="flow-node"><span>1</span><small id="dialogStartLabel"></small><b id="dialogStart"></b></div>
+        <i aria-hidden="true"></i>
+        <div class="flow-node"><span>2</span><small id="dialogMiddleLabel"></small><b id="dialogMiddle"></b></div>
+        <i aria-hidden="true"></i>
+        <div class="flow-node"><span>3</span><small id="dialogEndLabel"></small><b id="dialogEnd"></b></div>
       </div>
       <p class="dialog-insight" id="dialogInsight"></p>
       <button class="primary-button orange" id="dialogContinue" type="button"><span>Jätka järgmise etapiga</span></button>
@@ -217,6 +221,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=45"></script>
+  <script src="app.js?v=46"></script>
 </body>
 </html>
