@@ -241,11 +241,17 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 screenshot("ai-andmetoo-wrong-label-feedback.png")
                 evaluate("""(() => {
                   undoLabelChoice.click();
-                  ['fast','standard','supplement','self','review'].forEach(label => {
+                  ['fast','standard','supplement','self'].forEach(label => {
                     document.querySelector(`#labelActions button[data-label="${label}"]`).click();
                     nextLabelCase.click();
                   });
+                  document.querySelector('#labelActions button[data-label="review"]').click();
                 })()""")
+                time.sleep(0.25)
+                before_summary = json.loads(evaluate("JSON.stringify({progress:labelProgress.textContent,nextText:nextLabelCase.textContent,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),centerDelta:Math.round(Math.abs((document.querySelector('.control-card').getBoundingClientRect().left+document.querySelector('.control-card').getBoundingClientRect().width/2)-innerWidth/2))})"))
+                assert before_summary["progress"] == "5 / 5 märgendatud" and before_summary["nextText"] == "Vaata märgenduse kokkuvõtet", before_summary
+                assert before_summary["impactHidden"] and before_summary["pending"] and before_summary["centerDelta"] <= 10, before_summary
+                evaluate("nextLabelCase.click()")
                 time.sleep(0.25)
                 five_case_end = json.loads(evaluate("JSON.stringify({progress:labelProgress.textContent,summary:document.querySelector('#labelCase .case-top b').textContent,completeDisabled:document.querySelector('[data-complete=\"2\"]').disabled,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),fact:labeledFact.textContent})"))
                 assert five_case_end == {"progress": "5 / 5 märgendatud", "summary": "5 juhtumit", "completeDisabled": False, "impactHidden": False, "pending": False, "fact": "5 / 5"}, five_case_end

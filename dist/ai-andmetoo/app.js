@@ -668,7 +668,7 @@ function updateControls() {
 }
 
 function updateFocusState() {
-  const impactLocked = state.labels.length < labelCases.length;
+  const impactLocked = state.labels.length < labelCases.length || Boolean(state.pendingLabel);
   const impactCard = $("#impactCard");
   const impactPending = state.currentStage === 1 || (state.currentStage === 2 && impactLocked);
   impactCard.hidden = impactPending;
