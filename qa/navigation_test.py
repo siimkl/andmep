@@ -222,6 +222,21 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 evaluate("labelRule.scrollIntoView({block:'center'})")
                 time.sleep(0.25)
                 screenshot("ai-andmetoo-stage1-choices.png")
+                evaluate("document.querySelector('[data-complete=\"1\"]').click()")
+                time.sleep(0.25)
+                evaluate("dialogContinue.click()")
+                time.sleep(0.25)
+                assert not evaluate("Boolean(document.querySelector('.case-rule-hint'))"), "Kinnitatud reegli plokk on alles"
+                evaluate("document.querySelector('#labelActions button[data-label=\"supplement\"]').click()")
+                label_feedback = json.loads(evaluate("JSON.stringify({result:labelExplanation.dataset.result,status:labelExplanationStatus.textContent,title:labelExplanationTitle.textContent,text:labelExplanationText.textContent,summary:stage2Feedback.textContent,summaryHidden:stage2Feedback.hidden})"))
+                assert label_feedback["result"] == "incorrect" and label_feedback["status"] == "VALE MÄRGEND", label_feedback
+                assert label_feedback["title"] == "Õige vastus: „Kiire tugi”", label_feedback
+                assert "Sinu valik: „Andmete täiendamine”." in label_feedback["text"] and "vale märgend treeningandmetesse" in label_feedback["text"], label_feedback
+                assert "Vale märgend." in label_feedback["summary"] and "Õige vastus: „Kiire tugi”" in label_feedback["summary"], label_feedback
+                assert label_feedback["summaryHidden"], label_feedback
+                evaluate("labelExplanation.scrollIntoView({block:'center'})")
+                time.sleep(0.25)
+                screenshot("ai-andmetoo-wrong-label-feedback.png")
 
         command("Page.navigate", {"url": URL + "kraapimine/"})
         wait_for_path("/kraapimine/")

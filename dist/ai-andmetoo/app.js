@@ -407,33 +407,36 @@ function updateStage1Feedback() {
   $('[data-complete="1"]').disabled = !stageValid(1);
 }
 
-function ruleHintHtml() {
-  return `<div class="case-rule-hint"><span>KINNITATUD REEGEL</span><b>${ruleNames[state.labelRule] || "Reegel puudub"}</b></div>`;
-}
-
 function renderLabelCase() {
   const container = $("#labelCase");
   const actions = $("#labelActions");
   const explanation = $("#labelExplanation");
   $("#labelProgress").textContent = `${state.labels.length} / ${labelCases.length} märgendatud`;
+  $("#stage2Feedback").hidden = Boolean(state.pendingLabel);
   if (state.pendingLabel) {
     const { index, choice } = state.pendingLabel;
     const item = labelCases[index];
-    container.innerHTML = `<div class="case-top"><span>${item.id} · ${index + 1}/${labelCases.length}</span><b>VALISID: ${labelNames[choice]}</b></div><h4>${item.title}</h4>${ruleHintHtml()}${caseDataHtml(item)}<div class="case-meta"><span>${selectedFieldNames().length} nähtavat välja</span></div>`;
+    container.innerHTML = `<div class="case-top"><span>${item.id} · ${index + 1}/${labelCases.length}</span><b>VALISID: ${labelNames[choice]}</b></div><h4>${item.title}</h4>${caseDataHtml(item)}<div class="case-meta"><span>${selectedFieldNames().length} nähtavat välja</span></div>`;
     actions.hidden = true;
     explanation.hidden = false;
     const ideal = idealLabel(item);
     const idealAvailable = state.availableLabels.has(ideal);
     const aligned = choice === ideal;
     if (!idealAvailable) {
-      $("#labelExplanationTitle").textContent = `Juhisest puudub vajalik märgend „${labelNames[ideal]}”`;
-      $("#labelExplanationText").textContent = `${labelReason(item)} Valisid olemasoleva märgendi „${labelNames[choice]}”. See pole sinu eksimus, kuid mudel õpib treeningandmetesse lisatud kompromissist.`;
+      explanation.dataset.result = "missing";
+      $("#labelExplanationStatus").textContent = "MÄRGEND PUUDUB JUHISEST";
+      $("#labelExplanationTitle").textContent = `Vajalik märgend: „${labelNames[ideal]}”`;
+      $("#labelExplanationText").textContent = `Sinu valik: „${labelNames[choice]}”. ${labelReason(item)} Vajalikku märgendit ei saanud valida.`;
     } else if (aligned) {
-      $("#labelExplanationTitle").textContent = "Märgend on juhisega kooskõlas";
+      explanation.dataset.result = "correct";
+      $("#labelExplanationStatus").textContent = "ÕIGE MÄRGEND";
+      $("#labelExplanationTitle").textContent = `Õige vastus: „${labelNames[ideal]}”`;
       $("#labelExplanationText").textContent = labelReason(item);
     } else {
-      $("#labelExplanationTitle").textContent = `Juhise järgi sobib „${labelNames[ideal]}”`;
-      $("#labelExplanationText").textContent = `Valisid märgendi „${labelNames[choice]}”. ${labelReason(item)} Kui jätkad, lisatakse treeningandmetesse juhisega vastuolus olev märgend.`;
+      explanation.dataset.result = "incorrect";
+      $("#labelExplanationStatus").textContent = "VALE MÄRGEND";
+      $("#labelExplanationTitle").textContent = `Õige vastus: „${labelNames[ideal]}”`;
+      $("#labelExplanationText").textContent = `Sinu valik: „${labelNames[choice]}”. ${labelReason(item)} Jätkamisel lisatakse vale märgend treeningandmetesse.`;
     }
     $("#nextLabelCase").textContent = state.labels.length === labelCases.length ? "Vaata märgenduse kokkuvõtet" : "Jätka järgmise juhtumiga";
   } else if (state.labels.length === labelCases.length) {
@@ -445,7 +448,7 @@ function renderLabelCase() {
     $$("#labelActions button").forEach(button => { button.disabled = true; button.classList.remove("selected"); });
   } else {
     const item = labelCases[state.labels.length];
-    container.innerHTML = `<div class="case-top"><span>${item.id} · ${state.labels.length + 1}/${labelCases.length}</span><b>MÄRGENDAMISÜLESANNE</b></div><h4>${item.title}</h4>${ruleHintHtml()}${caseDataHtml(item)}<p class="case-prompt">Milline märgend sobib kinnitatud reegli järgi?</p><div class="case-meta"><span>${selectedFieldNames().length} nähtavat välja</span></div>`;
+    container.innerHTML = `<div class="case-top"><span>${item.id} · ${state.labels.length + 1}/${labelCases.length}</span><b>MÄRGENDAMISÜLESANNE</b></div><h4>${item.title}</h4>${caseDataHtml(item)}<p class="case-prompt">Milline märgend sobib märgendusjuhise järgi?</p><div class="case-meta"><span>${selectedFieldNames().length} nähtavat välja</span></div>`;
     actions.hidden = false;
     explanation.hidden = true;
     const labelingReady = Boolean(state.labelRule && state.disagreement);
@@ -920,10 +923,10 @@ $("#labelActions").addEventListener("click", event => {
   state.labels.push(choice);
   state.pendingLabel = { index, choice };
   const message = !idealAvailable
-    ? `Juhisest puudub selle juhtumi jaoks vajalik märgend „${labelNames[ideal]}”. Vaata, kuidas see piirang treeningandmeid mõjutab.`
+    ? `Juhisest puudub vajalik märgend „${labelNames[ideal]}”.`
     : choice === ideal
-      ? `Märgend „${labelNames[choice]}” vastab kinnitatud reeglile. Vaata põhjendust.`
-      : `Valitud märgend erineb kinnitatud reeglist. Vaata põhjendust enne jätkamist.`;
+      ? `Õige märgend: „${labelNames[ideal]}”.`
+      : `Vale märgend. Õige vastus: „${labelNames[ideal]}”; sinu valik: „${labelNames[choice]}”.`;
   $("#stage2Feedback").textContent = message;
   updateControls();
 });

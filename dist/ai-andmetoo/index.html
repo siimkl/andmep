@@ -7,7 +7,7 @@
   <title>AI andmetöö · Kes õpetab tehisaru?</title>
   <link rel="stylesheet" href="api1-base.css?v=1">
   <link rel="stylesheet" href="../api-common.css?v=11">
-  <link rel="stylesheet" href="simulator.css?v=24">
+  <link rel="stylesheet" href="simulator.css?v=25">
 </head>
 <body>
   <main class="shell" id="app">
@@ -141,7 +141,7 @@
           <div class="label-actions" id="labelActions" aria-label="Vali juhtumi märgend">
             <button type="button" data-label="fast">Kiire tugi</button><button type="button" data-label="standard">Tavaplaan</button><button type="button" data-label="self">Iseseisev jätkamine</button><button type="button" data-label="supplement">Andmete täiendamine</button><button type="button" data-label="review">Inimese ülevaatus</button>
           </div>
-          <div class="choice-explanation" id="labelExplanation" hidden aria-live="polite"><span>SINU MÄRGENDATUD JUHTUM LISATI TREENINGANDMETESSE</span><h4 id="labelExplanationTitle"></h4><p id="labelExplanationText"></p><div class="explanation-actions"><button class="explanation-retry" id="undoLabelChoice" type="button">Muuda märgendit</button><button class="explanation-next" id="nextLabelCase" type="button">Jätka järgmise juhtumiga</button></div></div>
+          <div class="choice-explanation" id="labelExplanation" hidden aria-live="polite"><span id="labelExplanationStatus">MÄRGENDI TAGASISIDE</span><h4 id="labelExplanationTitle"></h4><p id="labelExplanationText"></p><div class="explanation-actions"><button class="explanation-retry" id="undoLabelChoice" type="button">Muuda märgendit</button><button class="explanation-next" id="nextLabelCase" type="button">Jätka järgmise juhtumiga</button></div></div>
           <div class="decision-feedback" id="stage2Feedback" aria-live="polite">Märgenda kõik kümme juhtumit. Iga märgend õpetab mudelile, millised nähtavad tunnused millise soovitusega seostuvad.</div>
           <div class="next-action-guide contextual"><span class="next-action-label" aria-hidden="true">JÄRGMISENA <i>↓</i></span><button class="primary-button orange" type="button" data-complete="2" disabled><span>Kinnita märgendus</span></button></div>
         </section>
@@ -221,6 +221,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=28"></script>
+  <script src="app.js?v=29"></script>
 </body>
 </html>
