@@ -327,6 +327,23 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 after_quality_confirmation = json.loads(evaluate("JSON.stringify({dialogOpen:impactDialog.open,completed:state.completed.has(3),completedCount:completedCount.textContent,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),impactTitle:document.querySelector('#impactTitle').textContent})"))
                 assert after_quality_confirmation == {"dialogOpen": True, "completed": True, "completedCount": "3", "impactHidden": False, "pending": False, "impactTitle": "Mida tuleb järgmises mudeliversioonis parandada?"}, after_quality_confirmation
                 evaluate("dialogContinue.click()")
+                time.sleep(0.25)
+                stage4 = json.loads(evaluate("JSON.stringify({stage:state.currentStage,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),centerDelta:Math.round(Math.abs((document.querySelector('.control-card').getBoundingClientRect().left+document.querySelector('.control-card').getBoundingClientRect().width/2)-innerWidth/2)),impactTitle:document.querySelector('#impactTitle').textContent})"))
+                assert stage4["stage"] == 4 and stage4["impactHidden"] and stage4["pending"] and stage4["centerDelta"] <= 10, stage4
+                evaluate("""(() => {
+                  document.querySelectorAll('#ownershipGrid select').forEach(select => { select.value='internal'; select.dispatchEvent(new Event('change',{bubbles:true})); });
+                  maintenanceCadence.value='quarterly'; maintenanceCadence.dispatchEvent(new Event('change',{bubbles:true}));
+                  appealPolicy.value='owned'; appealPolicy.dispatchEvent(new Event('change',{bubbles:true}));
+                  [...document.querySelectorAll('#exitAssets input')].slice(0,2).forEach(input => input.click());
+                })()""")
+                time.sleep(0.25)
+                before_plan_confirmation = json.loads(evaluate("JSON.stringify({completeDisabled:document.querySelector('[data-complete=\"4\"]').disabled,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending')})"))
+                assert before_plan_confirmation == {"completeDisabled": False, "impactHidden": True, "pending": True}, before_plan_confirmation
+                screenshot("ai-andmetoo-before-plan-confirmation.png")
+                evaluate("document.querySelector('[data-complete=\"4\"]').click()")
+                time.sleep(0.25)
+                after_plan_confirmation = json.loads(evaluate("JSON.stringify({dialogOpen:impactDialog.open,completed:state.completed.has(4),completedCount:completedCount.textContent,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),impactTitle:document.querySelector('#impactTitle').textContent})"))
+                assert after_plan_confirmation == {"dialogOpen": True, "completed": True, "completedCount": "4", "impactHidden": False, "pending": False, "impactTitle": "Kuidas jõuavad parandused järgmisse versiooni?"}, after_plan_confirmation
 
         command("Page.navigate", {"url": URL + "kraapimine/"})
         wait_for_path("/kraapimine/")

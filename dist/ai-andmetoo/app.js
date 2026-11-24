@@ -666,7 +666,8 @@ function updateFocusState() {
   const impactCard = $("#impactCard");
   const impactPending = state.currentStage === 1
     || (state.currentStage === 2 && !state.completed.has(2))
-    || (state.currentStage === 3 && !state.completed.has(3));
+    || (state.currentStage === 3 && !state.completed.has(3))
+    || (state.currentStage === 4 && !state.completed.has(4));
   impactCard.hidden = impactPending;
   $(".lab-grid").classList.toggle("impact-pending", impactPending);
   impactCard.classList.toggle("is-muted", impactLocked);
