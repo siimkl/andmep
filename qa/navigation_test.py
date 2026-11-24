@@ -93,7 +93,10 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
               focused: document.activeElement === impactCard,
               impactVisible: !impactCard.hidden && !reviewImpactSummary.hidden,
               impactTitle: impactTitle.textContent,
-              canConfirmAgain: !document.querySelector('[data-complete="3"]').disabled
+              canConfirmAgain: !document.querySelector('[data-complete="3"]').disabled,
+              controlsInactive: document.querySelector('.control-card').inert,
+              controlsGray: getComputedStyle(document.querySelector('.control-card')).filter === 'grayscale(1)',
+              retryText: retryFromImpact.textContent
             })""")
             assert summary == {
                 "stage": 3,
@@ -104,6 +107,9 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 "impactVisible": True,
                 "impactTitle": "Mida tuleb järgmises mudeliversioonis parandada?",
                 "canConfirmAgain": False,
+                "controlsInactive": True,
+                "controlsGray": True,
+                "retryText": "Hinda väljundeid uuesti",
             }, summary
             for _ in range(20):
                 top = evaluate("impactTitle.getBoundingClientRect().top")
@@ -325,6 +331,9 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 time.sleep(0.25)
                 impact_transition = json.loads(evaluate("JSON.stringify({stage:state.currentStage,dialogOpen:impactDialog.open,impactHidden:impactCard.hidden,impactTitle:impactTitle.textContent,nextHidden:impactNextStep.hidden,nextText:continueFromImpact.textContent.trim(),focused:document.activeElement===impactCard})"))
                 assert impact_transition == {"stage": 2, "dialogOpen": False, "impactHidden": False, "impactTitle": "Mida mudel sinu märgenditest õpib?", "nextHidden": False, "nextText": "Jätka mudeli väljundite hindamisega", "focused": True}, impact_transition
+                assert evaluate("document.querySelector('.control-card').inert")
+                assert evaluate("getComputedStyle(document.querySelector('.control-card')).filter === 'grayscale(1)'")
+                assert evaluate("retryFromImpact.textContent") == "Märgenda kirjed uuesti"
                 assert evaluate("document.querySelector('[data-complete=\"2\"]').disabled")
                 assert evaluate("document.querySelector('[data-complete=\"2\"]').textContent.trim()") == "Märgendus kinnitatud"
                 screenshot("ai-andmetoo-label-impact-transition.png")
@@ -355,6 +364,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert stage3["stageTitle"] == "Kui kvaliteetsed on mudeli soovitused?" and "Teenuseotsuse eest vastutab ametnik" in stage3["stageLead"] and "varem valitud märgendid" in stage3["stageLead"], stage3
                 assert "Märgendamistöö on lõppenud." in stage3["transition"] and "uute registrikirjete" in stage3["transition"] and "arendajal ja tooteomanikul" in stage3["transition"], stage3
                 assert stage3["impactHidden"] and stage3["pending"] and stage3["centerDelta"] <= 10, stage3
+                assert evaluate("!document.querySelector('.control-card').inert")
                 assert "tagasisidet kogub" in stage3["cue"] and "Võrdle kuvatud soovitust kontrollkirje infoga" in stage3["cue"], stage3
                 assert stage3["policyLabel"] == "Kuidas peaks amet mudeli kohta tagasisidet koguma?" and len(stage3["policyOptions"]) == 5 and stage3["policyOptions"][1] == "Hinda iga kasutatud soovitust", stage3
                 assert stage3["recommendationLabel"] == "MUDELI SOOVITUS" and stage3["confidenceLabel"] == "MUDELI KINDLUS" and not stage3["qualityPromptExists"] and not stage3["impactLabelExists"], stage3
@@ -420,8 +430,9 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert after_plan_confirmation == {"dialogOpen": True, "completed": True, "completedCount": "4", "impactHidden": False, "pending": False, "impactTitle": "Kuidas jõuavad parandused järgmisse versiooni?"}, after_plan_confirmation
                 evaluate("dialogContinue.click(); document.querySelector('[data-step=\"2\"]').click()")
                 assert evaluate("document.querySelector('[data-complete=\"2\"]').disabled")
+                evaluate("retryFromImpact.click()")
+                assert evaluate("!document.querySelector('.control-card').inert && impactCard.hidden && state.labels.length === 0")
                 evaluate("""(() => {
-                  document.querySelector('[data-relabel]').click();
                   for (const label of ['self', 'fast', 'standard', 'self', 'review']) {
                     document.querySelector('#labelActions button[data-label="' + label + '"]').click();
                     nextLabelCase.click();
@@ -449,6 +460,8 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 evaluate("nextReviewCase.click(); document.querySelector('#reviewActions [data-review=\"human\"]').click(); nextReviewCase.click()")
                 command("Emulation.setDeviceMetricsOverride", {"width": 390, "height": 844, "deviceScaleFactor": 1, "mobile": True})
                 confirm_quality_and_check_summary()
+                evaluate("retryFromImpact.click()")
+                assert evaluate("state.currentStage === 3 && !document.querySelector('.control-card').inert && impactCard.hidden && state.reviews.length === 0")
                 command("Emulation.setDeviceMetricsOverride", {"width": 1440, "height": 1000, "deviceScaleFactor": 1, "mobile": False})
 
         command("Page.navigate", {"url": URL + "kraapimine/"})

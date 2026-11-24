@@ -313,6 +313,7 @@ function updateImpact() {
     $("#continueFromImpact span").textContent = evaluating
       ? "Jätka paranduskava juurde"
       : "Jätka mudeli väljundite hindamisega";
+    $("#retryFromImpact").textContent = evaluating ? "Hinda väljundeid uuesti" : "Märgenda kirjed uuesti";
   }
   if (state.currentStage === 3) {
     $("#impactKicker").textContent = "MUDELI VÄLJUNDITE HINDAMINE";
@@ -773,7 +774,11 @@ function updateFocusState() {
   }
 
   const stageDone = state.completed.has(state.currentStage);
-  $(".control-card").classList.toggle("focus-active", !stageDone);
+  const controlCard = $(".control-card");
+  const summaryActive = !impactPending && (state.currentStage === 2 || state.currentStage === 3);
+  controlCard.inert = summaryActive;
+  controlCard.classList.toggle("summary-inactive", summaryActive);
+  controlCard.classList.toggle("focus-active", !stageDone);
   $("#activeTaskCue").hidden = stageDone;
   if (stageDone) return;
 
@@ -1054,9 +1059,15 @@ $("#undoLabelChoice").addEventListener("click", () => {
   updateControls();
 });
 
+function restartLabeling() {
+  state.labels = [];
+  state.pendingLabel = null;
+  invalidateFrom(2);
+  updateControls();
+}
+
 $("#labelCase").addEventListener("click", event => {
-  if (!event.target.closest("[data-relabel]")) return;
-  invalidateFrom(2); state.labels = []; state.pendingLabel = null; updateControls();
+  if (event.target.closest("[data-relabel]")) restartLabeling();
 });
 
 $("#reviewActions").addEventListener("click", event => {
@@ -1084,12 +1095,15 @@ $("#nextReviewCase").addEventListener("click", () => {
   $("#outputCase").scrollIntoView({ behavior: "smooth", block: "center" });
 });
 
-$("#outputCase").addEventListener("click", event => {
-  if (!event.target.closest("[data-rereview]")) return;
-  invalidateFrom(3);
+function restartReviews() {
   state.reviews = [];
   state.pendingReview = null;
+  invalidateFrom(3);
   updateControls();
+}
+
+$("#outputCase").addEventListener("click", event => {
+  if (event.target.closest("[data-rereview]")) restartReviews();
 });
 
 $("#ownershipGrid").addEventListener("change", event => {
@@ -1109,6 +1123,14 @@ $$('.step').forEach(button => button.addEventListener("click", () => showStage(N
 $("#previousStage").addEventListener("click", () => showStage(Math.max(1, state.currentStage - 1)));
 $("#nextStage").addEventListener("click", () => showStage(Math.min(state.maxUnlocked, state.currentStage + 1)));
 $("#continueFromImpact").addEventListener("click", () => showStage(state.currentStage + 1));
+$("#retryFromImpact").addEventListener("click", () => {
+  const stage = state.currentStage;
+  if ($("#impactNextStep").hidden) return;
+  if (stage === 2) restartLabeling();
+  else if (stage === 3) restartReviews();
+  showStage(stage);
+  $(`[data-step="${stage}"]`).focus({ preventScroll: true });
+});
 
 $("#dialogContinue").addEventListener("click", () => {
   const stage = Number($("#impactDialog").dataset.completedStage);

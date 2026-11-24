@@ -140,5 +140,21 @@ button,select{font-size:1rem}
   padding-inline-start: 1.5rem;
   line-height: 1.55;
 }
+.control-card.summary-inactive {
+  background: #f1f3f5;
+  border-color: #cbd5db;
+  box-shadow: none;
+  filter: grayscale(1);
+}
+.control-card.summary-inactive .case-meta:has([data-relabel], [data-rereview]) {
+  display: none;
+}
+.impact-next-actions {
+  display: grid;
+  gap: 8px;
+}
+.impact-next-actions .inline-reset {
+  min-height: 42px;
+}
 @media(max-width:900px){.lab-grid.impact-pending{grid-template-columns:1fr}.lab-grid.impact-pending .control-card{max-width:none}}
 @media(max-width:680px){.label-actions{grid-template-columns:1fr}}

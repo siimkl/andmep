@@ -7,7 +7,7 @@
   <title>AI andmetöö · Kes õpetab tehisaru?</title>
   <link rel="stylesheet" href="api1-base.css?v=1">
   <link rel="stylesheet" href="../api-common.css?v=11">
-  <link rel="stylesheet" href="simulator.css?v=30">
+  <link rel="stylesheet" href="simulator.css?v=31">
   <link rel="stylesheet" href="../readability.css?v=1">
 </head>
 <body>
@@ -94,7 +94,10 @@
 
         <div class="impact-next-step" id="impactNextStep" hidden>
           <div><span>JÄRGMINE ETAPP</span><b>Uuri esmalt märgendite jaotust ja mudeli õpitud seoseid.</b><p>Kui oled valmis, liigu eraldi kontrollandmestikul mudeli soovitusi hindama.</p></div>
-          <button class="primary-button orange" id="continueFromImpact" type="button"><span>Jätka mudeli väljundite hindamisega</span></button>
+          <div class="impact-next-actions">
+            <button class="primary-button orange" id="continueFromImpact" type="button"><span>Jätka mudeli väljundite hindamisega</span></button>
+            <button class="inline-reset" id="retryFromImpact" type="button">Märgenda kirjed uuesti</button>
+          </div>
         </div>
 
       </section>
@@ -227,6 +230,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=49"></script>
+  <script src="app.js?v=50"></script>
 </body>
 </html>
