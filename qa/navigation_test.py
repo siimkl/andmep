@@ -75,6 +75,44 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
             result = command("Page.captureScreenshot", {"format": "png", "captureBeyondViewport": False})
             (ROOT / "qa" / name).write_bytes(base64.b64decode(result["data"]))
 
+        def confirm_quality_and_check_summary():
+            point = evaluate("""(() => {
+              const button = document.querySelector('[data-complete="3"]');
+              button.scrollIntoView({block:'center', behavior:'instant'});
+              const box = button.getBoundingClientRect();
+              return {x: box.left + box.width / 2, y: box.top + box.height / 2};
+            })()""")
+            for event_type in ("mousePressed", "mouseReleased"):
+                command("Input.dispatchMouseEvent", {"type": event_type, "button": "left", "clickCount": 1, **point})
+
+            summary = evaluate("""({
+              stage: state.currentStage,
+              dialogOpen: impactDialog.open,
+              completed: state.completed.has(3),
+              completedCount: completedCount.textContent,
+              focused: document.activeElement === impactCard,
+              impactVisible: !impactCard.hidden && !reviewImpactSummary.hidden,
+              impactTitle: impactTitle.textContent,
+              canConfirmAgain: !document.querySelector('[data-complete="3"]').disabled
+            })""")
+            assert summary == {
+                "stage": 3,
+                "dialogOpen": False,
+                "completed": True,
+                "completedCount": "3",
+                "focused": True,
+                "impactVisible": True,
+                "impactTitle": "Mida tuleb järgmises mudeliversioonis parandada?",
+                "canConfirmAgain": False,
+            }, summary
+            for _ in range(20):
+                top = evaluate("impactTitle.getBoundingClientRect().top")
+                if 0 <= top < 140:
+                    break
+                time.sleep(0.05)
+            else:
+                raise AssertionError(f"Summary heading outside the top of the viewport: {top}")
+
         command("Page.enable")
         command("Runtime.enable")
         command("Emulation.setDeviceMetricsOverride", {"width": 1440, "height": 1000, "deviceScaleFactor": 1, "mobile": False})
@@ -355,16 +393,11 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert not before_quality_confirmation["completeDisabled"] and before_quality_confirmation["reviews"] == 4 and before_quality_confirmation["impactHidden"] and before_quality_confirmation["pending"], before_quality_confirmation
                 assert "4 / 4 sinu hinnangust" in evaluate("outputCase.textContent")
                 screenshot("ai-andmetoo-before-quality-confirmation.png")
-                evaluate("document.querySelector('[data-complete=\"3\"]').click()")
-                time.sleep(0.25)
-                after_quality_confirmation = json.loads(evaluate("JSON.stringify({dialogOpen:impactDialog.open,completed:state.completed.has(3),completedCount:completedCount.textContent,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),impactTitle:document.querySelector('#impactTitle').textContent})"))
-                assert after_quality_confirmation == {"dialogOpen": True, "completed": True, "completedCount": "3", "impactHidden": False, "pending": False, "impactTitle": "Mida tuleb järgmises mudeliversioonis parandada?"}, after_quality_confirmation
+                confirm_quality_and_check_summary()
                 assert evaluate("trainingFlow.hidden && trainingImpact.hidden && !reviewImpactSummary.hidden")
                 assert evaluate("[...reviewImpactDetails.querySelectorAll('strong')].map(node => node.textContent)") == [
                     "T-201 · Vajab parandamist", "T-204 · Hinnanguks pole piisavalt infot"
                 ]
-                assert evaluate("dialogContinue.textContent.trim()") == "Vaata hindamise kokkuvõtet"
-                evaluate("dialogContinue.click()")
                 assert evaluate("state.currentStage === 3 && !impactNextStep.hidden")
                 assert evaluate("continueFromImpact.textContent.trim()") == "Jätka paranduskava juurde"
                 evaluate("continueFromImpact.click()")
@@ -413,6 +446,10 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 evaluate("undoReviewChoice.click(); document.querySelector('#reviewActions button[data-review=\"correct\"]').click()")
                 assert evaluate("reviewExplanation.dataset.result") == "correct"
                 assert "Sobiv soovitus on „Tavaplaan”" in evaluate("reviewExplanationText.textContent")
+                evaluate("nextReviewCase.click(); document.querySelector('#reviewActions [data-review=\"human\"]').click(); nextReviewCase.click()")
+                command("Emulation.setDeviceMetricsOverride", {"width": 390, "height": 844, "deviceScaleFactor": 1, "mobile": True})
+                confirm_quality_and_check_summary()
+                command("Emulation.setDeviceMetricsOverride", {"width": 1440, "height": 1000, "deviceScaleFactor": 1, "mobile": False})
 
         command("Page.navigate", {"url": URL + "kraapimine/"})
         wait_for_path("/kraapimine/")

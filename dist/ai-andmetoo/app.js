@@ -545,7 +545,6 @@ function renderOutputCase() {
     explanation.hidden = true;
     $$("#reviewActions button").forEach(button => { button.disabled = !state.completed.has(2); });
   }
-  $('[data-complete="3"]').disabled = !stageValid(3);
 }
 
 function renderReviewImpact() {
@@ -745,6 +744,11 @@ function updateFocusState() {
   confirmLabeling.disabled = labelingConfirmed || !stageValid(2);
   confirmLabeling.querySelector("span").textContent = labelingConfirmed ? "Märgendus kinnitatud" : "Kinnita märgendus";
 
+  const reviewConfirmed = state.completed.has(3);
+  const confirmReview = $('[data-complete="3"]');
+  confirmReview.disabled = reviewConfirmed || !stageValid(3);
+  confirmReview.querySelector("span").textContent = reviewConfirmed ? "Kvaliteedihinnangud kinnitatud" : "Kinnita kvaliteedihinnangud";
+
   const impactLocked = !labelingConfirmed;
   const impactCard = $("#impactCard");
   const impactPending = state.currentStage === 1
@@ -853,6 +857,12 @@ function showStage(stage, shouldScroll = true) {
   if (shouldScroll) $(".stepper").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function focusImpactSummary() {
+  const card = $("#impactCard");
+  card.focus({ preventScroll: true });
+  card.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 const dialogMessages = {
   1: {
     startLabel: "ANDMED JA JUHIS",
@@ -870,16 +880,6 @@ const dialogMessages = {
     end: "Mudel rakendab õpitud seoseid kogu registrile",
     continueText: "Vaata märgenduse mõju",
     insight: "Mudel ei tea, milline märgend oli ekslik. Ta õpib kõigist treeningandmetesse lisatud kirjetest, mistõttu märgendaja järjepidevus mõjutab kõigile tööotsijatele antavaid soovitusi."
-  },
-  3: {
-    startLabel: "VÄLJUNDITE HINDAMINE",
-    start: "Hindasid mudeli nelja väljundit",
-    middleLabel: "TAGASISIDE",
-    middle: "Märgetest ja põhjendustest sai struktureeritud tagasiside",
-    endLabel: "VIGADE ANALÜÜS",
-    end: "Arendaja ja tooteomanik näevad korduvaid vigu",
-    continueText: "Vaata hindamise kokkuvõtet",
-    insight: "Kvaliteedimärge ei ole uus treeningmärgend ega teenuseotsus. See näitab, kas väljund on kasutatav, vajab parandamist või kas usaldusväärseks hindamiseks on vaja paremaid kontrollandmeid."
   },
   4: {
     startLabel: "VASTUTUS",
@@ -899,6 +899,11 @@ function completeStage(stage) {
   if (stage < 4) state.maxUnlocked = Math.max(state.maxUnlocked, stage + 1);
   updateNavigation();
   updateImpact();
+  if (stage === 3) {
+    focusImpactSummary();
+    return;
+  }
+
   const message = { ...dialogMessages[stage] };
   if (stage === 1) {
     const fields = selectedFieldNames();
@@ -1108,10 +1113,8 @@ $("#continueFromImpact").addEventListener("click", () => showStage(state.current
 $("#dialogContinue").addEventListener("click", () => {
   const stage = Number($("#impactDialog").dataset.completedStage);
   $("#impactDialog").close();
-  if (stage === 2 || stage === 3) {
-    $("#impactCard").scrollIntoView({ behavior: "smooth", block: "start" });
-    $("#impactCard").focus({ preventScroll: true });
-  } else if (stage < 4) showStage(stage + 1);
+  if (stage === 2) focusImpactSummary();
+  else if (stage < 4) showStage(stage + 1);
   else $("#resultSection").scrollIntoView({ behavior: "smooth", block: "start" });
 });
 
