@@ -85,7 +85,7 @@
           </section>
         </div>
 
-        <section class="model-output-viz" aria-labelledby="modelVizTitle">
+        <section class="model-output-viz" id="modelOutputViz" aria-labelledby="modelVizTitle" hidden>
           <div class="model-viz-head"><div><span class="section-kicker">MÄRGENDUS → MUDELI SOOVITUS</span><h3 id="modelVizTitle">Kuidas muutuvad tööotsijatele antavad soovitused?</h3><p>Mudel kasutab sama soovitusloogikat kõigi registris olevate tööotsijate jaoks. Võrdle neljal kontrollkirjel varasema mudeli väljundit sinu treeningandmetest õpitud väljundiga.</p></div><b id="changedOutputCount">0 / 4 muutunud</b></div>
           <div class="model-output-grid" id="modelOutputGrid" aria-live="polite"></div>
         </section>
@@ -223,6 +223,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=35"></script>
+  <script src="app.js?v=36"></script>
 </body>
 </html>

@@ -276,6 +276,8 @@ function labelPatternRows() {
 function updateImpact() {
   const metrics = calculateLabelMetrics();
   const total = state.labels.length;
+  const outputsUnlocked = state.completed.has(3);
+  $("#modelOutputViz").hidden = !outputsUnlocked;
   if (state.currentStage === 3) {
     $("#impactKicker").textContent = "MUDELI VÄLJUNDITE HINDAMINE";
     $("#impactTitle").textContent = "Mida tuleb järgmises mudeliversioonis parandada?";
@@ -333,6 +335,9 @@ function updateImpact() {
   if (!total) {
     $("#latestLabelImpact").classList.remove("active");
     $("#latestLabelImpact").innerHTML = "<span>ALUSTA MÄRGENDAMISEST</span><p>Kui märgendad esimese registrikirje, näed siin, millise seose see treeningandmetesse lisab ja kuidas seos kontrollsoovitusi muudab.</p>";
+  } else if (!outputsUnlocked) {
+    $("#latestLabelImpact").classList.add("active");
+    $("#latestLabelImpact").innerHTML = `<span>VÄLJUNDITE VÕRDLUS POLE VEEL AVATUD</span><p>Treeningandmed on loodud, kuid mudeli soovituste muutusi veel ei näidata. Lisa neljale väljundile kvaliteedimärge ja vajuta „Kinnita kvaliteedihinnangud”.</p>`;
   } else {
     const index = total - 1;
     const item = labelCases[index];
