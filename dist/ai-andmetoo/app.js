@@ -686,7 +686,12 @@ function updateControls() {
   updateLabelingBrief();
   updateStage1Feedback();
   $("#stage2Feedback").className = stageValid(2) ? "decision-feedback good" : "decision-feedback";
-  if (stageValid(2)) $("#stage2Feedback").textContent = `${calculateLabelMetrics().aligned}/${labelCases.length} märgendit vastab kinnitatud juhendile. Mudel õpib siiski kõigist viiest märgendist, ka ekslikest.`;
+  if (stageValid(2)) {
+    const aligned = calculateLabelMetrics().aligned;
+    $("#stage2Feedback").textContent = aligned === labelCases.length
+      ? `Kõik ${labelCases.length} märgendit vastavad kinnitatud juhendile. Need moodustavad mudelile järjepidevad treeningnäited.`
+      : `${aligned}/${labelCases.length} märgendit vastab kinnitatud juhendile. Mudel kasutab treeningul kõiki viit näidet, sealhulgas juhisega vastuolus olevaid märgendeid.`;
+  }
   $("#stage3Feedback").className = stageValid(3) ? "decision-feedback good" : "decision-feedback";
   if (stageValid(3)) $("#stage3Feedback").textContent = "Neli väljundit said kvaliteedimärke. Koondvaade näitab arendajale ja tooteomanikule, millised soovitused, reeglid või andmed vajavad järgmises mudeliversioonis parandamist.";
   renderLabelCase();
