@@ -21,7 +21,7 @@
         </div>
         <h1 class="hero-title" aria-label="Kes õpetab tehisaru?">Kes õpetab<br><span>tehisaru?</span></h1>
         <p class="hero-subtitle">Märgendid õpetavad mudelit.</p>
-        <p class="hero-description">Vali märgendamiseks vajalikud andmed, koosta selge märgendamisjuhis ja märgenda viis juhtumit. Seejärel vaata, kuidas sinu loodud treeningandmed mõjutavad mudeli järgmisi soovitusi.</p>
+        <p class="hero-description">Vali märgendamiseks vajalikud registriandmed, koosta selge märgendamisjuhis ja märgenda viis anonüümset tööotsija kirjet. Seejärel vaata, kuidas sinu loodud treeningandmed mõjutavad kõigile registris olevatele tööotsijatele antavaid soovitusi.</p>
       </div>
       <div class="hero-side">
         <div class="mission-label">SIMULATSIOONI EDENEMINE</div>
@@ -36,14 +36,14 @@
       <div class="briefing-mark">AI</div>
       <div class="briefing-copy">
         <span>ARENDUSPROJEKTI MEESKONNA LIIGE / Valdkonnaspetsialist</span>
-        <p><b>Kujuteldav Riiklik Tööhõiveamet arendab ametnikele otsustustoesüsteemi.</b> See aitab hinnata, kui kiiresti tööotsija tuge vajab, ja soovitab sobivat teenindusrada. Lõpliku otsuse teeb alati ametnik. Sina valid, millised väljad lisatakse faili <code>noustamisjuhtumid.csv</code>, ja paned paika märgendite tähenduse. Seejärel märgendad juhtumid. Iga märgendatud juhtum lisatakse mudeli treeningandmetesse.</p>
+        <p><b>Kujuteldav Riiklik Tööhõiveamet arendab soovitussüsteemi kõigile registris olevatele tööotsijatele.</b> Mudel töötleb iga tööotsija registriandmeid sama loogika järgi ja annab ühe toe soovituse. Soovitus ei ole automaatne teenuseotsus: ametnik vastutab selle kasutamise eest. Sina valid faili <code>toootsijate_register.csv</code> väljad, määrad märgendite tähenduse ja märgendad viis anonüümset treeningkirjet. Nende põhjal õpitud seoseid rakendab mudel kogu registrile.</p>
       </div>
       <div class="briefing-question"><small>LÄBIV KÜSIMUS</small><strong>Kes otsustab, mida mudel õpib?</strong></div>
     </section>
 
     <nav class="stepper" aria-label="Simulatsiooni etapid">
       <button class="step active" type="button" data-step="1" aria-current="step"><span>1</span><div><b>Vali andmed ja määra nõuded</b><small>Mida märgendaja näeb ja millist juhist järgib?</small></div></button>
-      <button class="step" type="button" data-step="2" disabled><span>2</span><div><b>Märgenda juhtumid</b><small>5 juhtumit · valik, põhjendus ja parandus</small></div></button>
+      <button class="step" type="button" data-step="2" disabled><span>2</span><div><b>Märgenda tööotsijate kirjed</b><small>5 registrikirjet · valik, põhjendus ja parandus</small></div></button>
       <button class="step" type="button" data-step="3" disabled><span>3</span><div><b>Kontrolli mudeli soovitusi</b><small>Mida mudel sinu märgenditest õppis?</small></div></button>
       <button class="step" type="button" data-step="4" disabled><span>4</span><div><b>Paranda märgendusprotsessi</b><small>Versioonid, vead ja tagasiside</small></div></button>
     </nav>
@@ -52,7 +52,7 @@
       <section class="stage-card card is-muted" id="impactCard" aria-labelledby="impactTitle" aria-disabled="true" hidden>
         <div class="card-heading">
           <div><span class="section-kicker">MÄRGENDUSE MÕJU</span><h2 id="impactTitle">Mida mudel sinu märgenditest õpib?</h2></div>
-          <div class="flow-status" role="status" aria-live="polite"><span>TREENINGJUHTUMEID</span><b id="impactStatus">0 / 5 märgendatud</b></div>
+          <div class="flow-status" role="status" aria-live="polite"><span>TREENINGKIRJEID</span><b id="impactStatus">0 / 5 märgendatud</b></div>
         </div>
 
         <div class="impact-lock-note" id="impactLockedNotice" role="status"><span>MÕJUVADE POLE VEEL AVATUD</span><p>Kinnita esmalt vasakul andmed ja märgendusjuhis. Seejärel näed siin, mida mudel märgenditest õpib ja kuidas tema soovitused muutuvad.</p></div>
@@ -86,32 +86,32 @@
         </div>
 
         <section class="model-output-viz" aria-labelledby="modelVizTitle">
-          <div class="model-viz-head"><div><span class="section-kicker">MÄRGENDUS → MUDELI SOOVITUS</span><h3 id="modelVizTitle">Kuidas muutuvad uute juhtumite soovitused?</h3><p>Võrdle varasema mudeli soovitust sellega, mida mudel soovitab sinu treeningandmetes oleva kõige sarnasema märgendatud juhtumi põhjal.</p></div><b id="changedOutputCount">0 / 4 muutunud</b></div>
+          <div class="model-viz-head"><div><span class="section-kicker">MÄRGENDUS → MUDELI SOOVITUS</span><h3 id="modelVizTitle">Kuidas muutuvad tööotsijatele antavad soovitused?</h3><p>Mudel kasutab sama soovitusloogikat kõigi registris olevate tööotsijate jaoks. Võrdle neljal kontrollkirjel varasema mudeli väljundit sinu treeningandmetest õpitud väljundiga.</p></div><b id="changedOutputCount">0 / 4 muutunud</b></div>
           <div class="model-output-grid" id="modelOutputGrid" aria-live="polite"></div>
         </section>
 
-        <div class="latest-label-impact" id="latestLabelImpact" aria-live="polite"><span>ALUSTA MÄRGENDAMISEST</span><p>Kui märgendad esimese juhtumi, näed siin kohe, kuidas see muudab õppeandmestikku ja mudeli järgmisi soovitusi.</p></div>
+        <div class="latest-label-impact" id="latestLabelImpact" aria-live="polite"><span>ALUSTA MÄRGENDAMISEST</span><p>Kui märgendad esimese registrikirje, näed siin, millise seose see treeningandmetesse lisab ja kuidas seos kontrollsoovitusi muudab.</p></div>
 
       </section>
 
       <aside class="control-card card focus-active" aria-labelledby="decisionTitle">
         <div class="control-head"><span class="section-kicker">TEE ESMALT OTSUSED</span><span class="stage-counter" id="stageCounter">ETAPP 1 / 4</span></div>
-        <div class="active-task-cue" id="activeTaskCue" role="status" aria-live="polite"><span>TEE JÄRGMISENA</span><b>Vali vähemalt 2 märgendit</b><small>Märgendid määravad, milliseid otsuseid saab märgendaja teha.</small></div>
+        <div class="active-task-cue" id="activeTaskCue" role="status" aria-live="polite"><span>TEE JÄRGMISENA</span><b>Vali vähemalt 2 märgendit</b><small>Märgendid määravad, milliseid soovitusi saab mudel hiljem eristada.</small></div>
 
         <section class="decision-stage active" data-stage="1">
           <div class="control-title"><span>01</span><div><h3 id="decisionTitle">Vali andmed ja määra märgendusnõuded</h3><p>See etapp tuleb <b>enne märgendamist</b>. Siin otsustad, millist infot märgendaja näeb ja millise reegli järgi ta märgendi valib.</p></div></div>
           <div class="labeling-instruction-intro">
             <span>MIS ON MÄRGENDUSJUHIS?</span>
-            <p>Märgendusjuhis on ühine reeglistik, mis selgitab, mida iga märgend tähendab ja millise nähtava info põhjal seda kasutada. Selge juhis aitab eri märgendajatel sarnaseid juhtumeid ühtemoodi hinnata ning loob mudelile järjepidevad treeningandmed.</p>
+            <p>Märgendusjuhis on ühine reeglistik, mis selgitab, mida iga märgend tähendab ja millise nähtava info põhjal seda kasutada. Selge juhis aitab eri märgendajatel samasuguste registriandmetega tööotsijaid ühtemoodi hinnata ning loob mudelile järjepidevad treeningandmed.</p>
           </div>
           <fieldset class="choice-fieldset label-definition-fieldset" id="availableLabelChoices">
             <legend>Milliseid märgendeid saab märgendaja valida?</legend>
             <p class="choice-intro">Vali vähemalt kaks märgendit.</p>
             <label class="source-choice"><input type="checkbox" value="fast"><span><b>Kiire tugi</b><small>Konkreetne takistus peatab tööotsingu ja vajab ametniku sihitud abi.</small><strong class="provenance">Ilma selle märgendita ei saa sihitud toevajadust tavaplaanist eristada.</strong><em>sihitud sekkumine</em></span></label>
-            <label class="source-choice"><input type="checkbox" value="standard"><span><b>Tavaplaan</b><small>Info on piisav ja kooskõlaline ning kiiret sekkumist pole vaja.</small><strong class="provenance">Ilma selle märgendita võib mudel hakata tavapäraseid juhtumeid üle hindama.</strong><em>tavapärane teenindus</em></span></label>
-            <label class="source-choice"><input type="checkbox" value="self"><span><b>Iseseisev jätkamine</b><small>Inimene saab järgmise sammu teha ilma ameti lisatoeta.</small><strong class="provenance">See märgend eristab iseseisvalt jätkajaid tavapärast teenust vajavatest juhtumitest.</strong><em>lisatuge pole vaja</em></span></label>
-            <label class="source-choice"><input type="checkbox" value="supplement"><span><b>Andmete täiendamine</b><small>Otsustamiseks vajalik info puudub ja tuleb enne otsustamist täiendada.</small><strong class="provenance">See märgend hoiab puuduliku info eemal kindlatest teenuseotsustest.</strong><em>info pole piisav</em></span></label>
-            <label class="source-choice"><input type="checkbox" value="review"><span><b>Inimese ülevaatus</b><small>Olemasolev info on vastuoluline või juhis ei anna kindlat vastust.</small><strong class="provenance">Ilma selle märgendita tuleb vastuolulisele juhtumile anda põhjendamatult kindel märgend.</strong><em>vastuolu jääb nähtavaks</em></span></label>
+            <label class="source-choice"><input type="checkbox" value="standard"><span><b>Tavaplaan</b><small>Info on piisav ja kooskõlaline ning kiiret sekkumist pole vaja.</small><strong class="provenance">Ilma selle märgendita võib mudel hakata tavapäraseid tööotsijaid üle hindama.</strong><em>tavapärane teenindus</em></span></label>
+            <label class="source-choice"><input type="checkbox" value="self"><span><b>Iseseisev jätkamine</b><small>Inimene saab järgmise sammu teha ilma ameti lisatoeta.</small><strong class="provenance">See märgend eristab iseseisvalt jätkajaid tavapärast teenust vajavatest tööotsijatest.</strong><em>lisatuge pole vaja</em></span></label>
+            <label class="source-choice"><input type="checkbox" value="supplement"><span><b>Andmete täiendamine</b><small>Soovituse andmiseks vajalik registriinfo puudub ja seda tuleb täiendada.</small><strong class="provenance">See märgend takistab mudelil puuduliku kirje põhjal kindlat teenusesoovitust anda.</strong><em>info pole piisav</em></span></label>
+            <label class="source-choice"><input type="checkbox" value="review"><span><b>Inimese ülevaatus</b><small>Olemasolev info on vastuoluline või juhis ei anna kindlat vastust.</small><strong class="provenance">Ilma selle märgendita peab mudel andma vastuolulise registrikirje põhjal põhjendamatult kindla soovituse.</strong><em>vastuolu jääb nähtavaks</em></span></label>
           </fieldset>
           <fieldset class="choice-fieldset" id="sourceChoices">
             <legend>Millised väljad jõuavad märgendajale?</legend>
@@ -120,34 +120,34 @@
             <label class="source-choice"><input type="checkbox" value="barriers"><span><b>Dokumenteeritud takistused</b><small>Ligipääsu-, aja-, oskuse- ja hoolduspiirangud</small><strong class="provenance">Puuduv väärtus tähendab „teadmata”, mitte „takistust pole”.</strong><em>oluline praeguse vajaduse jaoks</em></span></label>
             <label class="source-choice"><input type="checkbox" value="activity"><span><b>Iseteeninduse tegevus</b><small>Otsingud, sisselogimised ja kandideerimised</small><strong class="provenance">Mõõdab tegevust, mitte motivatsiooni ega töö sobivust.</strong><em>asendustunnuse kasutamise risk</em></span></label>
           </fieldset>
-          <label class="select-label" for="missingPolicy"><span>Kui otsustamiseks vajalik info puudub</span><select id="missingPolicy"><option value="">Vali üks tegevus</option><option value="average">Eelda, et takistust pole, ja kasuta märgendit „Tavaplaan”</option><option value="guess">Vali olemasoleva info põhjal kõige tõenäolisem toe märgend</option><option value="drop">Kasuta märgendit „Andmete täiendamine” ja suuna juhtum info täiendamisele</option></select></label>
+          <label class="select-label" for="missingPolicy"><span>Kui soovituseks vajalik registriinfo puudub</span><select id="missingPolicy"><option value="">Vali üks tegevus</option><option value="average">Eelda, et takistust pole, ja kasuta märgendit „Tavaplaan”</option><option value="guess">Vali olemasoleva info põhjal kõige tõenäolisem toe märgend</option><option value="drop">Kasuta märgendit „Andmete täiendamine” ja saada kirje andmeomanikule täiendamiseks</option></select></label>
           <p class="availability-note" id="missingPolicyFeedback">Puuduliku info põhjal ei tohi teha kindlat toevajaduse otsust.</p>
           <label class="select-label" for="labelRule"><span>Mille põhjal määratakse uus märgend?</span><select id="labelRule"><option value="">Vali üks reegel</option><option value="activity">Kasuta iseteeninduse aktiivsust inimese toevajaduse hinnanguna</option><option value="current">Lähtu praegusest dokumenteeritud vajadusest ja märgendusjuhisest</option></select></label>
           <p class="availability-note" id="ruleAvailability">Õige reegel peab kirjeldama inimese praegust olukorda ja olema kõigile märgendajatele ühesugune.</p>
-          <label class="select-label" for="disagreementPolicy"><span>Kui kaks märgendajat ei nõustu</span><select id="disagreementPolicy"><option value="">Vali üks tegevus</option><option value="first">Kasuta esimese märgendaja valikut</option><option value="both">Lisa sama juhtum mõlema märgendiga treeningandmetesse</option><option value="expert">Valdkonnaspetsialist teeb põhjendatud lõppotsuse ja ebaselgus lisatakse juhisesse</option></select></label>
+          <label class="select-label" for="disagreementPolicy"><span>Kui kaks märgendajat sama kirje puhul ei nõustu</span><select id="disagreementPolicy"><option value="">Vali üks tegevus</option><option value="first">Kasuta esimese märgendaja valikut</option><option value="both">Lisa sama registrikirje mõlema märgendiga treeningandmetesse</option><option value="expert">Valdkonnaspetsialist teeb põhjendatud lõppotsuse ja ebaselgus lisatakse juhisesse</option></select></label>
           <p class="availability-note" id="disagreementFeedback">Treeningandmetesse peab jõudma üks põhjendatud märgend, mitte lahendamata vastuolu.</p>
-          <label class="select-label" for="representationAudit"><span>Mida kontrollitakse enne märgendamise algust?</span><select id="representationAudit"><option value="">Vali üks kontroll</option><option value="overall">Ainult seda, kas juhtumeid on kokku piisavalt</option><option value="technical">Ainult seda, kas kõik faili lahtrid on täidetud</option><option value="coverage">Kas piirkonnad, keeled ja teeninduskanalid on esindatud ning kus andmed puuduvad</option></select></label>
+          <label class="select-label" for="representationAudit"><span>Mida kontrollitakse enne märgendamise algust?</span><select id="representationAudit"><option value="">Vali üks kontroll</option><option value="overall">Ainult seda, kas treeningkirjeid on kokku piisavalt</option><option value="technical">Ainult seda, kas kõik faili lahtrid on täidetud</option><option value="coverage">Kas registri piirkonnad, keeled ja teeninduskanalid on treeningvalimis esindatud ning kus andmed puuduvad</option></select></label>
           <p class="availability-note" id="auditAvailability">Kontroll peab näitama nii valimi katvust kui ka kohti, kus otsustamiseks vajalik info puudub.</p>
           <div class="decision-feedback" id="stage1Feedback" aria-live="polite">Vali vähemalt kaks märgendit ja kaks andmevälja. Seejärel otsusta, kuidas käsitleda puuduvat infot ja eriarvamusi ning kuidas märgendusvalimit kontrollida.</div>
           <div class="next-action-guide contextual"><span class="next-action-label" aria-hidden="true">JÄRGMISENA <i>↓</i></span><button class="primary-button orange" type="button" data-complete="1" disabled><span>Kinnita andmed ja juhis</span></button></div>
         </section>
 
         <section class="decision-stage" data-stage="2" hidden>
-          <div class="control-title"><span>02</span><div><h3>Märgenda sama juhise järgi viis juhtumit</h3><p>Nüüd algab märgendamistöö. Näed ainult eelmises etapis valitud välju. Lähtu nähtavast infost, mitte oletustest.</p></div></div>
+          <div class="control-title"><span>02</span><div><h3>Märgenda sama juhise järgi viis tööotsija kirjet</h3><p>Need on anonüümsed treeningvalimi read tööotsijate registrist. Näed ainult eelmises etapis valitud välju. Lähtu registriinfost, mitte oletustest.</p></div></div>
           <div class="label-guide"><span>SINU VALITUD MÄRGENDUSJUHIS</span><div><article data-guide-label="fast"><b>Kiire tugi</b><p>Vali see märgend, kui konkreetne dokumenteeritud takistus peatab tööotsingu ja vajab ametniku sihitud abi.</p></article><article data-guide-label="standard"><b>Tavaplaan</b><p>Vali see märgend, kui info on piisav ja kooskõlaline ning inimene vajab tavapärast teenust.</p></article><article data-guide-label="self"><b>Iseseisev jätkamine</b><p>Vali see märgend, kui inimene saab järgmise sammu teha ilma ameti lisatoeta.</p></article><article data-guide-label="supplement"><b>Andmete täiendamine</b><p>Vali see märgend, kui otsustamiseks vajalik info puudub ja tuleb enne teenuseotsust täiendada.</p></article><article data-guide-label="review"><b>Inimese ülevaatus</b><p>Vali see märgend, kui olemasolev info on vastuoluline või juhis ei anna kindlat vastust.</p></article></div></div>
           <div class="labeling-brief" id="labelingBrief" aria-live="polite"></div>
-          <div class="case-progress"><span>JUHTUMID</span><b id="labelProgress">0 / 5 märgendatud</b></div>
+          <div class="case-progress"><span>TÖÖOTSIJATE KIRJED</span><b id="labelProgress">0 / 5 märgendatud</b></div>
           <div class="case-card" id="labelCase"></div>
-          <div class="label-actions" id="labelActions" aria-label="Vali juhtumi märgend">
+          <div class="label-actions" id="labelActions" aria-label="Vali tööotsija registrikirje märgend">
             <button type="button" data-label="fast">Kiire tugi</button><button type="button" data-label="standard">Tavaplaan</button><button type="button" data-label="self">Iseseisev jätkamine</button><button type="button" data-label="supplement">Andmete täiendamine</button><button type="button" data-label="review">Inimese ülevaatus</button>
           </div>
-          <div class="choice-explanation" id="labelExplanation" hidden aria-live="polite"><span id="labelExplanationStatus">MÄRGENDI TAGASISIDE</span><h4 id="labelExplanationTitle"></h4><p id="labelExplanationText"></p><div class="explanation-actions"><button class="explanation-retry" id="undoLabelChoice" type="button">Muuda märgendit</button><button class="explanation-next" id="nextLabelCase" type="button">Jätka järgmise juhtumiga</button></div></div>
-          <div class="decision-feedback" id="stage2Feedback" aria-live="polite">Märgenda kõik viis juhtumit. Iga märgend õpetab mudelile, millised nähtavad tunnused millise soovitusega seostuvad.</div>
+          <div class="choice-explanation" id="labelExplanation" hidden aria-live="polite"><span id="labelExplanationStatus">MÄRGENDI TAGASISIDE</span><h4 id="labelExplanationTitle"></h4><p id="labelExplanationText"></p><div class="explanation-actions"><button class="explanation-retry" id="undoLabelChoice" type="button">Muuda märgendit</button><button class="explanation-next" id="nextLabelCase" type="button">Jätka järgmise kirjega</button></div></div>
+          <div class="decision-feedback" id="stage2Feedback" aria-live="polite">Märgenda kõik viis registrikirjet. Iga märgend õpetab mudelile, millised registritunnused millise soovitusega seostuvad.</div>
           <div class="next-action-guide contextual"><span class="next-action-label" aria-hidden="true">JÄRGMISENA <i>↓</i></span><button class="primary-button orange" type="button" data-complete="2" disabled><span>Kinnita märgendus</span></button></div>
         </section>
 
         <section class="decision-stage" data-stage="3" hidden>
-          <div class="control-title"><span>03</span><div><h3>Millal saab mudeli soovitust usaldada?</h3><p>Süsteem kasutab sinu loodud treeningandmeid. Hinda nelja soovitust ja otsusta, millal peab ametnik need üle vaatama.</p></div></div>
+          <div class="control-title"><span>03</span><div><h3>Millal saab mudeli soovitust usaldada?</h3><p>Mudel annab soovituse igale registris olevale tööotsijale. Hinda nelja kontrollkirje soovitust ja otsusta, millal peab ametnik need üle vaatama.</p></div></div>
           <label class="select-label" for="interventionRule"><span>Millal peab ametnik soovituse üle vaatama?</span><select id="interventionRule"><option value="">Vali ülevaatuse reegel</option><option value="low">Ainult siis, kui mudeli kindlus on alla 50%</option><option value="medium">Kui kindlus on alla 70% või andmed on vastuolus</option><option value="group">Kui kindlus on alla 70%, andmed on vastuolus või ilmneb rühmapõhine veamuster</option><option value="none">Soovitust ei kontrollita enne kasutamist</option></select></label>
           <div class="case-progress"><span>VÄLJUNDID</span><b id="reviewProgress">0 / 4 hinnatud</b></div>
           <div class="output-card" id="outputCase"></div>
@@ -155,15 +155,15 @@
             <button type="button" data-review="accept">Kinnita soovitus</button><button type="button" data-review="correct">Paranda soovitust</button><button type="button" data-review="human">Suuna ametnikule ülevaatamiseks</button>
           </div>
           <div class="choice-explanation" id="reviewExplanation" hidden aria-live="polite"><span>KEDA SEE VALIK MÕJUTAB?</span><h4 id="reviewExplanationTitle"></h4><p id="reviewExplanationText"></p><button class="explanation-next" id="nextReviewCase" type="button">Jätka järgmise soovitusega</button></div>
-          <div class="decision-feedback" id="stage3Feedback" aria-live="polite">Kindlusprotsent ei näita, kas soovitus on sisuliselt õige. Vaata alati ka juhtumi andmeid ja konteksti.</div>
+          <div class="decision-feedback" id="stage3Feedback" aria-live="polite">Kindlusprotsent ei näita, kas soovitus on sisuliselt õige. Vaata alati ka tööotsija registriandmeid ja nende ajakohasust.</div>
           <div class="next-action-guide contextual"><span class="next-action-label" aria-hidden="true">JÄRGMISENA <i>↓</i></span><button class="primary-button orange" type="button" data-complete="3" disabled><span>Kinnita ülevaatuse reegel</span></button></div>
         </section>
 
         <section class="decision-stage" data-stage="4" hidden>
-          <div class="control-title"><span>04</span><div><h3>Kuidas märgendusprotsessi vigade põhjal parandada?</h3><p>Määra, kes ajakohastab märgendusjuhist, lahendab piirjuhtumeid, jälgib mudeli vigu ja lisab parandused järgmisse õppeandmestikku.</p></div></div>
+          <div class="control-title"><span>04</span><div><h3>Kuidas märgendusprotsessi vigade põhjal parandada?</h3><p>Määra, kes ajakohastab märgendusjuhist, lahendab vaidlustatud märgendeid, jälgib kogu registrile antavaid soovitusi ja lisab parandused järgmisse õppeandmestikku.</p></div></div>
           <div class="ownership-grid" id="ownershipGrid">
             <label><span>Märgendusjuhise mõisted ja näited</span><select data-owner="data"><option value="">Määra vastutaja</option><option value="internal">Ameti valdkonnaeksperdid</option><option value="shared">Amet ja arenduspartner ühiselt</option><option value="vendor">Ainult arenduspartner</option><option value="none">Vastutaja puudub</option></select></label>
-            <label><span>Piirjuhtumite lõplik lahendamine</span><select data-owner="rules"><option value="">Määra vastutaja</option><option value="internal">Ameti vanemekspert</option><option value="shared">Amet ja arenduspartner ühiselt</option><option value="vendor">Ainult arenduspartner</option><option value="none">Vastutaja puudub</option></select></label>
+            <label><span>Vaidlustatud märgendite lõplik lahendamine</span><select data-owner="rules"><option value="">Määra vastutaja</option><option value="internal">Ameti vanemekspert</option><option value="shared">Amet ja arenduspartner ühiselt</option><option value="vendor">Ainult arenduspartner</option><option value="none">Vastutaja puudub</option></select></label>
             <label><span>Märgendi- ja mudelivigade jälgimine</span><select data-owner="monitor"><option value="">Määra vastutaja</option><option value="internal">Ameti kvaliteeditiim</option><option value="shared">Amet ja arenduspartner ühiselt</option><option value="vendor">Ainult arenduspartner</option><option value="none">Vastutaja puudub</option></select></label>
             <label><span>Andmestiku versioonid ja muudatuslogi</span><select data-owner="docs"><option value="">Määra vastutaja</option><option value="internal">Ameti andmeomanik</option><option value="shared">Amet ja arenduspartner ühiselt</option><option value="vendor">Ainult arenduspartner</option><option value="none">Vastutaja puudub</option></select></label>
           </div>
@@ -171,8 +171,8 @@
           <label class="select-label" for="appealPolicy"><span>Kuidas saab inimene vea vaidlustada?</span><select id="appealPolicy"><option value="">Vali vaidlustamise kord</option><option value="helpdesk">Üldine infokanal; tehisaru soovitustel pole eraldi vastutajat</option><option value="vendor">Vaidlustus saadetakse arenduspartnerile veateatena</option><option value="owned">Ametil on selge vaidlustuskanal, vastutaja ja vastamise tähtaeg; parandus lisatakse seirelogisse</option></select></label>
           <fieldset class="choice-fieldset compact" id="exitAssets"><legend>Mida tuleb säilitada, et märgendamist saaks hiljem kontrollida?</legend>
             <label class="source-choice"><input type="checkbox" value="data"><span><b>Märgendusjuhis ja mõistete selgitused</b><small>Mida iga märgend tähendab ja millal seda kasutada</small></span></label>
-            <label class="source-choice"><input type="checkbox" value="rules"><span><b>Piirjuhtumid koos põhjendustega</b><small>Miks eksperdid eriarvamusele jäid ja kuidas otsus sündis</small></span></label>
-            <label class="source-choice"><input type="checkbox" value="tests"><span><b>Kontrollitud testjuhtumid</b><small>Kokkulepitud õigete märgenditega näited uute märgendajate ja mudeliversioonide kontrollimiseks</small></span></label>
+            <label class="source-choice"><input type="checkbox" value="rules"><span><b>Vaidlustatud registrinäited koos põhjendustega</b><small>Miks eksperdid eriarvamusele jäid ja kuidas lõplik märgend valiti</small></span></label>
+            <label class="source-choice"><input type="checkbox" value="tests"><span><b>Kontrollitud testprofiilid</b><small>Kokkulepitud õigete märgenditega registrinäited uute märgendajate ja mudeliversioonide kontrollimiseks</small></span></label>
           </fieldset>
           <div class="decision-feedback" id="stage4Feedback" aria-live="polite">Amet ei pea kõike ise ehitama. Küll aga peab tal säilima teadmine, mille abil tööd kontrollida, parandada või teisele partnerile üle anda.</div>
           <div class="next-action-guide contextual"><span class="next-action-label" aria-hidden="true">LÕPETA <i>↓</i></span><button class="primary-button orange" type="button" data-complete="4" disabled><span>Koosta märgenduse kokkuvõte</span></button></div>
@@ -183,7 +183,7 @@
     </section>
 
     <section class="result-section" id="resultSection" hidden aria-labelledby="resultTitle">
-      <header class="result-head"><div><span class="section-kicker">MÄRGENDAMISE TULEMUS</span><h2 id="resultTitle">Mudel kordab märgendites loodud mustreid</h2></div><p id="resultLead">Sinu märgendid mõjutavad nii mudeli õpitud seoseid kui ka järgmiste juhtumite soovitusi.</p></header>
+      <header class="result-head"><div><span class="section-kicker">MÄRGENDAMISE TULEMUS</span><h2 id="resultTitle">Mudel kordab märgendites loodud mustreid</h2></div><p id="resultLead">Sinu märgendid mõjutavad nii mudeli õpitud seoseid kui ka kõigile registris olevatele tööotsijatele antavaid soovitusi.</p></header>
       <div class="result-grid">
         <article class="result-card card"><span class="section-kicker">SINU MÄRGENDUSE KOKKUVÕTE</span><h3 id="profileTitle">Siin näed oma märgenduse tulemust</h3><p id="profileText"></p><div class="profile-tags" id="profileTags"></div></article>
         <article class="result-card card"><span class="section-kicker">MIDA TULEMUSEST ÕPPIDA?</span><div class="tradeoff-list" id="tradeoffList"></div></article>
@@ -193,7 +193,7 @@
         <div class="trace-flow" id="traceFlow"></div>
       </div>
       <div class="reflection-card"><span>PEA MEELES</span><p><b>Mudel õpib ainult seda, mida märgendatud näited talle näitavad.</b> Halb soovitus võib tuleneda mudelist, valest märgendist, puuduvast kontekstist või ebaselgest juhisest. Enne parandamist tuleb põhjus välja selgitada.</p></div>
-      <div class="reflection-questions card"><span class="section-kicker">KOLM KÜSIMUST ARUTELUKS</span><div><article><b>1</b><p>Milline sinu märgendusotsus muutis mudeli testsoovitusi kõige rohkem ja miks?</p></article><article><b>2</b><p>Millise piirjuhtumi jätaksid ametniku ülevaatuseks, selle asemel et anda sellele kindel märgend?</p></article><article><b>3</b><p>Kuidas märkaksid, et märgendusjuhis ei sobi enam uute juhtumite või muutunud teenusega?</p></article></div></div>
+      <div class="reflection-questions card"><span class="section-kicker">KOLM KÜSIMUST ARUTELUKS</span><div><article><b>1</b><p>Milline sinu märgendusotsus muutis mudeli kontrollsoovitusi kõige rohkem ja miks?</p></article><article><b>2</b><p>Millise puuduva või vastuolulise registritunnuse puhul peab soovitus jõudma ametniku ülevaatusele?</p></article><article><b>3</b><p>Kuidas märkaksid, et märgendusjuhis ei sobi enam registriandmete või muutunud teenusega?</p></article></div></div>
     </section>
 
     <footer class="site-footer">
@@ -221,6 +221,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=31"></script>
+  <script src="app.js?v=32"></script>
 </body>
 </html>

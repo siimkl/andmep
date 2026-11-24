@@ -176,7 +176,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert revealed == {"hidden": False, "pending": False}, {route: revealed}
             elif route == "ai-andmetoo":
                 intro = evaluate("document.querySelector('.labeling-instruction-intro').textContent.replace(/\\s+/g,' ').trim()")
-                assert intro == "MIS ON MÄRGENDUSJUHIS? Märgendusjuhis on ühine reeglistik, mis selgitab, mida iga märgend tähendab ja millise nähtava info põhjal seda kasutada. Selge juhis aitab eri märgendajatel sarnaseid juhtumeid ühtemoodi hinnata ning loob mudelile järjepidevad treeningandmed.", intro
+                assert intro == "MIS ON MÄRGENDUSJUHIS? Märgendusjuhis on ühine reeglistik, mis selgitab, mida iga märgend tähendab ja millise nähtava info põhjal seda kasutada. Selge juhis aitab eri märgendajatel samasuguste registriandmetega tööotsijaid ühtemoodi hinnata ning loob mudelile järjepidevad treeningandmed.", intro
                 choices = json.loads(evaluate("JSON.stringify({rules:[...labelRule.options].map(option=>option.textContent),audits:[...representationAudit.options].map(option=>option.textContent),missing:[...missingPolicy.options].map(option=>option.textContent),disagreement:[...disagreementPolicy.options].map(option=>option.textContent)})"))
                 assert choices["rules"] == [
                     "Vali üks reegel",
@@ -189,20 +189,20 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert "PROOVI TEIST VARIANTI" not in evaluate("document.body.textContent"), "Variandivõrdluse tekst on alles"
                 assert choices["audits"] == [
                     "Vali üks kontroll",
-                    "Ainult seda, kas juhtumeid on kokku piisavalt",
+                    "Ainult seda, kas treeningkirjeid on kokku piisavalt",
                     "Ainult seda, kas kõik faili lahtrid on täidetud",
-                    "Kas piirkonnad, keeled ja teeninduskanalid on esindatud ning kus andmed puuduvad",
+                    "Kas registri piirkonnad, keeled ja teeninduskanalid on treeningvalimis esindatud ning kus andmed puuduvad",
                 ], choices
                 assert choices["missing"] == [
                     "Vali üks tegevus",
                     "Eelda, et takistust pole, ja kasuta märgendit „Tavaplaan”",
                     "Vali olemasoleva info põhjal kõige tõenäolisem toe märgend",
-                    "Kasuta märgendit „Andmete täiendamine” ja suuna juhtum info täiendamisele",
+                    "Kasuta märgendit „Andmete täiendamine” ja saada kirje andmeomanikule täiendamiseks",
                 ], choices
                 assert choices["disagreement"] == [
                     "Vali üks tegevus",
                     "Kasuta esimese märgendaja valikut",
-                    "Lisa sama juhtum mõlema märgendiga treeningandmetesse",
+                    "Lisa sama registrikirje mõlema märgendiga treeningandmetesse",
                     "Valdkonnaspetsialist teeb põhjendatud lõppotsuse ja ebaselgus lisatakse juhisesse",
                 ], choices
                 evaluate("""(() => {
@@ -226,8 +226,12 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 time.sleep(0.25)
                 evaluate("dialogContinue.click()")
                 time.sleep(0.25)
-                five_case_start = json.loads(evaluate("JSON.stringify({total:labelCases.length,progress:labelProgress.textContent,step:document.querySelector('[data-step=\"2\"] small').textContent,caseId:document.querySelector('#labelCase .case-top span').textContent})"))
-                assert five_case_start == {"total": 5, "progress": "0 / 5 märgendatud", "step": "5 juhtumit · valik, põhjendus ja parandus", "caseId": "J-01 · 1/5"}, five_case_start
+                five_case_start = json.loads(evaluate("JSON.stringify({total:labelCases.length,progress:labelProgress.textContent,step:document.querySelector('[data-step=\"2\"] small').textContent,caseId:document.querySelector('#labelCase .case-top span').textContent,caseTitle:document.querySelector('#labelCase h4').textContent,trainingIds:labelCases.map(item=>item.id),trainingTitles:labelCases.map(item=>item.title),outputIds:outputCases.map(item=>item.id),outputTitles:outputCases.map(item=>item.title),briefing:document.querySelector('.briefing-copy p').textContent})"))
+                assert five_case_start["total"] == 5 and five_case_start["progress"] == "0 / 5 märgendatud", five_case_start
+                assert five_case_start["step"] == "5 registrikirjet · valik, põhjendus ja parandus" and five_case_start["caseId"] == "T-101 · 1/5" and five_case_start["caseTitle"] == "Tööotsija T-101", five_case_start
+                assert five_case_start["trainingIds"] == ["T-101", "T-102", "T-103", "T-104", "T-105"] and five_case_start["trainingTitles"] == ["Tööotsija T-101", "Tööotsija T-102", "Tööotsija T-103", "Tööotsija T-104", "Tööotsija T-105"], five_case_start
+                assert five_case_start["outputIds"] == ["T-201", "T-202", "T-203", "T-204"] and five_case_start["outputTitles"] == ["Tööotsija T-201", "Tööotsija T-202", "Tööotsija T-203", "Tööotsija T-204"], five_case_start
+                assert "kõigile registris olevatele tööotsijatele" in five_case_start["briefing"], five_case_start
                 assert not evaluate("Boolean(document.querySelector('.case-rule-hint'))"), "Kinnitatud reegli plokk on alles"
                 evaluate("document.querySelector('#labelActions button[data-label=\"supplement\"]').click()")
                 label_feedback = json.loads(evaluate("JSON.stringify({result:labelExplanation.dataset.result,status:labelExplanationStatus.textContent,title:labelExplanationTitle.textContent,text:labelExplanationText.textContent,summary:stage2Feedback.textContent,summaryHidden:stage2Feedback.hidden})"))
@@ -254,7 +258,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 evaluate("nextLabelCase.click()")
                 time.sleep(0.25)
                 five_case_end = json.loads(evaluate("JSON.stringify({progress:labelProgress.textContent,summary:document.querySelector('#labelCase .case-top b').textContent,completeDisabled:document.querySelector('[data-complete=\"2\"]').disabled,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),fact:labeledFact.textContent})"))
-                assert five_case_end == {"progress": "5 / 5 märgendatud", "summary": "5 juhtumit", "completeDisabled": False, "impactHidden": False, "pending": False, "fact": "5 / 5"}, five_case_end
+                assert five_case_end == {"progress": "5 / 5 märgendatud", "summary": "5 registrikirjet", "completeDisabled": False, "impactHidden": False, "pending": False, "fact": "5 / 5"}, five_case_end
 
         command("Page.navigate", {"url": URL + "kraapimine/"})
         wait_for_path("/kraapimine/")
