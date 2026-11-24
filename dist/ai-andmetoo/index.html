@@ -21,7 +21,7 @@
         </div>
         <h1 class="hero-title" aria-label="Kes õpetab tehisaru?">Kes õpetab<br><span>tehisaru?</span></h1>
         <p class="hero-subtitle">Märgendid õpetavad mudelit.</p>
-        <p class="hero-description">Vali märgendamiseks vajalikud andmed, koosta selge märgendamisjuhis ja märgenda kümme juhtumit. Seejärel vaata, kuidas sinu loodud treeningandmed mõjutavad mudeli järgmisi soovitusi.</p>
+        <p class="hero-description">Vali märgendamiseks vajalikud andmed, koosta selge märgendamisjuhis ja märgenda viis juhtumit. Seejärel vaata, kuidas sinu loodud treeningandmed mõjutavad mudeli järgmisi soovitusi.</p>
       </div>
       <div class="hero-side">
         <div class="mission-label">SIMULATSIOONI EDENEMINE</div>
@@ -43,7 +43,7 @@
 
     <nav class="stepper" aria-label="Simulatsiooni etapid">
       <button class="step active" type="button" data-step="1" aria-current="step"><span>1</span><div><b>Vali andmed ja määra nõuded</b><small>Mida märgendaja näeb ja millist juhist järgib?</small></div></button>
-      <button class="step" type="button" data-step="2" disabled><span>2</span><div><b>Märgenda juhtumid</b><small>10 juhtumit · valik, põhjendus ja parandus</small></div></button>
+      <button class="step" type="button" data-step="2" disabled><span>2</span><div><b>Märgenda juhtumid</b><small>5 juhtumit · valik, põhjendus ja parandus</small></div></button>
       <button class="step" type="button" data-step="3" disabled><span>3</span><div><b>Kontrolli mudeli soovitusi</b><small>Mida mudel sinu märgenditest õppis?</small></div></button>
       <button class="step" type="button" data-step="4" disabled><span>4</span><div><b>Paranda märgendusprotsessi</b><small>Versioonid, vead ja tagasiside</small></div></button>
     </nav>
@@ -52,7 +52,7 @@
       <section class="stage-card card is-muted" id="impactCard" aria-labelledby="impactTitle" aria-disabled="true" hidden>
         <div class="card-heading">
           <div><span class="section-kicker">MÄRGENDUSE MÕJU</span><h2 id="impactTitle">Mida mudel sinu märgenditest õpib?</h2></div>
-          <div class="flow-status" role="status" aria-live="polite"><span>TREENINGJUHTUMEID</span><b id="impactStatus">0 / 10 märgendatud</b></div>
+          <div class="flow-status" role="status" aria-live="polite"><span>TREENINGJUHTUMEID</span><b id="impactStatus">0 / 5 märgendatud</b></div>
         </div>
 
         <div class="impact-lock-note" id="impactLockedNotice" role="status"><span>MÕJUVADE POLE VEEL AVATUD</span><p>Kinnita esmalt vasakul andmed ja märgendusjuhis. Seejärel näed siin, mida mudel märgenditest õpib ja kuidas tema soovitused muutuvad.</p></div>
@@ -76,7 +76,7 @@
               <div data-label-bar="supplement"><div><span>Andmete täiendamine</span><b id="supplementLabelCount">0</b></div><i><span></span></i></div>
               <div data-label-bar="review"><div><span>Inimese ülevaatus</span><b id="reviewLabelCount">0</b></div><i><span></span></i></div>
             </div>
-            <div class="label-dataset-facts"><div><small>MÄRGENDATUD</small><b id="labeledFact">0 / 10</b></div><div><small>JUHISEGA KOOSKÕLAS</small><b id="categoryFact">0 / 0</b></div><div><small>TÄIENDADA VÕI ÜLE VAADATA</small><b id="ambiguityFact">0</b></div></div>
+            <div class="label-dataset-facts"><div><small>MÄRGENDATUD</small><b id="labeledFact">0 / 5</b></div><div><small>JUHISEGA KOOSKÕLAS</small><b id="categoryFact">0 / 0</b></div><div><small>TÄIENDADA VÕI ÜLE VAADATA</small><b id="ambiguityFact">0</b></div></div>
           </section>
 
           <section class="learned-patterns-panel" aria-labelledby="patternsTitle">
@@ -133,16 +133,16 @@
         </section>
 
         <section class="decision-stage" data-stage="2" hidden>
-          <div class="control-title"><span>02</span><div><h3>Märgenda sama juhise järgi kümme juhtumit</h3><p>Nüüd algab märgendamistöö. Näed ainult eelmises etapis valitud välju. Lähtu nähtavast infost, mitte oletustest.</p></div></div>
+          <div class="control-title"><span>02</span><div><h3>Märgenda sama juhise järgi viis juhtumit</h3><p>Nüüd algab märgendamistöö. Näed ainult eelmises etapis valitud välju. Lähtu nähtavast infost, mitte oletustest.</p></div></div>
           <div class="label-guide"><span>SINU VALITUD MÄRGENDUSJUHIS</span><div><article data-guide-label="fast"><b>Kiire tugi</b><p>Vali see märgend, kui konkreetne dokumenteeritud takistus peatab tööotsingu ja vajab ametniku sihitud abi.</p></article><article data-guide-label="standard"><b>Tavaplaan</b><p>Vali see märgend, kui info on piisav ja kooskõlaline ning inimene vajab tavapärast teenust.</p></article><article data-guide-label="self"><b>Iseseisev jätkamine</b><p>Vali see märgend, kui inimene saab järgmise sammu teha ilma ameti lisatoeta.</p></article><article data-guide-label="supplement"><b>Andmete täiendamine</b><p>Vali see märgend, kui otsustamiseks vajalik info puudub ja tuleb enne teenuseotsust täiendada.</p></article><article data-guide-label="review"><b>Inimese ülevaatus</b><p>Vali see märgend, kui olemasolev info on vastuoluline või juhis ei anna kindlat vastust.</p></article></div></div>
           <div class="labeling-brief" id="labelingBrief" aria-live="polite"></div>
-          <div class="case-progress"><span>JUHTUMID</span><b id="labelProgress">0 / 10 märgendatud</b></div>
+          <div class="case-progress"><span>JUHTUMID</span><b id="labelProgress">0 / 5 märgendatud</b></div>
           <div class="case-card" id="labelCase"></div>
           <div class="label-actions" id="labelActions" aria-label="Vali juhtumi märgend">
             <button type="button" data-label="fast">Kiire tugi</button><button type="button" data-label="standard">Tavaplaan</button><button type="button" data-label="self">Iseseisev jätkamine</button><button type="button" data-label="supplement">Andmete täiendamine</button><button type="button" data-label="review">Inimese ülevaatus</button>
           </div>
           <div class="choice-explanation" id="labelExplanation" hidden aria-live="polite"><span id="labelExplanationStatus">MÄRGENDI TAGASISIDE</span><h4 id="labelExplanationTitle"></h4><p id="labelExplanationText"></p><div class="explanation-actions"><button class="explanation-retry" id="undoLabelChoice" type="button">Muuda märgendit</button><button class="explanation-next" id="nextLabelCase" type="button">Jätka järgmise juhtumiga</button></div></div>
-          <div class="decision-feedback" id="stage2Feedback" aria-live="polite">Märgenda kõik kümme juhtumit. Iga märgend õpetab mudelile, millised nähtavad tunnused millise soovitusega seostuvad.</div>
+          <div class="decision-feedback" id="stage2Feedback" aria-live="polite">Märgenda kõik viis juhtumit. Iga märgend õpetab mudelile, millised nähtavad tunnused millise soovitusega seostuvad.</div>
           <div class="next-action-guide contextual"><span class="next-action-label" aria-hidden="true">JÄRGMISENA <i>↓</i></span><button class="primary-button orange" type="button" data-complete="2" disabled><span>Kinnita märgendus</span></button></div>
         </section>
 
@@ -221,6 +221,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=29"></script>
+  <script src="app.js?v=30"></script>
 </body>
 </html>

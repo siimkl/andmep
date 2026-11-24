@@ -14,22 +14,17 @@ const reviewNames = { accept: "Soovitus kinnitatud", correct: "Soovitus parandat
 
 const labelCases = [
   { id: "J-01", title: "Hiljutine töökaotus", pattern: "hiljutine töökaotus", fields: { profile: "Töösuhe lõppes kaks nädalat tagasi.", notes: "Inimene vajab abi töötuna registreerimisel.", barriers: "Töötuna registreerimine ja toetuste taotlemine on pooleli.", activity: "Iseteeninduses pole pärast töökaotust tegevust." }, expected: "fast", currentReason: "Hiljutine töökaotus ning pooleli olev registreerimine peatavad tööotsingu ja vajavad ametniku sihitud abi." },
-  { id: "J-02", title: "Lapsehoid takistab tööle naasmist", pattern: "lapsehoiu takistus", fields: { profile: "Tööotsingutes on olnud 18-kuuline paus.", notes: "Inimene soovib järgmisel kuul tööle või koolitusele minna.", barriers: "Lapsehoid puudub; ilma selleta ei saa inimene tööle ega koolitusele minna.", activity: "Iseteenindust pole 18 kuu jooksul kasutatud." }, expected: "fast", currentReason: "Puuduv lapsehoid takistab otseselt tööle või koolitusele minekut ning vajab sihitud abi." },
-  { id: "J-03", title: "Tööks vajalik kutsetunnistus puudub", pattern: "puuduv kutsetunnistus", fields: { profile: "Inimene kandideerib elektrikuna tööle.", notes: "Kõik valitud töökohad nõuavad kehtivat kutsetunnistust.", barriers: "Nõutud kutsetunnistus puudub.", activity: "27 kandideerimist elektrikuna tööle." }, expected: "fast", currentReason: "Puuduv kutsetunnistus takistab valitud tööle kandideerimist ja vajab konkreetset koolitus- või nõustamisabi." },
-  { id: "J-04", title: "Transport ei võimalda vahetustega tööd", pattern: "transpordipiirang", fields: { profile: "Sobivad töökohad asuvad teises maakonnas.", notes: "Pakutud töökohad eeldavad õhtuseid vahetusi.", barriers: "Viimane buss väljub enne töövahetuse lõppu.", activity: "Tööotsingud keskenduvad teisele maakonnale." }, expected: "fast", currentReason: "Dokumenteeritud transpordipiirang välistab pakutud tööajad ja vajab ametniku sihitud abi." },
-  { id: "J-05", title: "Tavapärane tööotsing", pattern: "selge tavapärane vajadus", fields: { profile: "Oskused vastavad soovitud töökohtade nõuetele.", notes: "Inimene vajab tavapärast töövahenduse tuge.", barriers: "Dokumenteeritud takistused puuduvad.", activity: "Inimene kandideerib regulaarselt sobivatele töökohtadele." }, expected: "standard", currentReason: "Info on täielik ja kooskõlaline ning ükski nähtav takistus ei vaja kiiret sekkumist." },
-  { id: "J-06", title: "Oluline info puudub", pattern: "puuduv info", fields: { profile: "Töösoov on märgitud, kuid oskuste väli on tühi.", notes: "Juhtumikirjeldus ei ütle, millist abi inimene vajab.", barriers: "— väärtus puudub", activity: "Üks sisselogimine viimase kuu jooksul." }, expected: "supplement", currentReason: "Takistuste väli on tühi ja juhtumikirjeldus ei anna otsustamiseks piisavalt infot." },
-  { id: "J-07", title: "Tervisemure mõju pole kirjeldatud", pattern: "ebaselge tundlik info", fields: { profile: "Töövõime väli on täitmata.", notes: "Märkuses mainitakse tervisemuret, kuid selle mõju tööle ei kirjeldata.", barriers: "Täpne piirang ja nõusolek selle info kasutamiseks puuduvad.", activity: "Iseteeninduse kasutus on ebaregulaarne." }, expected: "review", currentReason: "Tervisemure mõju pole kirjeldatud ja info kasutamise alus pole selge, seega ei saa kindlat toe märgendit põhjendada." },
-  { id: "J-08", title: "Koolitus on lõpetatud", pattern: "ajakohane positiivne muutus", fields: { profile: "Nõutud kutsetunnistus on lisatud sel kuul.", notes: "Oskused vastavad nüüd soovitud töökohtade nõuetele.", barriers: "Dokumenteeritud takistused puuduvad.", activity: "Inimene kandideerib sobivatele töökohtadele." }, expected: "self", currentReason: "Koolitus on lõpetatud, oskused vastavad nõuetele ja nähtavaid takistusi pole. Inimene saab tööotsingut iseseisvalt jätkata." },
-  { id: "J-09", title: "CV vajab parandamist", pattern: "parandatav CV takistus", fields: { profile: "12 kandideerimist, kuid intervjuukutseid pole.", notes: "Nõustaja leidis, et CV-st puuduvad töö jaoks olulised oskused.", barriers: "Sama puudulik CV takistab intervjuule jõudmist.", activity: "Kõik kandideerimised on tehtud sama CV-ga." }, expected: "fast", currentReason: "Dokumenteeritud CV puudus takistab intervjuule jõudmist ja seda saab sihitud abiga kiiresti parandada." },
-  { id: "J-10", title: "Nõustajad ei ole ühel meelel", pattern: "nõustajate eriarvamus", fields: { profile: "Põhiandmed on ajakohased.", notes: "Üks nõustaja soovitab kiiret tuge, teine tavaplaani.", barriers: "Takistuse mõju pole üheselt kirjeldatud.", activity: "Iseteeninduse kasutus vastab tavapärasele mustrile." }, expected: "review", currentReason: "Nõustajate hinnangud on vastuolus ja takistuse mõju pole selge, seega vajab juhtum inimese ülevaatust." }
+  { id: "J-02", title: "Tavapärane tööotsing", pattern: "selge tavapärane vajadus", fields: { profile: "Oskused vastavad soovitud töökohtade nõuetele.", notes: "Inimene vajab tavapärast töövahenduse tuge.", barriers: "Dokumenteeritud takistused puuduvad.", activity: "Inimene kandideerib regulaarselt sobivatele töökohtadele." }, expected: "standard", currentReason: "Info on täielik ja kooskõlaline ning ükski nähtav takistus ei vaja kiiret sekkumist." },
+  { id: "J-03", title: "Oluline info puudub", pattern: "puuduv info", fields: { profile: "Töösoov on märgitud, kuid oskuste väli on tühi.", notes: "Juhtumikirjeldus ei ütle, millist abi inimene vajab.", barriers: "— väärtus puudub", activity: "Üks sisselogimine viimase kuu jooksul." }, expected: "supplement", currentReason: "Takistuste väli on tühi ja juhtumikirjeldus ei anna otsustamiseks piisavalt infot." },
+  { id: "J-04", title: "Koolitus on lõpetatud", pattern: "ajakohane positiivne muutus", fields: { profile: "Nõutud kutsetunnistus on lisatud sel kuul.", notes: "Oskused vastavad nüüd soovitud töökohtade nõuetele.", barriers: "Dokumenteeritud takistused puuduvad.", activity: "Inimene kandideerib sobivatele töökohtadele." }, expected: "self", currentReason: "Koolitus on lõpetatud, oskused vastavad nõuetele ja nähtavaid takistusi pole. Inimene saab tööotsingut iseseisvalt jätkata." },
+  { id: "J-05", title: "Nõustajad ei ole ühel meelel", pattern: "nõustajate eriarvamus", fields: { profile: "Põhiandmed on ajakohased.", notes: "Üks nõustaja soovitab kiiret tuge, teine tavaplaani.", barriers: "Takistuse mõju pole üheselt kirjeldatud.", activity: "Iseteeninduse kasutus vastab tavapärasele mustrile." }, expected: "review", currentReason: "Nõustajate hinnangud on vastuolus ja takistuse mõju pole selge, seega vajab juhtum inimese ülevaatust." }
 ];
 
 const outputCases = [
   { id: "V-01", title: "Hiljutine muutus", trainingIndex: 0, text: "Uue juhtumi profiil on aegunud, kuid nõustaja on dokumenteerinud hiljutise töökaotuse.", confidence: 62, expected: "human", impact: "Kui sarnane treeningjuhtum sai vale märgendi, võib mudel sama viga uue inimese puhul korrata.", baseline: "Tavaplaan" },
-  { id: "V-02", title: "Kõrge aktiivsus, madal sobivus", trainingIndex: 2, text: "Uuel juhtumil on palju kandideerimisi, kuid töö nõutud oskus puudub.", confidence: 81, expected: "correct", impact: "Aktiivsuse segiajamine sobivusega suunab inimese jätkama tegevust, mis ei lahenda tegelikku takistust.", baseline: "Tavaplaan" },
-  { id: "V-03", title: "Selge tavapärane juhtum", trainingIndex: 4, text: "Uue juhtumi info on täielik, ajakohane ja kooskõlaline ning kiireks sekkumiseks pole põhjust.", confidence: 89, expected: "accept", impact: "Hea tavaplaani näide aitab mudelil vältida kõigi juhtumite põhjendamatut suunamist kiiresse sekkumisse.", baseline: "Tavaplaan" },
-  { id: "V-04", title: "Vastuoluline piirjuhtum", trainingIndex: 9, text: "Uue juhtumi eksperdimärkused annavad erineva soovituse ja takistuse mõju pole selge.", confidence: 74, expected: "human", impact: "Kui eriarvamus muudeti õppeandmetes kunstlikult kindlaks märgendiks, õpib mudel ebakindlust varjama.", baseline: "Kiire tugi" }
+  { id: "V-02", title: "Oluline info puudub", trainingIndex: 2, text: "Uue juhtumi takistuste väli on tühi ja kirjeldus ei ütle, millist abi inimene vajab.", confidence: 81, expected: "accept", impact: "Kui puudulik juhtum sai treeningandmetes märgendi „Andmete täiendamine”, oskab mudel küsida lisainfot ega tee põhjendamatult kindlat teenusesoovitust.", baseline: "Tavaplaan" },
+  { id: "V-03", title: "Selge tavapärane juhtum", trainingIndex: 1, text: "Uue juhtumi info on täielik, ajakohane ja kooskõlaline ning kiireks sekkumiseks pole põhjust.", confidence: 89, expected: "accept", impact: "Hea tavaplaani näide aitab mudelil vältida kõigi juhtumite põhjendamatut suunamist kiiresse sekkumisse.", baseline: "Tavaplaan" },
+  { id: "V-04", title: "Vastuoluline piirjuhtum", trainingIndex: 4, text: "Uue juhtumi eksperdimärkused annavad erineva soovituse ja takistuse mõju pole selge.", confidence: 74, expected: "human", impact: "Kui eriarvamus muudeti treeningandmetes kunstlikult kindlaks märgendiks, õpib mudel ebakindlust varjama.", baseline: "Kiire tugi" }
 ];
 
 const fieldNames = {
@@ -294,9 +289,9 @@ function updateImpact() {
   if (total && total < labelCases.length) distributionText = `Märgendasid ${total}/${labelCases.length} juhtumit. Neist ${metrics.aligned} vastab harjutuse juhendile. Iga uus märgend muudab mustrit, mida mudel õpib.`;
   if (total === labelCases.length) {
     const dominant = Object.entries(labelNames).map(([key, label]) => [key, label, metrics[key]]).sort((a, b) => b[2] - a[2])[0];
-    distributionText = dominant[2] >= 5
+    distributionText = dominant[2] >= 3
       ? `Märgend „${dominant[1]}” esineb ${dominant[2]}/${labelCases.length} näites. Seetõttu kipub mudel seda sarnastes olukordades sagedamini soovitama. Juhendile vastas ${metrics.aligned}/${labelCases.length} märgendit.`
-      : `Kõik kolm märgendit on andmestikus esindatud. Juhendile vastas ${metrics.aligned}/${labelCases.length} märgendit. Mudel õpib siiski ka ekslikest märgenditest.`;
+      : `Andmestikus on ${metrics.categories} erinevat märgendit. Juhendile vastas ${metrics.aligned}/${labelCases.length} märgendit. Mudel õpib siiski ka ekslikest märgenditest.`;
   }
   $("#distributionSummary").textContent = distributionText;
 
@@ -662,7 +657,7 @@ function updateControls() {
   updateLabelingBrief();
   updateStage1Feedback();
   $("#stage2Feedback").className = stageValid(2) ? "decision-feedback good" : "decision-feedback";
-  if (stageValid(2)) $("#stage2Feedback").textContent = `${calculateLabelMetrics().aligned}/${labelCases.length} märgendit vastab kinnitatud juhendile. Mudel õpib siiski kõigist kümnest märgendist, ka ekslikest.`;
+  if (stageValid(2)) $("#stage2Feedback").textContent = `${calculateLabelMetrics().aligned}/${labelCases.length} märgendit vastab kinnitatud juhendile. Mudel õpib siiski kõigist viiest märgendist, ka ekslikest.`;
   $("#stage3Feedback").className = stageValid(3) ? "decision-feedback good" : "decision-feedback";
   if (stageValid(3)) $("#stage3Feedback").textContent = "Soovitused on üle vaadatud. Ülevaatuse reegel muudab mudeli ebakindluse nähtavaks ametniku tööks.";
   renderLabelCase();
@@ -686,11 +681,11 @@ function updateFocusState() {
   if (impactLocked) {
     const labelingStarted = state.completed.has(1);
     impactLockedNotice.querySelector("span").textContent = labelingStarted
-      ? "MÕJUVADE AVANEB PÄRAST 10 MÄRGENDIT"
+      ? "MÕJUVADE AVANEB PÄRAST 5 MÄRGENDIT"
       : "MÕJUVADE POLE VEEL AVATUD";
     impactLockedNotice.querySelector("p").textContent = labelingStarted
-      ? `Märgendasid ${state.labels.length}/${labelCases.length} juhtumit. Pärast kümnendat märgendit näed, milliseid seoseid mudel sinu loodud treeningandmetest õpib ja kuidas tema soovitused muutuvad.`
-      : "Kinnita esmalt andmed ja märgendusjuhis. Seejärel märgenda kümme juhtumit.";
+      ? `Märgendasid ${state.labels.length}/${labelCases.length} juhtumit. Pärast viiendat märgendit näed, milliseid seoseid mudel sinu loodud treeningandmetest õpib ja kuidas tema soovitused muutuvad.`
+      : "Kinnita esmalt andmed ja märgendusjuhis. Seejärel märgenda viis juhtumit.";
   }
 
   const stageDone = state.completed.has(state.currentStage);
@@ -717,14 +712,14 @@ function updateFocusState() {
     else if (!state.audit) title = "Vali märgendusvalimi kontroll";
     else if (state.audit !== "coverage") title = "Vali kontroll, mis näitab valimi katvust ja puuduvaid andmeid";
     else title = "Kinnita andmed ja märgendusjuhis";
-    if (impactLocked && state.availableLabels.size >= 2) detail = "Mõjuvaade avaneb pärast kümne juhtumi märgendamist.";
+    if (impactLocked && state.availableLabels.size >= 2) detail = "Mõjuvaade avaneb pärast viie juhtumi märgendamist.";
   } else if (state.currentStage === 2) {
     if (state.pendingLabel) title = "Vaata tagasisidet ja jätka järgmise juhtumiga";
-    else if (state.labels.length === labelCases.length) title = "Kinnita kümne juhtumi märgendus";
+    else if (state.labels.length === labelCases.length) title = "Kinnita viie juhtumi märgendus";
     else title = `Märgenda juhtum ${state.labels.length + 1}/${labelCases.length}`;
     detail = impactLocked
-      ? "Kasuta ainult juhtumikaardil nähtavat infot ja kinnitatud juhist. Mõjuvaade avaneb pärast kümnendat märgendit."
-      : "Kõik kümme juhtumit on märgendatud. Vaata nüüd mõjuvaadet ja kinnita märgendus.";
+      ? "Kasuta ainult juhtumikaardil nähtavat infot ja kinnitatud juhist. Mõjuvaade avaneb pärast viiendat märgendit."
+      : "Kõik viis juhtumit on märgendatud. Vaata nüüd mõjuvaadet ja kinnita märgendus.";
   } else if (state.currentStage === 3) {
     if (!state.intervention) title = "Vali, millal ametnik peab soovituse üle vaatama";
     else if (state.pendingReview) title = "Vaata tagasisidet ja jätka järgmise soovitusega";
@@ -779,7 +774,7 @@ function showStage(stage, shouldScroll = true) {
 
 const dialogMessages = {
   1: { start: "Valis märgendid, andmed ja reegli", middle: "Valikutest sai märgendaja lähteülesanne", end: "Õpib nende põhjal loodud treeningandmetest", insight: "" },
-  2: { start: "Märgendas kümme juhtumit", middle: "Märgendatud juhtumitest said treeningandmed", end: "Õppis seoseid andmete ja soovituste vahel", insight: "Mudel ei tea, milline märgend oli ekslik. Ta õpib kõigist treeningandmetesse lisatud juhtumitest, mistõttu märgendaja järjepidevus mõjutab otseselt mudeli hilisemaid soovitusi." },
+  2: { start: "Märgendas viis juhtumit", middle: "Märgendatud juhtumitest said treeningandmed", end: "Õppis seoseid andmete ja soovituste vahel", insight: "Mudel ei tea, milline märgend oli ekslik. Ta õpib kõigist treeningandmetesse lisatud juhtumitest, mistõttu märgendaja järjepidevus mõjutab otseselt mudeli hilisemaid soovitusi." },
   3: { start: "Kontrollis nelja soovitust", middle: "Soovitused kinnitati, parandati või suunati ülevaatusele", end: "Vead ja ebakindlus muutusid nähtavaks", insight: "Soovituse parandamisest on pikemalt kasu siis, kui vea põhjus seotakse algse märgendi ja märgendusjuhisega." },
   4: { start: "Määras vastutajad ja parandamise korra", middle: "Vead seoti juhise ja õppeandmetega", end: "Järgmist versiooni saab vigade põhjal parandada", insight: "Juhise versioon, piirjuhtumite põhjendused ja kontrollitud testjuhtumid aitavad sama vea järgmises andme- või mudeliversioonis uuesti üles leida." }
 };
@@ -812,19 +807,19 @@ function renderResults() {
   const metrics = calculateLabelMetrics();
   const dominant = Object.entries(labelNames).map(([key, label]) => [key, label, metrics[key]]).sort((a, b) => b[2] - a[2])[0];
   let title = "Mitmekesine ja ebakindlust säilitav märgendus";
-  if (metrics.aligned <= 5) title = "Märgendus õpetab mudelile juhisega vastuolulisi seoseid";
-  else if (dominant[2] >= 7) title = "Ühe kategooria poole kaldu märgendus";
+  if (metrics.aligned <= 2) title = "Märgendus õpetab mudelile juhisega vastuolulisi seoseid";
+  else if (dominant[2] >= 3) title = "Ühe kategooria poole kaldu märgendus";
   else if (metrics.review + metrics.supplement === 0) title = "Kindel märgendus, mis peidab piirjuhtumeid";
   else if (metrics.categories < 3) title = "Kitsas märgendus, millest puudub üks võimalik soovitus";
   $("#profileTitle").textContent = title;
   const selectedCounts = Object.keys(labelNames)
     .filter(key => state.availableLabels.has(key))
     .map(key => `${metrics[key]} „${labelNames[key]}”`);
-  $("#profileText").textContent = `Märgendasid kümme juhtumit: ${selectedCounts.join(", ")}. Kinnitatud juhendile vastas ${metrics.aligned}/10 märgendit. Sinu loodud treeningandmed muutsid varasema mudeliga võrreldes ${metrics.changedOutputs}/4 testsoovitust.`;
+  $("#profileText").textContent = `Märgendasid viis juhtumit: ${selectedCounts.join(", ")}. Kinnitatud juhendile vastas ${metrics.aligned}/${labelCases.length} märgendit. Sinu loodud treeningandmed muutsid varasema mudeliga võrreldes ${metrics.changedOutputs}/4 testsoovitust.`;
   const tags = [
-    "10 treeningandmetesse lisatud juhtumit",
+    `${labelCases.length} treeningandmetesse lisatud juhtumit`,
     `${state.availableLabels.size} kasutatavat märgendit`,
-    `${metrics.aligned}/10 juhisega kooskõlas`,
+    `${metrics.aligned}/${labelCases.length} juhisega kooskõlas`,
     `${metrics.changedOutputs}/4 mudeli soovitust muutus`,
     `${metrics.review} ülevaatusele ja ${metrics.supplement} täiendamisele`,
     state.appeal === "owned" ? "parandus jõuab seirelogisse" : "tagasisideahel vajab täpsustamist"

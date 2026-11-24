@@ -206,7 +206,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                     "Valdkonnaspetsialist teeb põhjendatud lõppotsuse ja ebaselgus lisatakse juhisesse",
                 ], choices
                 evaluate("""(() => {
-                  ['fast','standard','supplement','review'].forEach(value=>document.querySelector(`#availableLabelChoices input[value="${value}"]`).click());
+                  ['fast','standard','self','supplement','review'].forEach(value=>document.querySelector(`#availableLabelChoices input[value="${value}"]`).click());
                   ['notes','barriers','activity'].forEach(value=>document.querySelector(`#sourceChoices input[value="${value}"]`).click());
                   missingPolicy.value='average'; missingPolicy.dispatchEvent(new Event('change',{bubbles:true}));
                   disagreementPolicy.value='first'; disagreementPolicy.dispatchEvent(new Event('change',{bubbles:true}));
@@ -226,6 +226,8 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 time.sleep(0.25)
                 evaluate("dialogContinue.click()")
                 time.sleep(0.25)
+                five_case_start = json.loads(evaluate("JSON.stringify({total:labelCases.length,progress:labelProgress.textContent,step:document.querySelector('[data-step=\"2\"] small').textContent,caseId:document.querySelector('#labelCase .case-top span').textContent})"))
+                assert five_case_start == {"total": 5, "progress": "0 / 5 märgendatud", "step": "5 juhtumit · valik, põhjendus ja parandus", "caseId": "J-01 · 1/5"}, five_case_start
                 assert not evaluate("Boolean(document.querySelector('.case-rule-hint'))"), "Kinnitatud reegli plokk on alles"
                 evaluate("document.querySelector('#labelActions button[data-label=\"supplement\"]').click()")
                 label_feedback = json.loads(evaluate("JSON.stringify({result:labelExplanation.dataset.result,status:labelExplanationStatus.textContent,title:labelExplanationTitle.textContent,text:labelExplanationText.textContent,summary:stage2Feedback.textContent,summaryHidden:stage2Feedback.hidden})"))
@@ -237,6 +239,16 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 evaluate("labelExplanation.scrollIntoView({block:'center'})")
                 time.sleep(0.25)
                 screenshot("ai-andmetoo-wrong-label-feedback.png")
+                evaluate("""(() => {
+                  undoLabelChoice.click();
+                  ['fast','standard','supplement','self','review'].forEach(label => {
+                    document.querySelector(`#labelActions button[data-label="${label}"]`).click();
+                    nextLabelCase.click();
+                  });
+                })()""")
+                time.sleep(0.25)
+                five_case_end = json.loads(evaluate("JSON.stringify({progress:labelProgress.textContent,summary:document.querySelector('#labelCase .case-top b').textContent,completeDisabled:document.querySelector('[data-complete=\"2\"]').disabled,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),fact:labeledFact.textContent})"))
+                assert five_case_end == {"progress": "5 / 5 märgendatud", "summary": "5 juhtumit", "completeDisabled": False, "impactHidden": False, "pending": False, "fact": "5 / 5"}, five_case_end
 
         command("Page.navigate", {"url": URL + "kraapimine/"})
         wait_for_path("/kraapimine/")
