@@ -44,15 +44,15 @@
     <nav class="stepper" aria-label="Simulatsiooni etapid">
       <button class="step active" type="button" data-step="1" aria-current="step"><span>1</span><div><b>Vali andmed ja määra nõuded</b><small>Mida märgendaja näeb ja millist juhist järgib?</small></div></button>
       <button class="step" type="button" data-step="2" disabled><span>2</span><div><b>Märgenda tööotsijate kirjed</b><small>5 registrikirjet · valik, põhjendus ja parandus</small></div></button>
-      <button class="step" type="button" data-step="3" disabled><span>3</span><div><b>Kontrolli mudeli soovitusi</b><small>Mida mudel sinu märgenditest õppis?</small></div></button>
-      <button class="step" type="button" data-step="4" disabled><span>4</span><div><b>Paranda märgendusprotsessi</b><small>Versioonid, vead ja tagasiside</small></div></button>
+      <button class="step" type="button" data-step="3" disabled><span>3</span><div><b>Hinda mudeli väljundeid</b><small>Leia vead järgmise mudeliversiooni parandamiseks</small></div></button>
+      <button class="step" type="button" data-step="4" disabled><span>4</span><div><b>Paranda mudeli arendusprotsessi</b><small>Vead, andmed ja järgmine mudeliversioon</small></div></button>
     </nav>
 
     <section class="lab-grid impact-pending" aria-label="AI andmetöö simulatsioon">
       <section class="stage-card card is-muted" id="impactCard" aria-labelledby="impactTitle" aria-disabled="true" hidden>
         <div class="card-heading">
-          <div><span class="section-kicker">MÄRGENDUSE MÕJU</span><h2 id="impactTitle">Mida mudel sinu märgenditest õpib?</h2></div>
-          <div class="flow-status" role="status" aria-live="polite"><span>TREENINGKIRJEID</span><b id="impactStatus">0 / 5 märgendatud</b></div>
+          <div><span class="section-kicker" id="impactKicker">MÄRGENDUSE MÕJU</span><h2 id="impactTitle">Mida mudel sinu märgenditest õpib?</h2></div>
+          <div class="flow-status" role="status" aria-live="polite"><span id="impactStatusLabel">TREENINGKIRJEID</span><b id="impactStatus">0 / 5 märgendatud</b></div>
         </div>
 
         <div class="impact-lock-note" id="impactLockedNotice" role="status"><span>MÕJUVADE POLE VEEL AVATUD</span><p>Kinnita esmalt vasakul andmed ja märgendusjuhis. Seejärel näed siin, mida mudel märgenditest õpib ja kuidas tema soovitused muutuvad.</p></div>
@@ -147,20 +147,21 @@
         </section>
 
         <section class="decision-stage" data-stage="3" hidden>
-          <div class="control-title"><span>03</span><div><h3>Millal saab mudeli soovitust usaldada?</h3><p>Mudel annab soovituse igale registris olevale tööotsijale. Hinda nelja kontrollkirje soovitust ja otsusta, millal peab ametnik need üle vaatama.</p></div></div>
+          <div class="control-title"><span>03</span><div><h3>Kas mudeli väljundid sobivad kasutamiseks?</h3><p>Mudel annab soovituse igale registris olevale tööotsijale. Hinda neljal kontrollkirjel, kas väljund sobib, vajab parandamist või tuleb suunata ametnikule.</p></div></div>
+          <div class="labeling-instruction-intro"><span>MÄRGENDAMISEST MUDELI HINDAMISSE</span><p><b>Märgendamistöö on lõppenud.</b> Nüüd hinnatakse eraldi kontrollandmestikul mudeli väljundeid. Need hinnangud ei ole uued treeningmärgendid: nende abil leitakse korduvad vead ning otsustatakse, mida tuleb andmetes, reeglites või mudeli järgmises versioonis parandada.</p></div>
           <label class="select-label" for="interventionRule"><span>Millal peab ametnik soovituse üle vaatama?</span><select id="interventionRule"><option value="">Vali ülevaatuse reegel</option><option value="low">Ainult siis, kui mudeli kindlus on alla 50%</option><option value="medium">Kui kindlus on alla 70% või andmed on vastuolus</option><option value="group">Kui kindlus on alla 70%, andmed on vastuolus või ilmneb rühmapõhine veamuster</option><option value="none">Soovitust ei kontrollita enne kasutamist</option></select></label>
           <div class="case-progress"><span>VÄLJUNDID</span><b id="reviewProgress">0 / 4 hinnatud</b></div>
           <div class="output-card" id="outputCase"></div>
           <div class="review-actions" id="reviewActions" aria-label="Hinda mudeli soovitust">
-            <button type="button" data-review="accept">Kinnita soovitus</button><button type="button" data-review="correct">Paranda soovitust</button><button type="button" data-review="human">Suuna ametnikule ülevaatamiseks</button>
+            <button type="button" data-review="accept">Väljund sobib</button><button type="button" data-review="correct">Väljund vajab parandamist</button><button type="button" data-review="human">Vajab ametniku hinnangut</button>
           </div>
-          <div class="choice-explanation" id="reviewExplanation" hidden aria-live="polite"><span>KEDA SEE VALIK MÕJUTAB?</span><h4 id="reviewExplanationTitle"></h4><p id="reviewExplanationText"></p><button class="explanation-next" id="nextReviewCase" type="button">Jätka järgmise soovitusega</button></div>
-          <div class="decision-feedback" id="stage3Feedback" aria-live="polite">Kindlusprotsent ei näita, kas soovitus on sisuliselt õige. Vaata alati ka tööotsija registriandmeid ja nende ajakohasust.</div>
-          <div class="next-action-guide contextual"><span class="next-action-label" aria-hidden="true">JÄRGMISENA <i>↓</i></span><button class="primary-button orange" type="button" data-complete="3" disabled><span>Kinnita ülevaatuse reegel</span></button></div>
+          <div class="choice-explanation" id="reviewExplanation" hidden aria-live="polite"><span>MIDA SELLE HINNANGUGA TEHAKSE?</span><h4 id="reviewExplanationTitle"></h4><p id="reviewExplanationText"></p><button class="explanation-next" id="nextReviewCase" type="button">Jätka järgmise väljundiga</button></div>
+          <div class="decision-feedback" id="stage3Feedback" aria-live="polite">Kindlusprotsent ei tõesta väljundi õigsust. Hinda soovituse sisulist sobivust, alust ja mõju ning säilita tulemus mudeli järgmise versiooni arendamiseks.</div>
+          <div class="next-action-guide contextual"><span class="next-action-label" aria-hidden="true">JÄRGMISENA <i>↓</i></span><button class="primary-button orange" type="button" data-complete="3" disabled><span>Kinnita väljundite hindamine</span></button></div>
         </section>
 
         <section class="decision-stage" data-stage="4" hidden>
-          <div class="control-title"><span>04</span><div><h3>Kuidas märgendusprotsessi vigade põhjal parandada?</h3><p>Määra, kes ajakohastab märgendusjuhist, lahendab vaidlustatud märgendeid, jälgib kogu registrile antavaid soovitusi ja lisab parandused järgmisse õppeandmestikku.</p></div></div>
+          <div class="control-title"><span>04</span><div><h3>Kuidas jõuavad hindamistulemused järgmisse mudeliversiooni?</h3><p>Määra, kes analüüsib väljundivigu, ajakohastab märgendusjuhist ja treeningandmeid, jälgib kogu registrile antavaid soovitusi ning kontrollib parandatud mudelit.</p></div></div>
           <div class="ownership-grid" id="ownershipGrid">
             <label><span>Märgendusjuhise mõisted ja näited</span><select data-owner="data"><option value="">Määra vastutaja</option><option value="internal">Ameti valdkonnaeksperdid</option><option value="shared">Amet ja arenduspartner ühiselt</option><option value="vendor">Ainult arenduspartner</option><option value="none">Vastutaja puudub</option></select></label>
             <label><span>Vaidlustatud märgendite lõplik lahendamine</span><select data-owner="rules"><option value="">Määra vastutaja</option><option value="internal">Ameti vanemekspert</option><option value="shared">Amet ja arenduspartner ühiselt</option><option value="vendor">Ainult arenduspartner</option><option value="none">Vastutaja puudub</option></select></label>
@@ -175,7 +176,7 @@
             <label class="source-choice"><input type="checkbox" value="tests"><span><b>Kontrollitud testprofiilid</b><small>Kokkulepitud õigete märgenditega registrinäited uute märgendajate ja mudeliversioonide kontrollimiseks</small></span></label>
           </fieldset>
           <div class="decision-feedback" id="stage4Feedback" aria-live="polite">Amet ei pea kõike ise ehitama. Küll aga peab tal säilima teadmine, mille abil tööd kontrollida, parandada või teisele partnerile üle anda.</div>
-          <div class="next-action-guide contextual"><span class="next-action-label" aria-hidden="true">LÕPETA <i>↓</i></span><button class="primary-button orange" type="button" data-complete="4" disabled><span>Koosta märgenduse kokkuvõte</span></button></div>
+          <div class="next-action-guide contextual"><span class="next-action-label" aria-hidden="true">LÕPETA <i>↓</i></span><button class="primary-button orange" type="button" data-complete="4" disabled><span>Koosta mudeli paranduskava</span></button></div>
         </section>
 
         <div class="lesson-nav"><button type="button" id="previousStage" disabled>Eelmine etapp</button><div id="lessonDots" aria-hidden="true"></div><button type="button" id="nextStage" disabled>Järgmine etapp</button></div>
@@ -183,9 +184,9 @@
     </section>
 
     <section class="result-section" id="resultSection" hidden aria-labelledby="resultTitle">
-      <header class="result-head"><div><span class="section-kicker">MÄRGENDAMISE TULEMUS</span><h2 id="resultTitle">Mudel kordab märgendites loodud mustreid</h2></div><p id="resultLead">Sinu märgendid mõjutavad nii mudeli õpitud seoseid kui ka kõigile registris olevatele tööotsijatele antavaid soovitusi.</p></header>
+      <header class="result-head"><div><span class="section-kicker">MUDELI ARENDAMISE TULEMUS</span><h2 id="resultTitle">Mudel kordab märgendites loodud mustreid</h2></div><p id="resultLead">Sinu märgendid kujundavad mudeli õpitud seoseid. Väljundite hindamine näitab, mida tuleb järgmises mudeliversioonis parandada.</p></header>
       <div class="result-grid">
-        <article class="result-card card"><span class="section-kicker">SINU MÄRGENDUSE KOKKUVÕTE</span><h3 id="profileTitle">Siin näed oma märgenduse tulemust</h3><p id="profileText"></p><div class="profile-tags" id="profileTags"></div></article>
+        <article class="result-card card"><span class="section-kicker">MÄRGENDUSE JA HINDAMISE KOKKUVÕTE</span><h3 id="profileTitle">Siin näed oma märgenduse tulemust</h3><p id="profileText"></p><div class="profile-tags" id="profileTags"></div></article>
         <article class="result-card card"><span class="section-kicker">MIDA TULEMUSEST ÕPPIDA?</span><div class="tradeoff-list" id="tradeoffList"></div></article>
       </div>
       <div class="trace-card card">
@@ -221,6 +222,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=32"></script>
+  <script src="app.js?v=33"></script>
 </body>
 </html>

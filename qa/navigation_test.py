@@ -259,6 +259,29 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 time.sleep(0.25)
                 five_case_end = json.loads(evaluate("JSON.stringify({progress:labelProgress.textContent,summary:document.querySelector('#labelCase .case-top b').textContent,completeDisabled:document.querySelector('[data-complete=\"2\"]').disabled,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),fact:labeledFact.textContent})"))
                 assert five_case_end == {"progress": "5 / 5 märgendatud", "summary": "5 registrikirjet", "completeDisabled": False, "impactHidden": False, "pending": False, "fact": "5 / 5"}, five_case_end
+                evaluate("document.querySelector('[data-complete=\"2\"]').click()")
+                time.sleep(0.25)
+                evaluate("dialogContinue.click()")
+                time.sleep(0.25)
+                stage3 = json.loads(evaluate("""JSON.stringify({
+                  stepTitle: document.querySelector('[data-step="3"] b').textContent,
+                  stepDetail: document.querySelector('[data-step="3"] small').textContent,
+                  stageTitle: document.querySelector('[data-stage="3"] .control-title h3').textContent,
+                  transition: document.querySelector('[data-stage="3"] .labeling-instruction-intro').textContent,
+                  cue: activeTaskCue.textContent,
+                  impactKicker: impactKicker.textContent,
+                  impactTitle: document.querySelector('#impactTitle').textContent,
+                  impactStatusLabel: document.querySelector('#impactStatusLabel').textContent,
+                  buttons: [...document.querySelectorAll('#reviewActions button')].map(button => button.textContent),
+                  complete: document.querySelector('[data-complete="3"] span').textContent
+                })"""))
+                assert stage3["stepTitle"] == "Hinda mudeli väljundeid" and "järgmise mudeliversiooni" in stage3["stepDetail"], stage3
+                assert stage3["stageTitle"] == "Kas mudeli väljundid sobivad kasutamiseks?" and "Märgendamistöö on lõppenud." in stage3["transition"] and "ei ole uued treeningmärgendid" in stage3["transition"], stage3
+                assert stage3["impactKicker"] == "MUDELI VÄLJUNDITE HINDAMINE" and stage3["impactTitle"] == "Mida tuleb järgmises mudeliversioonis parandada?" and stage3["impactStatusLabel"] == "HINDAMISE SEIS", stage3
+                assert "mitte uute registrikirjete märgendamine" in stage3["cue"] and stage3["buttons"] == ["Väljund sobib", "Väljund vajab parandamist", "Vajab ametniku hinnangut"] and stage3["complete"] == "Kinnita väljundite hindamine", stage3
+                evaluate("document.querySelector('[data-stage=\"3\"] .labeling-instruction-intro').scrollIntoView({block:'center'})")
+                time.sleep(0.25)
+                screenshot("ai-andmetoo-model-evaluation.png")
 
         command("Page.navigate", {"url": URL + "kraapimine/"})
         wait_for_path("/kraapimine/")

@@ -10,7 +10,7 @@ const metricMeta = {
 };
 
 const labelNames = { fast: "Kiire tugi", standard: "Tavaplaan", self: "Iseseisev jätkamine", supplement: "Andmete täiendamine", review: "Inimese ülevaatus" };
-const reviewNames = { accept: "Soovitus kinnitatud", correct: "Soovitus parandatud", human: "Ametnikule suunatud" };
+const reviewNames = { accept: "Väljund sobib", correct: "Väljund vajab parandamist", human: "Vajab ametniku hinnangut" };
 
 const labelCases = [
   { id: "T-101", title: "Tööotsija T-101", pattern: "hiljutine töökaotus", fields: { profile: "Registris on aktiivne tööotsija. Töösuhe lõppes kaks nädalat tagasi.", notes: "Töötuna registreerimine vajab lõpuleviimist.", barriers: "Registreerimine ja toetuste taotlemine on pooleli.", activity: "Pärast töösuhte lõppu pole iseteeninduses tegevust." }, expected: "fast", currentReason: "Hiljutine töökaotus ning pooleli olev registreerimine takistavad tööotsingu alustamist ja vajavad ametniku sihitud abi." },
@@ -75,8 +75,8 @@ function outputText(item) { return item.text; }
 const stageCopy = {
   1: { title: "Vali andmed ja määra nõuded", story: "<b>Andmete valik eelneb märgendamisele.</b> Valitud väljad ja juhis määravad, mida märgendaja saab põhjendatult otsustada ning mida mudel hiljem õppida saab." },
   2: { title: "Märgenda tööotsijate kirjed", story: "<b>Iga märgendatud registrikirje lisatakse mudeli treeningandmetesse.</b> Hästi põhjendatud märgend tugineb nähtavale infole ja ühtsele juhisele. Kui kindlat soovitust ei saa teha, peab ebakindlus jääma nähtavaks." },
-  3: { title: "Kontrolli mudeli soovitusi", story: "<b>Mudel rakendab õpitud seoseid kõigile registris olevatele tööotsijatele.</b> Võrdle kontrollkirjete soovitusi varasema mudeliga ja kontrolli, kas need põhinevad asjakohasel infol." },
-  4: { title: "Paranda märgendusprotsessi", story: "<b>Mudeli viga võib alata märgendist.</b> Paranduse põhjus peab jõudma tagasi juhisesse, vaidlustatud näidetesse ja andmestiku järgmisse versiooni." }
+  3: { title: "Hinda mudeli väljundeid", story: "<b>See ei ole enam märgendamistöö.</b> Mudeli edasiarendamisel hinnatakse väljundeid eraldi kontrollandmestikul. Tulemused näitavad, milliseid vigu tuleb järgmises mudeliversioonis parandada." },
+  4: { title: "Paranda mudeli arendusprotsessi", story: "<b>Mudeli väljundite hindamine loob parandussisendi.</b> Korduv viga peab jõudma tagasi märgendusjuhisesse, treeningandmetesse, hindamiskriteeriumidesse või mudeli järgmisse versiooni." }
 };
 
 const state = {
@@ -272,7 +272,22 @@ function labelPatternRows() {
 function updateImpact() {
   const metrics = calculateLabelMetrics();
   const total = state.labels.length;
-  $("#impactStatus").textContent = `${total} / ${labelCases.length} märgendatud`;
+  if (state.currentStage === 3) {
+    $("#impactKicker").textContent = "MUDELI VÄLJUNDITE HINDAMINE";
+    $("#impactTitle").textContent = "Mida tuleb järgmises mudeliversioonis parandada?";
+    $("#impactStatusLabel").textContent = "HINDAMISE SEIS";
+    $("#impactStatus").textContent = `${state.reviews.length} / ${outputCases.length} hinnatud`;
+  } else if (state.currentStage === 4) {
+    $("#impactKicker").textContent = "MUDELI EDASIARENDUS";
+    $("#impactTitle").textContent = "Kuidas jõuavad parandused järgmisse versiooni?";
+    $("#impactStatusLabel").textContent = "HINDAMISTULEMUS";
+    $("#impactStatus").textContent = `${state.reviews.length} / ${outputCases.length} väljundit hinnatud`;
+  } else {
+    $("#impactKicker").textContent = "MÄRGENDUSE MÕJU";
+    $("#impactTitle").textContent = "Mida mudel sinu märgenditest õpib?";
+    $("#impactStatusLabel").textContent = "TREENINGKIRJEID";
+    $("#impactStatus").textContent = `${total} / ${labelCases.length} märgendatud`;
+  }
   Object.keys(labelNames).forEach(key => {
     const available = state.availableLabels.has(key);
     $(`[data-label-bar="${key}"]`).hidden = !available;
@@ -471,16 +486,16 @@ function renderOutputCase() {
     actions.hidden = true;
     explanation.hidden = false;
     const actionMeaning = {
-      accept: "Soovitust kinnitades võtad selle eest vastutuse sina, mitte kindlusprotsent.",
-      correct: "Parandus aitab seda tööotsijat. Et sama viga ei korduks ülejäänud registris, lisa paranduse põhjus seirelogisse.",
-      human: "Ametniku ülevaatus jätab ebakindluse nähtavaks, kuid selleks peab olema selge vastutaja ja tähtaeg."
+      accept: "Hindamistulemus näitab, et väljund sobib kontrollkriteeriumidega. See ei tõesta veel kogu mudeli kvaliteeti.",
+      correct: "Hindamistulemus märgib väljundi veaks. Lisa vea põhjus seirelogisse, et seda saaks järgmises mudeliversioonis parandada.",
+      human: "Hindamistulemus näitab, et automaatseks otsuseks ei piisa infost. Enne mudeli muutmist on vaja eksperdi analüüsi."
     };
     $("#reviewExplanationTitle").textContent = reviewNames[choice];
     $("#reviewExplanationText").textContent = `${actionMeaning[choice]} ${item.impact}`;
-    $("#nextReviewCase").textContent = state.reviews.length === outputCases.length ? "Vaata soovituste kokkuvõtet" : "Jätka järgmise soovitusega";
+    $("#nextReviewCase").textContent = state.reviews.length === outputCases.length ? "Vaata hindamise kokkuvõtet" : "Jätka järgmise väljundiga";
   } else if (state.reviews.length === outputCases.length) {
     const summary = Object.keys(reviewNames).map(key => `${reviewNames[key]}: ${state.reviews.filter(value => value === key).length}`).join(" · ");
-    container.innerHTML = `<div class="case-top"><span>KONTROLL VALMIS</span><b>4 soovitust</b></div><h4>Ametniku otsused</h4><p>${summary}</p><div class="case-meta"><button class="inline-reset" type="button" data-rereview>Hinda soovitusi uuesti</button></div>`;
+    container.innerHTML = `<div class="case-top"><span>HINDAMINE VALMIS</span><b>4 väljundit</b></div><h4>Mudeli väljundite hinnangud</h4><p>${summary}</p><div class="case-meta"><button class="inline-reset" type="button" data-rereview>Hinda väljundeid uuesti</button></div>`;
     actions.hidden = true;
     explanation.hidden = true;
     $$("#reviewActions button").forEach(button => { button.disabled = true; button.classList.remove("selected"); });
@@ -659,7 +674,7 @@ function updateControls() {
   $("#stage2Feedback").className = stageValid(2) ? "decision-feedback good" : "decision-feedback";
   if (stageValid(2)) $("#stage2Feedback").textContent = `${calculateLabelMetrics().aligned}/${labelCases.length} märgendit vastab kinnitatud juhendile. Mudel õpib siiski kõigist viiest märgendist, ka ekslikest.`;
   $("#stage3Feedback").className = stageValid(3) ? "decision-feedback good" : "decision-feedback";
-  if (stageValid(3)) $("#stage3Feedback").textContent = "Soovitused on üle vaadatud. Ülevaatuse reegel muudab mudeli ebakindluse nähtavaks ametniku tööks.";
+  if (stageValid(3)) $("#stage3Feedback").textContent = "Neli väljundit on hinnatud. Koondtulemus näitab arendusmeeskonnale, millised soovitused, reeglid või andmed vajavad järgmises mudeliversioonis parandamist.";
   renderLabelCase();
   renderOutputCase();
   updateStage4();
@@ -721,17 +736,17 @@ function updateFocusState() {
       ? "Kasuta ainult kirjel nähtavat registriinfot ja kinnitatud juhist. Mõjuvaade avaneb pärast viiendat märgendit."
       : "Kõik viis registrikirjet on märgendatud. Vaata nüüd mõjuvaadet ja kinnita märgendus.";
   } else if (state.currentStage === 3) {
-    if (!state.intervention) title = "Vali, millal ametnik peab soovituse üle vaatama";
-    else if (state.pendingReview) title = "Vaata tagasisidet ja jätka järgmise soovitusega";
-    else if (state.reviews.length === outputCases.length) title = "Kinnita soovituste kontroll";
-    else title = `Hinda mudeli soovitust ${state.reviews.length + 1}/${outputCases.length}`;
-    detail = "Kontrolli soovitust, selle alust ja mõju inimesele.";
+    if (!state.intervention) title = "Määra, millal mudeli väljund vajab inimese ülevaatust";
+    else if (state.pendingReview) title = "Vaata tagasisidet ja jätka järgmise väljundiga";
+    else if (state.reviews.length === outputCases.length) title = "Kinnita mudeli väljundite hindamine";
+    else title = `Hinda mudeli väljundit ${state.reviews.length + 1}/${outputCases.length}`;
+    detail = "See on mudeli väljundite hindamine, mitte uute registrikirjete märgendamine.";
   } else if (state.currentStage === 4) {
     const unassigned = Object.values(state.ownership).filter(value => !value).length;
     if (unassigned) title = `Määra veel ${unassigned} vastutusala`;
     else if (!state.cadence || !state.appeal || state.assets.size < 2) title = "Lõpeta jälgimise ja parandamise valikud";
-    else title = "Koosta märgenduse kokkuvõte";
-    detail = "Määra, kuidas vigu jälgitakse ja nende põhjal märgendusjuhist parandatakse.";
+    else title = "Koosta mudeli paranduskava";
+    detail = "Määra, kuidas hindamisel leitud vead jõuavad andmetesse, juhisesse ja mudeli järgmisse versiooni.";
   }
   $("#activeTaskCue b").textContent = title;
   $("#activeTaskCue small").textContent = detail;
@@ -753,7 +768,7 @@ function updateNavigation() {
   $("#stageCounter").textContent = `ETAPP ${state.currentStage} / 4`;
   $("#storyIndex").textContent = String(state.currentStage).padStart(2, "0");
   $("#storyText").innerHTML = stageCopy[state.currentStage].story;
-  $("#progressText").textContent = state.completed.size === 4 ? "Märgenduse tulemus valmis" : stageCopy[state.currentStage].title;
+  $("#progressText").textContent = state.completed.size === 4 ? "Mudeli paranduskava valmis" : stageCopy[state.currentStage].title;
   const progress = state.completed.size * 25;
   $("#progressValue").textContent = `${progress}%`;
   $("#progressBar").style.width = `${progress}%`;
@@ -775,8 +790,8 @@ function showStage(stage, shouldScroll = true) {
 const dialogMessages = {
   1: { start: "Valis märgendid, andmed ja reegli", middle: "Valikutest sai märgendaja lähteülesanne", end: "Õpib nende põhjal loodud treeningandmetest", insight: "" },
   2: { start: "Märgendas viis registrikirjet", middle: "Märgendatud kirjetest said treeningandmed", end: "Rakendab õpitud seoseid kogu registrile", insight: "Mudel ei tea, milline märgend oli ekslik. Ta õpib kõigist treeningandmetesse lisatud kirjetest, mistõttu märgendaja järjepidevus mõjutab kõigile tööotsijatele antavaid soovitusi." },
-  3: { start: "Kontrollis nelja soovitust", middle: "Soovitused kinnitati, parandati või suunati ülevaatusele", end: "Vead ja ebakindlus muutusid nähtavaks", insight: "Soovituse parandamisest on pikemalt kasu siis, kui vea põhjus seotakse algse märgendi ja märgendusjuhisega." },
-  4: { start: "Määras vastutajad ja parandamise korra", middle: "Vead seoti juhise ja õppeandmetega", end: "Järgmist versiooni saab vigade põhjal parandada", insight: "Juhise versioon, vaidlustatud näidete põhjendused ja kontrollitud testprofiilid aitavad sama vea järgmises andme- või mudeliversioonis uuesti üles leida." }
+  3: { start: "Hindas mudeli nelja väljundit", middle: "Hinnangutest sai mudeli parandussisend", end: "Korduvad vead muutusid arendusmeeskonnale nähtavaks", insight: "Hindamistulemused ei ole uued treeningmärgendid. Need näitavad, milliseid andmeid, reegleid või mudeli omadusi tuleb järgmises versioonis parandada." },
+  4: { start: "Määras vastutajad ja parandamise korra", middle: "Hindamisel leitud vead seoti juhise ja treeningandmetega", end: "Järgmist mudeliversiooni saab kontrollitult parandada", insight: "Juhise versioon, vaidlustatud näidete põhjendused, hindamistulemused ja kontrollitud testprofiilid aitavad sama vea järgmises mudeliversioonis uuesti üles leida." }
 };
 
 function completeStage(stage) {
@@ -797,7 +812,7 @@ function completeStage(stage) {
   $("#dialogMiddle").textContent = message.middle;
   $("#dialogEnd").textContent = message.end;
   $("#dialogInsight").textContent = message.insight;
-  $("#dialogContinue span").textContent = stage === 4 ? "Vaata märgenduse tulemust" : "Jätka järgmise etapiga";
+  $("#dialogContinue span").textContent = stage === 4 ? "Vaata mudeli paranduskava" : "Jätka järgmise etapiga";
   $("#impactDialog").dataset.completedStage = stage;
   $("#impactDialog").showModal();
   if (stage === 4) renderResults();
@@ -842,8 +857,8 @@ function renderResults() {
   $("#traceFlow").innerHTML = [
     ["1 · ANDMED + JUHIS", selectedFieldNames().join(", "), `Märgendid: ${Object.keys(labelNames).filter(key => state.availableLabels.has(key)).map(key => labelNames[key]).join(", ")}; ${missingNames[state.missingPolicy]}; ${ruleNames[state.labelRule]}`],
     ["2 · MÄRGENDAMISTÖÖ", `${metrics.aligned}/${labelCases.length} juhisega kooskõlas`, `${state.labels.length} treeningandmetesse lisatud registrikirjet; ${disagreementNames[state.disagreement]}`],
-    ["3 · SOOVITUS", interventionNames[state.intervention], `${state.reviews.length} soovitust hinnatud; ametnikule suunati ${state.reviews.filter(value => value === "human").length}`],
-    ["4 · KONTROLL", `Amet osaleb ${internalOwners}/4 vastutusala töös`, appealNames[state.appeal]]
+    ["3 · MUDELI HINDAMINE", interventionNames[state.intervention], `${state.reviews.length} väljundit hinnatud; eksperdi analüüsi vajab ${state.reviews.filter(value => value === "human").length}`],
+    ["4 · EDASIARENDUS", `Amet osaleb ${internalOwners}/4 vastutusala töös`, appealNames[state.appeal]]
   ].map(([step, heading, detail]) => `<article><span>${step}</span><b>${heading}</b><small>${detail}</small></article>`).join("");
   $("#resultSection").hidden = false;
 }
@@ -955,7 +970,7 @@ $("#reviewActions").addEventListener("click", event => {
   state.reviews.push(choice);
   state.pendingReview = { index, choice };
   const ideal = outputCases[index].expected;
-  $("#stage3Feedback").textContent = choice === ideal ? "See valik vastab kontrollkirje peamisele ülevaatusvajadusele." : choice === "human" ? "Ametnikule suunamine jätab ebakindluse nähtavaks, kuid kasvatab töömahtu." : "See valik võib olla põhjendatud. Säilita põhjendus ja jälgi, kas sama viga kordub teiste registriprofiilide soovitustes.";
+  $("#stage3Feedback").textContent = choice === ideal ? "Hinnang vastab kontrollkirje peamisele ülevaatusvajadusele ja lisatakse mudeli hindamistulemustesse." : choice === "human" ? "Ametniku hinnang jätab ebakindluse nähtavaks. Korduv vajadus näitab, mida mudelis või andmetes parandada." : "Säilita hinnang ja põhjendus. Kui sama viga kordub, tuleb selle põhjus järgmise mudeliversiooni arendamisel parandada.";
   updateControls();
 });
 
