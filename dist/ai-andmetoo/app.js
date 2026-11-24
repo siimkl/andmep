@@ -334,7 +334,7 @@ function invalidateFrom(stage) {
 }
 
 function stageValid(stage) {
-  if (stage === 1) return state.availableLabels.size >= 2 && hasMissingInfoRoute() && state.sources.size >= 2 && state.missingPolicy === "drop" && state.audit === "coverage" && state.labelRule === "current" && state.disagreement === "expert";
+  if (stage === 1) return state.availableLabels.size >= 3 && hasMissingInfoRoute() && state.sources.size >= 2 && state.missingPolicy === "drop" && state.audit === "coverage" && state.labelRule === "current" && state.disagreement === "expert";
   if (stage === 2) return state.labels.length === labelCases.length && !state.pendingLabel;
   if (stage === 3) return state.intervention && state.reviews.length === outputCases.length && !state.pendingReview;
   if (stage === 4) return Object.values(state.ownership).every(Boolean) && state.cadence && state.appeal && state.assets.size >= 2;
@@ -343,9 +343,9 @@ function stageValid(stage) {
 
 function updateStage1Feedback() {
   const feedback = $("#stage1Feedback");
-  if (state.availableLabels.size < 2) {
+  if (state.availableLabels.size < 3) {
     feedback.className = "decision-feedback";
-    feedback.textContent = `Vali veel ${2 - state.availableLabels.size} ${2 - state.availableLabels.size === 1 ? "märgend" : "märgendit"}. Märgendite loetelu määrab, milliseid erinevusi saab andmestikus talletada.`;
+    feedback.textContent = `Vali veel ${3 - state.availableLabels.size} ${3 - state.availableLabels.size === 1 ? "märgend" : "märgendit"}. Märgendite loetelu määrab, milliseid erinevusi saab andmestikus talletada.`;
   } else if (!hasMissingInfoRoute()) {
     feedback.className = "decision-feedback warn";
     feedback.textContent = "Lisa vähemalt üks märgend puuduliku info käsitlemiseks: „Tavaplaan”, „Andmete täiendamine” või „Inimese ülevaatus”. Ilma selleta ei saa puuduliku registrikirje kohta järjepidevat soovitust õpetada.";
@@ -690,8 +690,8 @@ function updateFocusState() {
   let title = "Tee järgmine valik";
   let detail = "Jätka selles paneelis. Siin on kõik selle etapi valikud.";
   if (state.currentStage === 1) {
-    if (state.availableLabels.size < 2) {
-      title = "Vali vähemalt 2 märgendit";
+    if (state.availableLabels.size < 3) {
+      title = "Vali vähemalt 3 märgendit";
       detail = "Märgendid määravad, milliseid soovitusi saab mudel hiljem eristada.";
     } else if (!hasMissingInfoRoute()) {
       title = "Lisa puuduliku info jaoks sobiv märgend";
@@ -706,7 +706,7 @@ function updateFocusState() {
     else if (!state.audit) title = "Vali märgendusvalimi kontroll";
     else if (state.audit !== "coverage") title = "Vali kontroll, mis näitab valimi katvust ja puuduvaid andmeid";
     else title = "Kinnita andmed ja märgendusjuhis";
-    if (impactLocked && state.availableLabels.size >= 2) detail = "Mõjuvaade avaneb pärast viie registrikirje märgendamist ja märgenduse kinnitamist.";
+    if (impactLocked && state.availableLabels.size >= 3) detail = "Mõjuvaade avaneb pärast viie registrikirje märgendamist ja märgenduse kinnitamist.";
   } else if (state.currentStage === 2) {
     if (state.pendingLabel) title = "Vaata tagasisidet ja jätka järgmise kirjega";
     else if (state.labels.length === labelCases.length) title = "Kinnita viie registrikirje märgendus";

@@ -89,7 +89,7 @@
 
       <aside class="control-card card focus-active" aria-labelledby="decisionTitle">
         <div class="control-head"><span class="section-kicker">TEE ESMALT OTSUSED</span><span class="stage-counter" id="stageCounter">ETAPP 1 / 4</span></div>
-        <div class="active-task-cue" id="activeTaskCue" role="status" aria-live="polite"><span>TEE JÄRGMISENA</span><b>Vali vähemalt 2 märgendit</b><small>Märgendid määravad, milliseid soovitusi saab mudel hiljem eristada.</small></div>
+        <div class="active-task-cue" id="activeTaskCue" role="status" aria-live="polite"><span>TEE JÄRGMISENA</span><b>Vali vähemalt 3 märgendit</b><small>Märgendid määravad, milliseid soovitusi saab mudel hiljem eristada.</small></div>
 
         <section class="decision-stage active" data-stage="1">
           <div class="control-title"><span>01</span><div><h3 id="decisionTitle">Vali andmed ja määra märgendusnõuded</h3><p>See etapp tuleb <b>enne märgendamist</b>. Siin otsustad, millist infot märgendaja näeb ja millise reegli järgi ta märgendi valib.</p></div></div>
@@ -99,7 +99,7 @@
           </div>
           <fieldset class="choice-fieldset label-definition-fieldset" id="availableLabelChoices">
             <legend>Milliseid märgendeid ehk kategooriaid saab märgendaja valida?</legend>
-            <p class="choice-intro">Vali vähemalt kaks märgendit.</p>
+            <p class="choice-intro">Vali vähemalt kolm märgendit.</p>
             <label class="source-choice"><input type="checkbox" value="fast"><span><b>Kiire tugi</b><small>Konkreetne takistus peatab tööotsingu ja vajab ametniku sihitud abi.</small><strong class="provenance">Ilma selle märgendita ei saa sihitud toevajadust tavaplaanist eristada.</strong><em>sihitud sekkumine</em></span></label>
             <label class="source-choice"><input type="checkbox" value="standard"><span><b>Tavaplaan</b><small>Info on piisav ja kooskõlaline ning kiiret sekkumist pole vaja.</small><strong class="provenance">Ilma selle märgendita võib mudel hakata tavapäraseid tööotsijaid üle hindama.</strong><em>tavapärane teenindus</em></span></label>
             <label class="source-choice"><input type="checkbox" value="self"><span><b>Iseseisev jätkamine</b><small>Inimene saab järgmise sammu teha ilma ameti lisatoeta.</small><strong class="provenance">See märgend eristab iseseisvalt jätkajaid tavapärast teenust vajavatest tööotsijatest.</strong><em>lisatuge pole vaja</em></span></label>
@@ -121,7 +121,7 @@
           <p class="availability-note" id="disagreementFeedback">Treeningandmetesse peab jõudma üks põhjendatud märgend, mitte lahendamata vastuolu.</p>
           <label class="select-label" for="representationAudit"><span>Mida kontrollitakse enne märgendamise algust?</span><select id="representationAudit"><option value="">Vali üks kontroll</option><option value="overall">Ainult seda, kas treeningkirjeid on kokku piisavalt</option><option value="technical">Ainult seda, kas kõik faili lahtrid on täidetud</option><option value="coverage">Kas registri piirkonnad, keeled ja teeninduskanalid on treeningvalimis esindatud ning kus andmed puuduvad</option></select></label>
           <p class="availability-note" id="auditAvailability">Kontroll peab näitama nii valimi katvust kui ka kohti, kus otsustamiseks vajalik info puudub.</p>
-          <div class="decision-feedback" id="stage1Feedback" aria-live="polite">Vali vähemalt kaks märgendit ja kaks andmevälja. Seejärel otsusta, kuidas käsitleda puuduvat infot ja eriarvamusi ning kuidas märgendusvalimit kontrollida.</div>
+          <div class="decision-feedback" id="stage1Feedback" aria-live="polite">Vali vähemalt kolm märgendit ja kaks andmevälja. Seejärel otsusta, kuidas käsitleda puuduvat infot ja eriarvamusi ning kuidas märgendusvalimit kontrollida.</div>
           <div class="next-action-guide contextual"><span class="next-action-label" aria-hidden="true">JÄRGMISENA <i>↓</i></span><button class="primary-button orange" type="button" data-complete="1" disabled><span>Kinnita andmed ja juhis</span></button></div>
         </section>
 
@@ -211,6 +211,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=41"></script>
+  <script src="app.js?v=42"></script>
 </body>
 </html>

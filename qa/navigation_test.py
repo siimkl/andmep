@@ -177,6 +177,11 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
             elif route == "ai-andmetoo":
                 intro = evaluate("document.querySelector('.labeling-instruction-intro').textContent.replace(/\\s+/g,' ').trim()")
                 assert intro == "MIS ON MÄRGENDUSJUHIS? Märgendusjuhis on ühine reeglistik, mis selgitab, mida iga märgend tähendab ja millise nähtava info põhjal seda kasutada. Selge juhis aitab eri märgendajatel samasuguste registriandmetega tööotsijaid ühtemoodi hinnata ning loob mudelile järjepidevad treeningandmed.", intro
+                label_requirement = json.loads(evaluate("JSON.stringify({cue:activeTaskCue.querySelector('b').textContent,intro:document.querySelector('#availableLabelChoices .choice-intro').textContent})"))
+                assert label_requirement == {"cue": "Vali vähemalt 3 märgendit", "intro": "Vali vähemalt kolm märgendit."}, label_requirement
+                evaluate("document.querySelector('#availableLabelChoices input[value=\"fast\"]').click(); document.querySelector('#availableLabelChoices input[value=\"standard\"]').click()")
+                two_labels = json.loads(evaluate("JSON.stringify({button:document.querySelector('[data-complete=\"1\"]').disabled,cue:activeTaskCue.querySelector('b').textContent,feedback:stage1Feedback.textContent})"))
+                assert two_labels["button"] and two_labels["cue"] == "Vali vähemalt 3 märgendit" and "Vali veel 1 märgend" in two_labels["feedback"], two_labels
                 choices = json.loads(evaluate("JSON.stringify({rules:[...labelRule.options].map(option=>option.textContent),audits:[...representationAudit.options].map(option=>option.textContent),missing:[...missingPolicy.options].map(option=>option.textContent),disagreement:[...disagreementPolicy.options].map(option=>option.textContent)})"))
                 assert choices["rules"] == [
                     "Vali üks reegel",
@@ -206,7 +211,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                     "Valdkonnaspetsialist teeb põhjendatud lõppotsuse ja ebaselgus lisatakse juhisesse",
                 ], choices
                 evaluate("""(() => {
-                  ['fast','standard','self','supplement','review'].forEach(value=>document.querySelector(`#availableLabelChoices input[value="${value}"]`).click());
+                  ['self','supplement','review'].forEach(value=>document.querySelector(`#availableLabelChoices input[value="${value}"]`).click());
                   ['notes','barriers','activity'].forEach(value=>document.querySelector(`#sourceChoices input[value="${value}"]`).click());
                   missingPolicy.value='average'; missingPolicy.dispatchEvent(new Event('change',{bubbles:true}));
                   disagreementPolicy.value='first'; disagreementPolicy.dispatchEvent(new Event('change',{bubbles:true}));
