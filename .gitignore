@@ -1,3 +1,5 @@
-.local-server.json
-qa/chrome-profile/
 qa/*.png
+qa/__pycache__/
+qa/chrome-profile/
+*.pyc
+.local-server.json

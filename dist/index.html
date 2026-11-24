@@ -3,25 +3,37 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Andmepädevuse kolm API-praktikumi. Vali sobiv praktikum ja alusta interaktiivset õpiteekonda.">
-  <title>Andmepädevus · API-praktikumid</title>
-  <link rel="stylesheet" href="landing.css?v=3">
-  <link rel="stylesheet" href="api-common.css?v=7">
+  <meta name="description" content="Andmepädevuse viis interaktiivset praktikumi: API-päringud, R, tehisaru API, veebikraapimine ja AI treeningandmed.">
+  <title>Andmepädevus · interaktiivsed praktikumid</title>
+  <link rel="stylesheet" href="landing.css?v=5">
+  <link rel="stylesheet" href="api-common.css?v=10">
 </head>
 <body>
   <main class="launcher">
     <header class="launcher-hero">
-      <div class="brand"><span aria-hidden="true"></span><a class="api-home-link" href="./" aria-label="Mine Andmepädevuse avalehele" aria-current="page">ANDMEPÄDEVUS</a> <span class="brand-suffix" aria-hidden="true">· API</span></div>
+      <div class="brand"><span aria-hidden="true"></span><a class="api-home-link" href="./" aria-label="Mine Andmepädevuse avalehele" aria-current="page">ANDMEPÄDEVUS</a> <span class="brand-suffix" aria-hidden="true">· PRAKTIKUMID</span></div>
       <div class="hero-grid">
         <div>
-          <p class="kicker">KOLM JÄRJESTIKUST PRAKTIKUMI</p>
-          <h1>Vali praktikum, millest alustada.</h1>
-          <p class="intro">Õpiteekond algab API-päringu alustest, jätkub andmete töötlemisega RStudios ja jõuab tehisaru API ühendamiseni. Alustuseks on valitud API 1.</p>
+          <p class="kicker">VIIS INTERAKTIIVSET PRAKTIKUMI</p>
+          <h1>Vali teema, millest alustada.</h1>
+          <p class="intro">Õpi API-päringuid, andmetöötlust R-is, tehisaru API kasutamist, veebikraapimist ja treeningandmete märgendamist. API-teekond koosneb kolmest järjestikusest praktikumist; ülejäänud kahte saad läbida eraldi.</p>
         </div>
-        <div class="sequence" aria-label="Õpiteekond">
-          <span>API 1<small>Päringust vastuseni</small></span><i aria-hidden="true">→</i>
-          <span>API 2<small>Andmetöötlus R-is</small></span><i aria-hidden="true">→</i>
-          <span>API 3<small>Tehisaru API</small></span>
+        <div class="sequence" aria-label="Andmepädevuse õpiteed">
+          <section class="path-section" aria-labelledby="apiPathTitle">
+            <div class="path-heading"><b id="apiPathTitle">API ÕPITEEKOND</b><small>Läbi soovituslikult selles järjekorras</small></div>
+            <div class="api-path">
+              <a class="path-card path-api1" href="./api1/"><strong>API 1</strong><small>Koosta päring ja loe vastust</small></a><i aria-hidden="true"></i>
+              <a class="path-card path-api2" href="./api2/"><strong>API 2</strong><small>Küsi API-andmed ja töötle neid R-is</small></a><i aria-hidden="true"></i>
+              <a class="path-card path-api3" href="./api3/"><strong>API 3</strong><small>Saada R-is arvutatud tulemus keelemudelile</small></a>
+            </div>
+          </section>
+          <section class="path-section standalone-section" aria-labelledby="standalonePathTitle">
+            <div class="path-heading"><b id="standalonePathTitle">TEISED ANDMETÖÖ PRAKTIKUMID</b><small>Neid saad läbida API-teekonnast sõltumatult</small></div>
+            <div class="standalone-path">
+              <a class="path-card path-scraping" href="./kraapimine/"><strong>Veebikraapimine</strong><small>Leia HTML-ist andmed ja koosta kontrollitud tabel</small></a>
+              <a class="path-card path-ai" href="./ai-andmetoo/"><strong>AI-andmetöö</strong><small>Märgenda juhtumid ja vaata mõju mudeli soovitustele</small></a>
+            </div>
+          </section>
         </div>
       </div>
     </header>
@@ -29,10 +41,10 @@
     <section class="chooser" aria-labelledby="chooseTitle">
       <div class="chooser-head">
         <div><span class="step-label">VALI PRAKTIKUM</span><h2 id="chooseTitle">Millise praktikumi valid?</h2></div>
-        <p>Praktikumi saad hiljem vahetada iga lehe päises.</p>
+        <p>Praktikumi saad hiljem vahetada iga mooduli päises.</p>
       </div>
 
-      <div class="api-options" role="radiogroup" aria-label="API-praktikumi valik">
+      <div class="api-options" role="radiogroup" aria-label="Andmepädevuse praktikumi valik">
         <label class="api-card">
           <input type="radio" name="api-version" value="api1" data-number="1" checked>
           <span class="card-body">
@@ -68,11 +80,35 @@
             <em>≈ 20 min</em>
           </span>
         </label>
+
+        <label class="api-card">
+          <input type="radio" name="api-version" value="kraapimine" data-number="4">
+          <span class="card-body">
+            <span class="api-number">04</span>
+            <span class="level">ANDMETE KOGUMINE · R + RVEST</span>
+            <strong>Veebikraapimine</strong>
+            <b>Muuda veebileht kontrollitud andmetabeliks</b>
+            <small>Hinda kraapimise sobivust, leia HTML-ist õiged selektorid, kogu R-is andmed ja kontrolli tulemust.</small>
+            <em>≈ 30 min</em>
+          </span>
+        </label>
+
+        <label class="api-card">
+          <input type="radio" name="api-version" value="ai-andmetoo" data-number="5">
+          <span class="card-body">
+            <span class="api-number">05</span>
+            <span class="level">AI ANDMETÖÖ · MÄRGENDAMINE</span>
+            <strong>Kes õpetab tehisaru?</strong>
+            <b>Märgenda juhtumid ja vaata mõju mudelile</b>
+            <small>Vali andmed ja märgendid, koosta juhis ning vaata, kuidas treeningandmed muudavad mudeli soovitusi.</small>
+            <em>≈ 20–25 min</em>
+          </span>
+        </label>
       </div>
 
       <div class="start-panel">
         <div><span>VALITUD PRAKTIKUM</span><strong id="selectedLabel">API 1 · Saada päring. Loe vastust.</strong></div>
-        <a class="start-button" id="startButton" href="./api1/"><span>Alusta 1. praktikumist</span><i aria-hidden="true">→</i></a>
+        <a class="start-button" id="startButton" href="./api1/"><span>Alusta API 1 praktikumi</span><i aria-hidden="true">→</i></a>
       </div>
     </section>
 
@@ -81,11 +117,11 @@
       <div class="footer-details">
         <div class="footer-detail"><small>Tehnoloogia</small><strong>HTML5 · CSS3 · JavaScript (ES2022)</strong><span>Buildless veebirakendus, mis töötab otse brauseris.</span></div>
         <div class="footer-detail"><small>Arenduskeskkond ja mudel</small><strong>VS Code · OpenAI Codex · GPT-5.6 Sol · Extra High</strong><span>Spec-driven · AI-supported coding</span></div>
-        <div class="footer-detail footer-workflow"><small>Versioonihaldus ja avaldamine</small><strong>GitHub · GitHub Actions · GitHub Pages</strong><span>Kood, automaatkontroll ja avalik veebiversioon.</span></div>
+        <div class="footer-detail footer-workflow"><small>Versioonihaldus ja kavandatud avaldamine</small><strong>GitHub · GitHub Actions · GitHub Pages</strong><span>Kohalik kandidaat; uus avalik veebiversioon ei ole veel kasutusele võetud.</span></div>
       </div>
-      <div class="footer-note"><small>Metoodiline märkus</small><span><b>Õppesimulatsioon.</b> Põhinäite <code>GR_W_AVG</code> + <code>TOTAL</code> kolme II kvartali arvud vastavad tabelile PA111; muude valikute tulemused on näitlikud.</span></div>
+      <div class="footer-note"><small>Metoodiline märkus</small><span><b>Interaktiivsed õppesimulatsioonid.</b> API-praktikumid kasutavad Statistikaameti tabeli PA111 näidet, veebikraapimine harjutuslehte <code>quotes.toscrape.com</code> ja AI-andmetöö sünteetilisi juhtumeid.</span></div>
     </footer>
   </main>
-  <script src="landing.js"></script>
+  <script src="landing.js?v=2"></script>
 </body>
 </html>

@@ -122,6 +122,7 @@
     progressText: $("#progressText"),
     progressBar: $("#progressBar"),
     completedCount: $("#completedCount"),
+    labGrid: $(".lab-grid"),
     stageTitle: $("#stageTitle"),
     stageCard: $("#stageCard"),
     storyStrip: $(".story-strip"),
@@ -188,6 +189,12 @@
     els.toast.textContent = message;
     els.toast.classList.add("show");
     window.setTimeout(() => els.toast.classList.remove("show"), 1800);
+  }
+
+  function setResultPanelVisible(visible) {
+    els.stageCard.hidden = !visible;
+    els.labGrid.classList.toggle("result-pending", !visible);
+    syncHeight();
   }
 
   function alignResponseWithLesson(step) {
@@ -662,6 +669,7 @@
     }
     if (step === 4) els.modelGuide.hidden = true;
     if (step === 1) {
+      setResultPanelVisible(true);
       els.stageCard.classList.remove("awaiting-response");
       els.stageCard.removeAttribute("aria-disabled");
     }
@@ -1099,6 +1107,7 @@
     completed = 0;
     running = false;
     if (els.flowDialog.open) els.flowDialog.close();
+    setResultPanelVisible(false);
     els.selectionAction.dataset.run = "2";
     els.selectionAction.classList.remove("orange");
     $$("[data-run]").forEach((button) => {

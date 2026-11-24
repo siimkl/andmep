@@ -1,0 +1,343 @@
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url("assets/fonts/manrope-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "DM Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("assets/fonts/dm-mono-400-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "DM Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("assets/fonts/dm-mono-500-latin.woff2") format("woff2");
+}
+
+/* Shared visual language for all three API practicums. */
+.api-home-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid #8fb7ce;
+  border-radius: 9px;
+  color: #173f73;
+  background: #fff;
+  box-shadow: 0 5px 13px rgba(16, 47, 85, .08);
+  font: 800 12px "Manrope", system-ui, sans-serif;
+  letter-spacing: .1em;
+  text-decoration: none;
+  transition: border-color .16s ease, box-shadow .16s ease, color .16s ease, transform .16s ease;
+}
+
+.api-home-link:hover {
+  border-color: #2f60a0;
+  color: #102f55;
+  box-shadow: 0 7px 17px rgba(16, 47, 85, .14);
+  transform: translateY(-1px);
+}
+
+.api-home-link:focus-visible {
+  outline: 3px solid rgba(10, 167, 216, .3);
+  outline-offset: 2px;
+}
+
+.api-home-link[aria-current="page"] {
+  border-color: #2f60a0;
+  background: #f5fbff;
+}
+
+.brand .brand-suffix {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.hero-copy h1.hero-title {
+  max-width: 780px;
+  margin: 18px 0 10px;
+  font-size: clamp(38px, 5.2vw, 70px);
+  line-height: .94;
+  letter-spacing: -.055em;
+}
+
+.hero-copy .hero-subtitle {
+  max-width: 850px;
+  margin: 0;
+  color: #07979a;
+  font-size: clamp(22px, 3vw, 38px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -.035em;
+}
+
+.hero-copy .hero-description {
+  max-width: 760px;
+  margin-top: 18px;
+  color: #344f68;
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  color: #405b72;
+  font-size: 11px;
+}
+
+.progress-meta b { color: #056f72; }
+
+.briefing-mark {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  font: 900 14px "DM Mono", monospace;
+}
+
+@media (min-width: 1041px) {
+  .lab-grid { grid-template-columns: minmax(390px, .8fr) minmax(0, 1.42fr); }
+  .control-card { grid-column: 1; grid-row: 1; }
+  .stage-card { grid-column: 2; grid-row: 1; }
+}
+
+/* API 3-style in-context action cue for the multi-section API 1/2 controls. */
+.next-action-guide.contextual {
+  position: relative;
+  margin-top: 16px;
+}
+
+.next-action-guide.contextual .next-action-label,
+.next-action-guide.contextual::before,
+.next-action-guide.contextual::after { display: none; }
+
+.next-action-guide.contextual.next-target {
+  z-index: 8;
+  margin: 31px 0 4px;
+  padding: 8px;
+  border: 2px solid #df6b25;
+  border-radius: 17px;
+  outline: 0 !important;
+  background: #fff2e9;
+  box-shadow: 0 9px 20px rgba(185, 71, 12, .13), inset 0 0 0 1px rgba(255, 255, 255, .7) !important;
+  animation: none;
+}
+
+.next-action-guide.contextual.next-target::before,
+.next-action-guide.contextual.next-target::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  display: block;
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-top: 3px solid #df6b25;
+  border-right: 3px solid #df6b25;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.next-action-guide.contextual.next-target::before {
+  left: -16px;
+  right: auto;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.next-action-guide.contextual.next-target::after {
+  right: -16px;
+  transform: translateY(-50%) rotate(225deg);
+}
+
+.next-action-guide.contextual.next-target .next-action-label {
+  position: absolute;
+  left: 14px;
+  top: -24px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px 6px;
+  border-radius: 7px 7px 0 0;
+  color: #fff;
+  background: #b9470c;
+  box-shadow: 0 5px 13px rgba(185, 71, 12, .25);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  line-height: 1;
+}
+
+.next-action-guide.contextual .next-action-label i {
+  font-style: normal;
+  font-size: 12px;
+  line-height: .7;
+}
+
+.next-action-guide.contextual.next-target .primary-button {
+  box-shadow: 0 5px 13px rgba(35, 79, 136, .18), inset 0 4px 0 rgba(255, 255, 255, .12) !important;
+}
+
+/* One shared footer system for the landing page and all practicums. */
+body { padding-bottom: 0; }
+
+.site-footer {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  justify-content: normal;
+  gap: 16px 28px;
+  margin-top: 34px;
+  padding: 25px 8px 5px;
+  border: 0;
+  border-top: 1px solid #b8cbd9;
+  border-radius: 0;
+  color: #38546b;
+  background: transparent;
+  box-shadow: none;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.site-footer .footer-author {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 26px 0 0;
+  border: 0;
+  border-right: 1px solid #b8cbd9;
+}
+
+.site-footer .footer-author > div {
+  display: grid;
+  gap: 2px;
+}
+
+.site-footer .footer-monogram {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  color: #fff;
+  background: linear-gradient(135deg, #234f88, #0aa7d8);
+  box-shadow: none;
+  font-weight: 900;
+}
+
+.site-footer .footer-details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  min-width: 0;
+}
+
+.site-footer .footer-details > div {
+  display: block;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.site-footer .footer-author small,
+.site-footer .footer-details small {
+  display: block;
+  color: #405a70;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.45;
+  text-transform: none;
+}
+
+.site-footer .footer-author strong {
+  display: block;
+  margin-top: 2px;
+  color: #102f55;
+  font-size: 14px;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.site-footer .footer-details strong {
+  display: block;
+  margin: 3px 0;
+  color: #183f70;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.site-footer .footer-details span {
+  display: block;
+  color: #38546b;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.site-footer .footer-note {
+  grid-column: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 12px 0 0;
+  border: 0;
+  border-top: 1px solid #c8d7e1;
+  border-radius: 0;
+  background: transparent;
+}
+
+.site-footer .footer-note > small {
+  flex: 0 0 auto;
+  padding: 0;
+  color: #405a70;
+  background: transparent;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.site-footer .footer-note > span { color: #38546b; }
+
+.site-footer .footer-note code {
+  color: #234f88;
+  font: 500 10px "DM Mono", monospace;
+}
+
+@media (max-width: 900px) {
+  .site-footer { grid-template-columns: 1fr; }
+  .site-footer .footer-author {
+    padding: 0 0 18px;
+    border-right: 0;
+    border-bottom: 1px solid #b8cbd9;
+  }
+  .site-footer .footer-note { grid-column: 1; }
+}
+
+@media (max-width: 680px) {
+  .hero-copy h1.hero-title { font-size: clamp(34px, 10.5vw, 48px); }
+  .hero-copy .hero-subtitle { font-size: 24px; }
+  .hero-copy .hero-description { font-size: 14px; }
+  .site-footer .footer-details { grid-template-columns: 1fr; }
+  .next-action-guide.contextual.next-target { margin-top: 29px; padding: 6px; }
+  .next-action-guide.contextual.next-target::before,
+  .next-action-guide.contextual.next-target::after { display: none; }
+}

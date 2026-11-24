@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="et">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interaktiivne veebikraapimise praktikum: meetodi valik, CSS-selektorid, R ja rvest ning andmete kvaliteedikontroll.">
+  <title>Veebikraapimine - interaktiivne praktikum</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css?v=12">
+  <link rel="stylesheet" href="../api-common.css?v=11">
+</head>
+<body>
+  <main class="shell" id="app">
+    <header class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow api-eyebrow"><span class="pulse-dot" aria-hidden="true"></span><a class="api-home-link" href="../" aria-label="Mine Andmepädevuse avalehele">ANDMEPÄDEVUS</a><span aria-hidden="true">·</span><label class="api-version-switch"><span class="sr-only">Vali praktikum</span><select class="api-version-select" aria-label="Vali praktikum"><option value="../api1/">API 1</option><option value="../api2/">API 2</option><option value="../api3/">API 3</option><option value="../kraapimine/" selected>Veebikraapimine</option><option value="../ai-andmetoo/">AI andmetöö</option></select></label></div>
+        <h1 class="hero-title" aria-label="Veebilehest andmetabelini">Veebilehest<br><span>andmetabelini</span></h1>
+        <p class="hero-subtitle">R-ist kontrollitud andmetabelini</p>
+        <p class="hero-description">Otsusta esmalt, kas kraapimine on põhjendatud. Seejärel leia HTML-ist õiged väljad, kogu R-i ja <code>rvest</code>-iga 20 tsitaati ning kontrolli saadud andmestikku.</p>
+      </div>
+      <div class="hero-side">
+        <div class="mission-label">PRAKTIKUMI EDENEMINE</div>
+        <div class="progress-value"><strong id="progressValue">0%</strong><span id="progressText">Hinda andmeallikat</span></div>
+        <div class="progress-track" aria-hidden="true"><span id="progressBar"></span></div>
+        <div class="progress-meta"><span><b id="completedCount">0</b> / 5 sammu</span><span>≈ 30 min</span></div>
+        <button class="ghost-button" id="resetButton" type="button">Alusta algusest</button>
+      </div>
+    </header>
+
+    <section class="briefing-card" aria-label="Praktikumi ülesanne">
+      <div class="briefing-mark">R</div>
+      <div class="briefing-copy"><span>ÜLESANNE</span><p><b>Kogu harjutusveebi kahelt lehelt 20 tsitaati koos autori, märksõnade, lehekülje, URL-i ja kogumise kuupäevaga.</b> Väljund on kontrollitud <code>tsitaadid.csv</code>.</p></div>
+      <div class="briefing-target"><small>SIHTLEHT</small><a href="https://quotes.toscrape.com/" target="_blank" rel="noopener noreferrer">quotes.toscrape.com</a></div>
+    </section>
+
+    <nav class="stepper scrape-stepper" aria-label="Veebikraapimise töövoo sammud">
+      <button class="step active" type="button" data-step="1"><span>1</span><div><b>Otsus</b><small>Kas kraapida?</small></div></button>
+      <button class="step" type="button" data-step="2"><span>2</span><div><b>HTML</b><small>Leia selektorid</small></div></button>
+      <button class="step" type="button" data-step="3"><span>3</span><div><b>R + rvest</b><small>Kraabi 1. leht</small></div></button>
+      <button class="step" type="button" data-step="4"><span>4</span><div><b>Kordus</b><small>Kogu 2 lehte</small></div></button>
+      <button class="step" type="button" data-step="5"><span>5</span><div><b>Kvaliteet</b><small>Kontrolli tulemust</small></div></button>
+    </nav>
+
+    <section class="lab-grid result-pending" aria-label="Veebikraapimise labor">
+      <aside class="control-card card">
+        <div class="control-head"><span class="section-kicker">KOOSTA TÖÖVOOG<b id="currentStepLabel" hidden>1/6</b></span></div>
+
+        <section class="lesson-panel active" data-lesson="1">
+          <div class="control-title"><span>01</span><div><h3>Kas kraapimine on õige meetod?</h3><p>Veebikraapimine on varuvariant, kui sobivat faili või API-t pole. Avalik leht ei ole automaatselt vaba andmestik.</p></div></div>
+          <fieldset class="scrape-checklist" id="permissionChecklist">
+            <legend>Kinnita enne esimest päringut</legend>
+            <label><input type="checkbox"><span><b>API või CSV puudub</b><small>Kontrollisin esmalt ametlikku andmeallikat.</small></span></label>
+            <label><input type="checkbox"><span><b>Ligipääs ja kasutuse alus on olemas</b><small>Harjutusleht on loodud kraapimise õppimiseks.</small></span></label>
+            <label><input type="checkbox"><span><b>Reeglid on üle vaadatud</b><small>Kasutustingimused ja robots.txt ei asenda õiguslikku hinnangut.</small></span></label>
+            <label><input type="checkbox"><span><b>Tundlikke andmeid ei koguta</b><small>Puuduvad isikuandmed, siseinfo ja juurdepääsupiiranguga teave.</small></span></label>
+          </fieldset>
+          <p class="selection-feedback" id="permissionFeedback" aria-live="polite">0/4 kontrolli kinnitatud.</p>
+          <div class="next-action-guide"><span class="next-action-label">JÄRGMISENA</span><button class="primary-button" type="button" data-run="1" disabled><span>Kinnita kraapimisotsus</span></button></div>
+        </section>
+
+        <section class="lesson-panel" data-lesson="2" hidden>
+          <div class="control-title"><span>02</span><div><h3>Ava HTML-inspektor ja leia korduv kirje</h3><p>Enne R-koodi vaata brauseris, milline HTML-plokk vastab ühele tabelireale ja millised väljad selle sees korduvad.</p></div></div>
+          <button class="inspector-help-link" id="inspectorHelpOpen" type="button"><span>HTML-INSPEKTOR</span><b>Vaata samm-sammult inspekteerimise juhist</b><small>Sihtlehe avamine · Inspect · vanemplokk · selektori kontroll</small></button>
+          <p class="inspect-note"><b>Miks alustada vanemplokist?</b> Kui otsid <code>.tag</code>-elemente kogu lehelt, satub tulemusse ka eraldi „Top Ten tags”. Iga kirje seest otsides säilib õige seos.</p>
+          <pre class="code-block html-sample"><code>&lt;div class=<span class="str">"quote"</span> itemscope&gt;
+  &lt;span class=<span class="str">"text"</span> itemprop=<span class="str">"text"</span>&gt;“The world …”&lt;/span&gt;
+  &lt;small class=<span class="str">"author"</span> itemprop=<span class="str">"author"</span>&gt;Albert Einstein&lt;/small&gt;
+  &lt;a href=<span class="str">"/author/Albert-Einstein"</span>&gt;(about)&lt;/a&gt;
+  &lt;div class=<span class="str">"tags"</span>&gt;
+    Tags: &lt;a class=<span class="str">"tag"</span>&gt;change&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+          <div class="selector-grid" id="selectorFields">
+            <label><span>Kirje plokk</span><select id="recordSelector"><option value="">Vali selektor</option><option value=".text">.text</option><option value=".quote">.quote</option><option value="body">body</option></select></label>
+            <label><span>Tsitaadi tekst</span><select id="textSelector"><option value="">Vali selektor</option><option value=".quote">.quote</option><option value=".author">.author</option><option value=".text">.text</option></select></label>
+            <label><span>Autor</span><select id="authorSelector"><option value="">Vali selektor</option><option value=".tags">.tags</option><option value=".author">.author</option><option value="small.quote">small.quote</option></select></label>
+            <label><span>Märksõnad kirje sees</span><select id="tagSelector"><option value="">Vali selektor</option><option value=".tag">.tag kogu lehelt</option><option value=".tags .tag">.tags .tag ploki sees</option><option value="a">kõik a-elemendid</option></select></label>
+          </div>
+          <p class="selection-feedback" id="selectorFeedback" aria-live="polite">Vali neli CSS-selektorit.</p>
+          <div class="next-action-guide"><span class="next-action-label">JÄRGMISENA</span><button class="primary-button" type="button" data-run="2" disabled><span>Kinnita selektorid</span></button></div>
+        </section>
+
+        <section class="lesson-panel" data-lesson="3" hidden>
+          <div class="control-title"><span>03</span><div><h3>Kraabi esimene lehekülg R-is</h3><p><code>read_html()</code> laeb HTML-i, <code>html_elements()</code> leiab kirjed ja <code>html_element()</code> leiab välja iga kirje seest.</p></div></div>
+          <pre class="code-block"><code><span class="kw">library</span>(rvest)
+
+url &lt;- <span class="str">"https://quotes.toscrape.com/page/1/"</span>
+leht &lt;- read_html(url)
+kirjed &lt;- html_elements(leht, <span class="str">".quote"</span>)
+andmed &lt;- data.frame(
+  tsitaat = html_text2(html_element(kirjed, <span class="str">".text"</span>)),
+  autor = html_text2(html_element(kirjed, <span class="str">".author"</span>))
+)</code></pre>
+          <div class="next-action-guide"><span class="next-action-label">JÄRGMISENA</span><button class="primary-button" type="button" data-run="3"><span>Kraabi esimene leht</span></button></div>
+        </section>
+
+        <section class="lesson-panel" data-lesson="4" hidden>
+          <div class="control-title"><span>04</span><div><h3>Kogu kaks lehte ja säilita seosed</h3><p>Sihtlehe aadressid on <code>/page/1/</code> ja <code>/page/2/</code>; lehel viib edasi „Next”. Funktsioon eraldab väljad iga <code>.quote</code>-ploki seest ja <code>Sys.sleep(1)</code> jätab päringute vahele pausi.</p></div></div>
+          <pre class="code-block"><code>kraabi_leht &lt;- <span class="kw">function</span>(nr) {
+  aadress &lt;- paste0(<span class="str">"https://quotes.toscrape.com/page/"</span>, nr, <span class="str">"/"</span>)
+  leht &lt;- read_html(aadress)
+  kirjed &lt;- html_elements(leht, <span class="str">".quote"</span>)
+  marksonad &lt;- vapply(kirjed, <span class="kw">function</span>(kirje) {
+    paste(html_text2(html_elements(kirje, <span class="str">".tags .tag"</span>)), collapse = <span class="str">"; "</span>)
+  }, character(1))
+  data.frame(tsitaat = html_text2(html_element(kirjed, <span class="str">".text"</span>)),
+             autor = html_text2(html_element(kirjed, <span class="str">".author"</span>)),
+             marksonad, leht = nr, allikas = aadress, kogutud = Sys.Date())
+}
+
+tabelid &lt;- lapply(1:2, <span class="kw">function</span>(nr) {
+  <span class="kw">if</span> (nr &gt; 1) Sys.sleep(1)
+  kraabi_leht(nr)
+})
+andmed &lt;- do.call(rbind, tabelid)</code></pre>
+          <div class="next-action-guide"><span class="next-action-label">JÄRGMISENA</span><button class="primary-button" type="button" data-run="4"><span>Kogu mõlemad lehed</span></button></div>
+        </section>
+
+        <section class="lesson-panel" data-lesson="5" hidden>
+          <div class="control-title"><span>05</span><div><h3>Kontrolli andmestikku, mitte ainult koodi</h3><p>Töötav skript ei tõesta, et kõik kirjed ja väljadevahelised seosed on õiged. Võrdle tulemust ka algallikaga.</p></div></div>
+          <div class="quality-command-list">
+            <code>nrow(andmed)</code><span>Kas kirjeid on 20?</span>
+            <code>table(andmed$leht)</code><span>Kas mõlemalt lehelt tuli 10?</span>
+            <code>sum(is.na(andmed$autor) | trimws(andmed$autor) == "")</code><span>Kas autor puudub?</span>
+            <code>sum(duplicated(andmed$tsitaat))</code><span>Kas tsitaadid korduvad?</span>
+            <code>View(andmed)</code><span>Kas kirjed vastavad algallikale?</span>
+          </div>
+          <div class="next-action-guide"><span class="next-action-label">LÕPETA PRAKTIKUM</span><button class="primary-button orange" type="button" data-run="5"><span>Käivita kvaliteedikontroll</span></button></div>
+        </section>
+
+        <div class="lesson-nav"><button id="prevLesson" type="button" disabled>Eelmine</button><div><span id="lessonDots"></span></div><button id="nextLesson" type="button" disabled>Järgmine</button></div>
+      </aside>
+
+      <section class="stage-card card awaiting-response" id="stageCard" aria-disabled="true" hidden>
+        <div class="card-heading">
+          <div><span class="section-kicker">KRAAPIMISE TULEMUS</span><h2>Mida töövoog leidis?</h2></div>
+          <div class="status-chip neutral" id="statusChip" role="status" aria-live="polite"><span aria-hidden="true"></span><div><small>TÖÖVOO OLEK</small><b id="statusText">Kraapimist pole veel käivitatud</b></div></div>
+        </div>
+        <div class="response-context neutral" id="responseContext" aria-live="polite"><span id="responseContextLabel">TULEMUS ILMUB PÄRAST PÄRINGUT</span><p id="responseContextText">See vaade aktiveerub, kui R on esimese lehe HTML-i küsinud.</p></div>
+        <div class="scrape-result" id="dataPanel" hidden>
+          <div class="result-summary" aria-label="Kraabitud andmestiku kokkuvõte">
+            <div><small>KIRJEID</small><strong id="rowCount">0</strong><span>oodatud 20</span></div>
+            <div><small>LEHEKÜLGI</small><strong id="pageCount">0</strong><span>oodatud 2</span></div>
+            <div><small>PUUDUVAID</small><strong id="missingCount">—</strong><span>tsitaat või autor</span></div>
+            <div><small>KORDUSEID</small><strong id="duplicateCount">—</strong><span>tsitaadi tekst</span></div>
+          </div>
+          <div class="data-table-shell">
+            <div class="table-head"><div><span class="section-kicker">TSITAADID.CSV · EELVAADE</span><h3>Kirjed koos metaandmetega</h3><p>Eelvaates on tsitaat lühendatud; R-i tabelisse läheb lehelt loetud täistekst.</p></div><b id="tableState">0 rida</b></div>
+            <div class="table-scroll"><table><thead><tr><th>Tsitaadi algus</th><th>Autor</th><th>Märksõnad</th><th>Leht</th></tr></thead><tbody id="resultRows"></tbody></table></div>
+          </div>
+          <div class="quality-results" id="qualityResults" hidden></div>
+        </div>
+      </section>
+    </section>
+
+    <section class="practice-suite locked" id="practiceSuite" aria-labelledby="practiceTitle" aria-disabled="true">
+      <header class="practice-suite-head">
+        <div><span class="section-kicker">ISESEISEV HARJUTUS · MEETODI VALIK</span><h2 id="practiceTitle">Vali olukorrale sobiv andmekogumise viis</h2></div>
+        <p>Meetod sõltub sellest, kas ametlik andmeallikas on olemas, kui palju kirjeid vajad ning kas veebilehe kasutamiseks on alus.</p>
+      </header>
+      <div class="decision-lab card">
+        <div class="decision-inputs">
+          <label><span>Olukord</span><select id="scenarioInput"><option value="">Vali olukord</option><option value="few">Vajan ühekordselt kolme avalikku väärtust</option><option value="file">Veebis on ametlik CSV-fail</option><option value="api">Teenusel on dokumenteeritud API</option><option value="static">Staatilisel lehel on 20 kirjet, faili ega API-t pole</option><option value="restricted">Siseveebile puudub kogumiseks volitus</option></select></label>
+          <label><span>Sinu meetod</span><select id="methodInput"><option value="">Vali meetod</option><option value="manual">Käsitsi kopeerimine</option><option value="file">Ametlik fail</option><option value="api">API</option><option value="rvest">R + rvest</option><option value="stop">Peatun ja küsin volituse</option></select></label>
+        </div>
+        <div class="decision-preview pending" id="decisionPreview" aria-live="polite"><span>?</span><div><small>OTSUSE TAGASISIDE</small><h3>Vali olukord ja meetod</h3><p>Eelista kõige lihtsamat ametlikku allikat, mis täidab ülesande.</p></div></div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div class="footer-author"><span class="footer-monogram" aria-hidden="true">SK</span><div><small>Õppematerjali autor</small><strong>Siim Klais</strong></div></div>
+      <div class="footer-details">
+        <div class="footer-detail"><small>Tehnoloogia</small><strong>HTML5 · CSS3 · JavaScript (ES2022)</strong><span>Buildless veebirakendus, mis töötab otse brauseris.</span></div>
+        <div class="footer-detail"><small>Arenduskeskkond ja mudel</small><strong>VS Code · OpenAI Codex · GPT-5.6 Sol · Extra High</strong><span>Spec-driven · AI-supported coding</span></div>
+        <div class="footer-detail footer-workflow"><small>Kohalik käitus</small><strong>Python HTTP server · 127.0.0.1</strong><span>Õpirakendus ei saada andmeid ühelegi välisele API-le.</span></div>
+      </div>
+      <div class="footer-note"><small>Metoodiline märkus</small><span><b>Õppesimulatsioon.</b> Sisu tugineb kraapimise praktikumi slaididele. Harjutusveeb on <code>quotes.toscrape.com</code>; rakenduse tulemused on lokaalne näidis ega tee ise veebipäringuid.</span></div>
+    </footer>
+  </main>
+
+  <dialog class="flow-dialog inspector-help-dialog" id="inspectorHelpDialog" aria-labelledby="inspectorHelpTitle" aria-describedby="inspectorHelpDescription">
+    <div class="flow-dialog-shell">
+      <div class="flow-dialog-head">
+        <div><span class="section-kicker">BRAUSERI ARENDAJATÖÖRIISTAD</span><h2 id="inspectorHelpTitle">Kuidas HTML-struktuuri inspekteerida?</h2><p id="inspectorHelpDescription">Leia brauseris ühe tsitaadi HTML-plokk ja kontrolli selektorit enne R-koodi kirjutamist.</p></div>
+        <div class="flow-status"><span>EESMÄRK</span><b>Leia üks korduv kirje</b></div>
+      </div>
+      <div class="inspector-help-body">
+        <div class="inspect-guide" aria-label="HTML-struktuuri uurimise sammud">
+          <article><span>1</span><div><b>Ava sihtleht</b><p>Ava <a href="https://quotes.toscrape.com/" target="_blank" rel="noopener noreferrer">quotes.toscrape.com</a> ja vali üks nähtav tsitaat.</p></div></article>
+          <article><span>2</span><div><b>Käivita elemendi valimine</b><p>Tee tsitaadil paremklõps ja vali <b>Inspect</b>. Alternatiivina vajuta <kbd>F12</kbd> ning seejärel <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd>.</p></div></article>
+          <article><span>3</span><div><b>Leia vanemplokk</b><p>Liigu Elements-vaates üles lähima <code>&lt;div class="quote"&gt;</code>-plokini. See plokk vastab ühele tulevase tabeli reale.</p></div></article>
+          <article><span>4</span><div><b>Kontrolli välju</b><p>Laienda plokk ning leia selle seest <code>.text</code>, <code>.author</code> ja <code>.tags .tag</code>.</p></div></article>
+        </div>
+        <div class="inspector-check"><span>KONTROLLI BRAUSERI KONSOOLIS</span><b>oodatud tulemus: 10</b><code>document.querySelectorAll(".quote").length</code></div>
+        <p class="inspect-note"><b>Hea selektor on piisavalt täpne.</b> <code>.quote</code> leiab lehe kümme tsitaadikirjet. Märksõnu otsi iga kirje seest, et „Top Ten tags” külgriba ei satuks andmetesse.</p>
+      </div>
+      <div class="flow-dialog-footer"><p><b>Valmis?</b> Sulge juhis ja vali harjutuses neli CSS-selektorit.</p><button class="primary-button" id="inspectorHelpClose" type="button"><span>Tagasi harjutusse</span></button></div>
+    </div>
+  </dialog>
+
+  <dialog class="flow-dialog" id="flowDialog" aria-labelledby="flowDialogTitle" aria-describedby="flowDialogDescription">
+    <div class="flow-dialog-shell">
+      <div class="flow-dialog-head">
+        <div><span class="section-kicker" id="flowDialogKicker">R KÜSIB HTML-I</span><h2 id="flowDialogTitle">Mis kraapimise ajal toimub?</h2><p id="flowDialogDescription">Jälgi, kuidas R küsib lehe HTML-i ning muudab valitud elemendid tabeliridadeks.</p></div>
+        <div class="flow-status" role="status" aria-live="polite"><span>PÄRINGU OLEK</span><b id="dialogFlowStatus">Valmistab päringut ette</b></div>
+      </div>
+      <div class="dialog-flow-stage" id="dialogFlowStage" aria-label="R küsib veebilehe HTML-i ja koostab andmetabeli">
+        <div class="dialog-node dialog-client-node"><span class="dialog-node-icon" id="dialogClientIcon">R</span><small id="dialogClientRole">KLIENT</small><b id="dialogClientName">R / RStudio</b><em id="dialogClientAction">Saadab GET-päringu</em></div>
+        <div class="dialog-route dialog-route-one"><span class="dialog-route-label"><i>1</i>PÄRING</span></div>
+        <div class="dialog-node dialog-api-node"><span class="dialog-node-icon" id="dialogApiIcon">&lt;/&gt;</span><small id="dialogApiRole">AADRESS</small><b id="dialogApiName">/page/1/</b><em id="dialogApiAction">Tagastab HTML-i</em></div>
+        <div class="dialog-route dialog-route-two"><span class="dialog-route-label"><i>2</i>ERALDAMINE</span></div>
+        <div class="dialog-node dialog-service-node"><span class="dialog-node-icon" id="dialogServiceIcon">▦</span><small id="dialogServiceRole">VÄLJUND</small><b id="dialogServiceName">Andmetabel</b><em id="dialogServiceAction">Seob väljad kirjeteks</em></div>
+        <div class="dialog-packet" aria-hidden="true"><span></span></div>
+        <div class="dialog-response-path"><span><i>3</i>HTML JA ANDMED TAGASI</span></div>
+      </div>
+      <div class="flow-dialog-footer"><p id="flowDialogResult"><b>Päring on teel.</b> Tulemus pole veel saabunud.</p><button class="primary-button" id="flowDialogClose" type="button" disabled><span>Vaata tulemust</span></button></div>
+    </div>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="../api-nav.js?v=2"></script>
+  <script src="app.js?v=12"></script>
+</body>
+</html>

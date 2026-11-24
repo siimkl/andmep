@@ -1,4 +1,4 @@
-name: Deploy combined API learning app to GitHub Pages
+name: Deploy Andmepädevus learning app to GitHub Pages
 
 on:
   push:

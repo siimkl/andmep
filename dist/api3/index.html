@@ -6,13 +6,13 @@
   <meta name="description" content="API 3 interaktiivne õpirakendus: tehisaru API-de ühendamine enda rakendusega ning Statistikaameti andmete tõlgendamine Gemini API abil.">
   <title>API 3 · Tehisaru API-de ühendamine enda rakendusega</title>
   <link rel="stylesheet" href="styles.css?v=66">
-  <link rel="stylesheet" href="../api-common.css?v=7">
+  <link rel="stylesheet" href="../api-common.css?v=11">
 </head>
 <body>
   <main class="shell" id="app">
     <header class="hero">
       <div class="hero-copy">
-        <div class="eyebrow api-eyebrow"><span class="pulse-dot" aria-hidden="true"></span><a class="api-home-link" href="../" aria-label="Mine Andmepädevuse avalehele">ANDMEPÄDEVUS</a> <span aria-hidden="true">·</span><label class="api-version-switch"><span class="sr-only">Vali API praktikum</span><select class="api-version-select" aria-label="Vali API praktikum"><option value="../api1/">API 1</option><option value="../api2/">API 2</option><option value="../api3/" selected>API 3</option></select></label></div>
+        <div class="eyebrow api-eyebrow"><span class="pulse-dot" aria-hidden="true"></span><a class="api-home-link" href="../" aria-label="Mine Andmepädevuse avalehele">ANDMEPÄDEVUS</a> <span aria-hidden="true">·</span><label class="api-version-switch"><span class="sr-only">Vali praktikum</span><select class="api-version-select" aria-label="Vali praktikum"><option value="../api1/">API 1</option><option value="../api2/">API 2</option><option value="../api3/" selected>API 3</option><option value="../kraapimine/">Veebikraapimine</option><option value="../ai-andmetoo/">AI andmetöö</option></select></label></div>
         <h1 class="hero-title" aria-label="API päringust vastuseni">API päringust<br><span>vastuseni</span></h1>
         <p class="hero-subtitle">Tehisaru API-de ühendamine enda rakendusega</p>
         <p class="hero-description">Alusta nagu API 2 praktikumis: küsi Statistikaametist GET-iga metaandmed ja POST-iga palgaandmed. Seejärel lase R-il muutus arvutada ning saada tulemus uue POST-päringuga Gemini API-le.</p>
@@ -41,7 +41,7 @@
       <button class="step" type="button" data-step="4"><span>4</span><div><b>AI POST</b><small>Saada andmed mudelile</small></div></button>
     </nav>
 
-    <section class="lab-grid" aria-label="AI API integratsiooni labor">
+    <section class="lab-grid result-pending" aria-label="AI API integratsiooni labor">
       <aside class="control-card card">
         <div class="control-head"><span class="section-kicker">KOOSTA PÄRING<b id="currentStepLabel" hidden>1/4</b></span></div>
 
@@ -114,7 +114,7 @@ vastus_ai &lt;- request(<span class="str">"https://generativelanguage.googleapis
         <div class="lesson-nav"><button id="prevLesson" type="button" disabled>← Eelmine</button><div><span id="lessonDots"></span></div><button id="nextLesson" type="button" disabled>Järgmine →</button></div>
       </aside>
 
-      <section class="stage-card card awaiting-response" id="stageCard" aria-disabled="true">
+      <section class="stage-card card awaiting-response" id="stageCard" aria-disabled="true" hidden>
         <div class="card-heading">
           <div><span class="section-kicker">PÄRINGU VASTUS</span><h2 id="stageTitle">Mida API vastas?</h2></div>
           <div class="status-chip neutral" id="statusChip" role="status" aria-live="polite">
@@ -378,6 +378,6 @@ vastus_ai &lt;- request(<span class="str">"https://generativelanguage.googleapis
   </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js"></script>
-  <script src="app.js?v=68"></script>
+  <script src="app.js?v=69"></script>
 </body>
 </html>

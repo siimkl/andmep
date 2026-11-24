@@ -8,7 +8,7 @@
   const els = {
     progressValue: $("#progressValue"), progressText: $("#progressText"), progressBar: $("#progressBar"), completedCount: $("#completedCount"),
     resetButton: $("#resetButton"),
-    stageCard: $(".stage-card"), controlCard: $(".control-card"), flowStatus: $("#flowStatus"), storyIndex: $("#storyIndex"), storyText: $("#storyText"),
+    labGrid: $(".lab-grid"), stageCard: $(".stage-card"), controlCard: $(".control-card"), flowStatus: $("#flowStatus"), storyIndex: $("#storyIndex"), storyText: $("#storyText"),
     flowDialog: $("#flowDialog"), flowDialogKicker: $("#flowDialogKicker"), dialogFlowStage: $("#dialogFlowStage"), dialogFlowStatus: $("#dialogFlowStatus"),
     flowDialogResult: $("#flowDialogResult"), flowDialogClose: $("#flowDialogClose"),
     responseContext: $("#responseContext"), responseContextLabel: $("#responseContextLabel"), responseContextText: $("#responseContextText"),
@@ -260,6 +260,11 @@
     els.storyIndex.textContent = String(index).padStart(2, "0");
     els.storyText.innerHTML = html;
   }
+  function setResultPanelVisible(visible) {
+    els.stageCard.hidden = !visible;
+    els.labGrid.classList.toggle("result-pending", !visible);
+    syncHeight();
+  }
   function setStatus(code, kind) { els.statusBadge.textContent = code; els.statusBadge.className = kind; }
   function showResponse(data) { els.responseOutput.textContent = JSON.stringify(data, null, 2); }
   function escapeHtml(value) {
@@ -443,6 +448,7 @@
 
   async function loadMetadata() {
     if (els.getMetadata.disabled) return;
+    setResultPanelVisible(true);
     els.stageCard.classList.remove("awaiting-response");
     els.stageCard.removeAttribute("aria-disabled");
     els.getMetadata.disabled = true;
@@ -766,6 +772,7 @@
     state = initialState();
     if (els.flowDialog.open) els.flowDialog.close();
     dialogTarget = null;
+    setResultPanelVisible(false);
     els.stageCard.classList.add("awaiting-response");
     els.stageCard.setAttribute("aria-disabled", "true");
     els.selectionSection.classList.add("locked");
