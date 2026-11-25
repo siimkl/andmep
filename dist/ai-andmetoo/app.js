@@ -547,7 +547,7 @@ function renderReviewImpact() {
       <dl>
         <dt>Mudeli soovitus</dt><dd>${labelNames[suggestion]}</dd>
         <dt>Sinu hinnang</dt><dd>${reviewNames[state.reviews[index]]}</dd>
-        <dt>Harjutuse tagasiside</dt><dd>${reviewNames[review]}</dd>
+        <dt>Kontrolli tulemus</dt><dd>${reviewNames[review]}</dd>
       </dl>
       <p>${item.reason}${reference}</p>
     </li>`;
