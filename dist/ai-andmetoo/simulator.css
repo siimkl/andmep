@@ -140,14 +140,44 @@ button,select{font-size:1rem}
   padding-inline-start: 1.5rem;
   line-height: 1.55;
 }
-.control-card.summary-inactive {
-  background: #f1f3f5;
-  border-color: #cbd5db;
-  box-shadow: none;
-  filter: grayscale(1);
-}
-.control-card.summary-inactive .case-meta:has([data-relabel], [data-rereview]) {
+.control-card.summary-inactive .case-meta:has([data-relabel], [data-rereview]),
+.control-card.summary-inactive .next-action-label {
   display: none;
+}
+.control-card.summary-inactive :is(
+  .label-guide, .label-guide article, .labeling-brief, .labeling-instruction-intro,
+  .decision-feedback, .case-progress, .decision-stage .case-card, .output-card, .next-action-guide
+) {
+  background: var(--inactive-panel-inner);
+  border-color: var(--inactive-panel-border);
+  box-shadow: none;
+}
+.control-card.summary-inactive .case-card::before {
+  display: none;
+}
+.control-card.summary-inactive .decision-stage .case-card {
+  border-width: 1px;
+}
+.control-card.summary-inactive :is(.control-title > span, .stage-counter, .primary-button:disabled),
+.control-card.summary-inactive .decision-stage .case-card .case-top b,
+.control-card.summary-inactive .output-card .case-top b {
+  color: var(--inactive-panel-heading);
+  background: var(--inactive-panel-badge);
+  box-shadow: none;
+}
+.control-card.summary-inactive .control-head {
+  border-color: var(--inactive-panel-border);
+}
+.control-card.summary-inactive :is(.label-guide b, .labeling-brief > span, .labeling-instruction-intro > span, .case-progress, .decision-stage .case-card h4, .decision-stage .case-card .case-top span) {
+  color: var(--inactive-panel-heading);
+  font-weight: 700;
+}
+.control-card.summary-inactive .labeling-instruction-intro p::first-line {
+  color: inherit;
+}
+.control-card.summary-inactive .primary-button:disabled {
+  filter: none;
+  opacity: 1;
 }
 .impact-next-actions {
   display: grid;

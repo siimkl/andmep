@@ -95,7 +95,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
               impactTitle: impactTitle.textContent,
               canConfirmAgain: !document.querySelector('[data-complete="3"]').disabled,
               controlsInactive: document.querySelector('.control-card').inert,
-              controlsGray: getComputedStyle(document.querySelector('.control-card')).filter === 'grayscale(1)',
+              controlsGray: getComputedStyle(document.querySelector('.control-card')).backgroundColor === 'rgb(238, 242, 244)',
               retryText: retryFromImpact.textContent
             })""")
             assert summary == {
@@ -207,6 +207,13 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert not evaluate("Boolean(document.querySelector('.source-profile'))")
             assert state["resultHidden"] and state["resultPending"], {route: state}
             assert state["controlCenterDelta"] <= 10, {route: state}
+            if route != "ai-andmetoo":
+                inactive_palette = evaluate("""(() => {
+                  const panel = document.querySelector('.practice-suite.locked');
+                  return [getComputedStyle(panel).backgroundColor, getComputedStyle(panel).opacity,
+                    getComputedStyle(panel.querySelector('h2')).color];
+                })()""")
+                assert inactive_palette == ["rgb(238, 242, 244)", "1", "rgb(67, 88, 101)"], {route: inactive_palette}
             module_states[route] = state
             screenshot(f"{route}-initial.png")
 
@@ -362,7 +369,12 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 impact_transition = json.loads(evaluate("JSON.stringify({stage:state.currentStage,dialogOpen:impactDialog.open,impactHidden:impactCard.hidden,impactTitle:impactTitle.textContent,nextHidden:impactNextStep.hidden,nextText:continueFromImpact.textContent.trim(),focused:document.activeElement===impactCard})"))
                 assert impact_transition == {"stage": 2, "dialogOpen": False, "impactHidden": False, "impactTitle": "Mida mudel sinu märgenditest õpib?", "nextHidden": False, "nextText": "Jätka mudeli väljundite hindamisega", "focused": True}, impact_transition
                 assert evaluate("document.querySelector('.control-card').inert")
-                assert evaluate("getComputedStyle(document.querySelector('.control-card')).filter === 'grayscale(1)'")
+                inactive_palette = evaluate("""(() => {
+                  const panel = document.querySelector('.control-card');
+                  return [getComputedStyle(panel).backgroundColor, getComputedStyle(panel).opacity,
+                    getComputedStyle(panel.querySelector('.decision-stage.active h3')).color];
+                })()""")
+                assert inactive_palette == ["rgb(238, 242, 244)", "1", "rgb(67, 88, 101)"], inactive_palette
                 assert evaluate("retryFromImpact.textContent") == "Märgenda kirjed uuesti"
                 assert evaluate("document.querySelector('[data-complete=\"2\"]').disabled")
                 assert evaluate("document.querySelector('[data-complete=\"2\"]').textContent.trim()") == "Märgendus kinnitatud"

@@ -22,7 +22,48 @@
   src: url("api3/assets/fonts/dm-mono-500-latin.woff2") format("woff2");
 }
 
-/* Shared visual language for all three API practicums. */
+/* Shared visual language for all five practicums. */
+:root {
+  --inactive-panel-bg: #eef2f4;
+  --inactive-panel-border: #c8d0d5;
+  --inactive-panel-heading: #435865;
+  --inactive-panel-ink: #526570;
+  --inactive-panel-inner: #f5f7f8;
+  --inactive-panel-badge: #dfe6e9;
+}
+
+.shell :is(
+  .stage-card.awaiting-response, .stage-card.is-muted, .control-card.summary-inactive,
+  .validation-card.locked, .practice-suite.locked, .sequence-exercise.locked
+) {
+  color: var(--inactive-panel-ink);
+  background: var(--inactive-panel-bg);
+  border-color: var(--inactive-panel-border);
+  box-shadow: 0 10px 24px rgba(68, 84, 96, .07);
+  opacity: 1;
+  filter: saturate(.28);
+}
+
+.shell .control-section.locked {
+  opacity: 1;
+  filter: saturate(.28);
+}
+
+.shell :is(
+  .stage-card.awaiting-response, .stage-card.is-muted, .control-card.summary-inactive,
+  .validation-card.locked, .practice-suite.locked, .sequence-exercise.locked, .control-section.locked
+) :is(h2, h3, h4, .section-kicker, .test-kicker) {
+  color: var(--inactive-panel-heading);
+  font-weight: 700;
+}
+
+.shell :is(
+  .stage-card.awaiting-response, .stage-card.is-muted, .control-card.summary-inactive,
+  .validation-card.locked, .practice-suite.locked, .sequence-exercise.locked, .control-section.locked
+) :is(p, small, legend, .stage-counter, .flow-status b, .status-chip b) {
+  color: var(--inactive-panel-ink);
+}
+
 .api-home-link {
   display: inline-flex;
   align-items: center;
