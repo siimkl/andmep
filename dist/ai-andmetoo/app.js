@@ -963,26 +963,6 @@ function completeStage(stage) {
 
 function renderResults() {
   const metrics = calculateLabelMetrics();
-  const dominant = Object.entries(labelNames).map(([key, label]) => [key, label, metrics[key]]).sort((a, b) => b[2] - a[2])[0];
-  let title = "Mitmekesine ja ebakindlust säilitav märgendus";
-  if (metrics.aligned <= 2) title = "Märgendus õpetab mudelile juhisega vastuolulisi seoseid";
-  else if (dominant[2] >= 3) title = "Ühe kategooria poole kaldu märgendus";
-  else if (metrics.review + metrics.supplement === 0) title = "Kindel märgendus, mis peidab puuduliku ja vastuolulise info";
-  else if (metrics.categories < 3) title = "Kitsas märgendus, millest puudub üks võimalik soovitus";
-  $("#profileTitle").textContent = title;
-  const selectedCounts = Object.keys(labelNames)
-    .filter(key => state.availableLabels.has(key))
-    .map(key => `${metrics[key]} „${labelNames[key]}”`);
-  $("#profileText").textContent = `Märgendasid viis registrikirjet: ${selectedCounts.join(", ")}. Kinnitatud juhendile vastas ${metrics.aligned}/${labelCases.length} märgendit. Mudeli soovitused põhinevad nendest näidetest õpitud seostel.`;
-  const tags = [
-    `${labelCases.length} treeningandmetesse lisatud registrikirjet`,
-    `${state.availableLabels.size} kasutatavat märgendit`,
-    `${metrics.aligned}/${labelCases.length} juhisega kooskõlas`,
-    `${metrics.categories} erinevat märgendit õppeandmestikus`,
-    `${metrics.review} ülevaatusele ja ${metrics.supplement} täiendamisele`,
-    state.appeal === "owned" ? "parandus jõuab seirelogisse" : "tagasisideahel vajab täpsustamist"
-  ];
-  $("#profileTags").innerHTML = tags.map(value => `<span>${value}</span>`).join("");
   const attentionCount = metrics.review + metrics.supplement;
   const tradeoffs = [
     ["1", "Juhise järjepidevus", metrics.aligned === labelCases.length ? "Kasutasid kinnitatud juhist kõigi registrikirjete puhul järjepidevalt. See ei tõesta, et juhis ise on hea, kuid teeb andmestiku tähenduse kontrollitavaks." : `${labelCases.length - metrics.aligned} märgendit erines kinnitatud juhendist. Mudel ei oska neid eksimuseks pidada, vaid õpib neist samamoodi nagu teistest näidetest.`],

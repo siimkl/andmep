@@ -510,6 +510,8 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                     "Mida tasub säilitada?", "Kontroll järgmises versioonis"
                 ]
                 assert evaluate("dialogInsight.querySelectorAll('li').length") == 4
+                assert evaluate("!resultSection.hidden && tradeoffList.children.length === 4")
+                assert evaluate("!resultSection.querySelector('#profileTitle, #profileText, #profileTags')")
                 evaluate("dialogContinue.click(); document.querySelector('[data-step=\"2\"]').click()")
                 assert evaluate("document.querySelector('[data-complete=\"2\"]').disabled")
                 evaluate("retryFromImpact.click()")
