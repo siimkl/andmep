@@ -900,21 +900,43 @@ const dialogMessages = {
   }
 };
 
+function confirmedRuleSection(select, feedback) {
+  const options = [...select.options].filter(option => option.value);
+  return {
+    title: select.labels[0].querySelector("span").textContent,
+    items: options.map(option => option.textContent),
+    selectedIndex: options.indexOf(select.selectedOptions[0]),
+    text: feedback.textContent
+  };
+}
+
 function renderDialogInsight(sections) {
-  const content = sections.map(({ title, text, items }) => {
+  const content = sections.map(({ title, text, items, selectedIndex }) => {
     const section = document.createElement("section");
     const heading = document.createElement("h3");
     heading.textContent = title;
     section.append(heading);
     if (items) {
       const list = document.createElement("ul");
-      items.forEach(item => {
+      if (selectedIndex !== undefined) {
+        list.className = "dialog-rule-options";
+        list.setAttribute("role", "list");
+      }
+      items.forEach((item, index) => {
         const entry = document.createElement("li");
-        entry.textContent = item;
+        if (index === selectedIndex) {
+          entry.className = "dialog-rule-selected";
+          const label = document.createElement("strong");
+          label.textContent = "Sinu valik";
+          entry.append(label, item);
+        } else {
+          entry.textContent = item;
+        }
         list.append(entry);
       });
       section.append(list);
-    } else {
+    }
+    if (text) {
       const paragraph = document.createElement("p");
       paragraph.textContent = text;
       section.append(paragraph);
@@ -943,7 +965,10 @@ function completeStage(stage) {
     message.sections = [
       { title: "Valitud märgendid", items: labels },
       { title: "Märgendajale nähtavad väljad", items: fields },
-      { title: "Märgendusreegel", text: `${$("#labelRule").selectedOptions[0].textContent}.` },
+      confirmedRuleSection($("#missingPolicy"), $("#missingPolicyFeedback")),
+      confirmedRuleSection($("#labelRule"), $("#ruleAvailability")),
+      confirmedRuleSection($("#disagreementPolicy"), $("#disagreementFeedback")),
+      confirmedRuleSection($("#representationAudit"), $("#auditAvailability")),
       { title: "Mida mudel saab õppida?", text: "Mudel õpib seoseid treeningkirjetes olevate andmeväljade ja märgendite põhjal." }
     ];
   }
@@ -956,8 +981,13 @@ function completeStage(stage) {
   $("#dialogEnd").textContent = message.end;
   renderDialogInsight(message.sections);
   $("#dialogContinue span").textContent = message.continueText ?? "Jätka järgmise etapiga";
-  $("#impactDialog").dataset.completedStage = stage;
-  $("#impactDialog").showModal();
+  const dialog = $("#impactDialog");
+  dialog.dataset.completedStage = stage;
+  dialog.showModal();
+  if (stage === 1) {
+    $("#dialogTitle").focus({ preventScroll: true });
+    dialog.scrollTop = 0;
+  }
   if (stage === 4) renderResults();
 }
 
