@@ -104,7 +104,7 @@ function caseDataHtml(item) {
 const stageCopy = {
   1: { title: "Vali andmed ja määra nõuded", story: "<b>Andmete valik eelneb märgendamisele.</b> Valitud väljad ja juhis määravad, mida märgendaja saab põhjendatult otsustada ning mida mudel hiljem õppida saab." },
   2: { title: "Märgenda tööotsijate kirjed", story: "<b>Iga märgendatud registrikirje lisatakse mudeli treeningandmetesse.</b> Hästi põhjendatud märgend tugineb nähtavale infole ja ühtsele juhisele. Kui kindlat soovitust ei saa teha, peab ebakindlus jääma nähtavaks." },
-  3: { title: "Hinda mudeli väljundeid", story: "<b>Ametnik vastutab teenuseotsuse eest.</b> Selles etapis lisad mudeli väljundile eraldi kvaliteedimärke. Märge ja põhjendus annavad arendajale ning tooteomanikule sisendi järgmise mudeliversiooni parandamiseks." },
+  3: { title: "Hinda mudeli väljundeid", story: "<b>Hindasid mudeli nelja soovitust.</b> Sinu hinnangud aitavad arendajal ja tooteomanikul otsustada, milliseid vigu uurida ja mida järgmises mudeliversioonis parandada." },
   4: { title: "Paranda mudeli arendusprotsessi", story: "<b>Mudeli väljundite hindamine loob parandussisendi.</b> Korduv viga peab jõudma tagasi märgendusjuhisesse, treeningandmetesse, hindamiskriteeriumidesse või mudeli järgmisse versiooni." }
 };
 
