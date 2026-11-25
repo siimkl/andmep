@@ -452,7 +452,8 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 time.sleep(0.25)
                 quality_feedback = json.loads(evaluate("JSON.stringify({mark:document.querySelector('#outputCase .quality-result b').textContent,title:reviewExplanationTitle.textContent,text:reviewExplanationText.textContent,result:reviewExplanation.dataset.result,feedback:stage3Feedback.textContent,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending')})"))
                 assert quality_feedback["mark"] == "Vajab parandamist" and quality_feedback["title"] == "Vajab parandamist" and quality_feedback["result"] == "correct", quality_feedback
-                assert "Iseseisev jätkamine" in quality_feedback["text"] and "rohkem aega" in quality_feedback["feedback"] and quality_feedback["impactHidden"] and quality_feedback["pending"], quality_feedback
+                assert "Varasem takistus on lahendatud" in quality_feedback["text"] and "rohkem aega" in quality_feedback["feedback"] and quality_feedback["impactHidden"] and quality_feedback["pending"], quality_feedback
+                assert evaluate("!reviewReference.hidden && reviewReferenceLabel.textContent === 'Iseseisev jätkamine'")
                 screenshot("ai-andmetoo-quality-feedback.png")
                 evaluate("nextReviewCase.click()")
                 for recommendation, rating in [("Andmete täiendamine", "accept"), ("Tavaplaan", "accept"), ("Inimese ülevaatus", "human")]:
@@ -460,6 +461,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                     assert actual == recommendation, actual
                     evaluate(f"document.querySelector('#reviewActions button[data-review=\"{rating}\"]').click()")
                     assert evaluate("reviewExplanation.dataset.result") == "correct", recommendation
+                    assert evaluate("reviewReference.hidden"), recommendation
                     evaluate("nextReviewCase.click()")
                 time.sleep(0.25)
                 before_quality_confirmation = json.loads(evaluate("JSON.stringify({completeDisabled:document.querySelector('[data-complete=\"3\"]').disabled,reviews:state.reviews.length,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending')})"))
@@ -500,7 +502,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 evaluate("retryFromImpact.click()")
                 assert evaluate("!document.querySelector('.control-card').inert && impactCard.hidden && state.labels.length === 0")
                 evaluate("""(() => {
-                  for (const label of ['self', 'fast', 'standard', 'self', 'review']) {
+                  for (const label of ['self', 'fast', 'fast', 'self', 'review']) {
                     document.querySelector('#labelActions button[data-label="' + label + '"]').click();
                     nextLabelCase.click();
                   }
@@ -509,21 +511,36 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert evaluate("document.querySelector('[data-complete=\"2\"]').textContent.trim()") == "Kinnita märgendus"
                 assert evaluate("document.querySelector('[data-step=\"3\"]').disabled")
                 evaluate("document.querySelector('[data-complete=\"2\"]').click(); dialogContinue.click(); continueFromImpact.click()")
-                for recommendation, rating in [("Iseseisev jätkamine", "accept"), ("Tavaplaan", "correct")]:
-                    actual = evaluate("document.querySelector('#outputCase .output-recommendation strong').textContent")
-                    assert actual == recommendation, actual
-                    assert not evaluate(f"document.querySelector('#reviewActions button[data-review=\"{rating}\"]').disabled")
-                    evaluate(f"document.querySelector('#reviewActions button[data-review=\"{rating}\"]').click()")
-                    assert evaluate("!reviewExplanation.hidden && reviewExplanation.dataset.result === 'correct'"), recommendation
-                    evaluate("nextReviewCase.click()")
+                assert evaluate("document.querySelector('#outputCase .output-recommendation strong').textContent") == "Iseseisev jätkamine"
+                evaluate("document.querySelector('#reviewActions button[data-review=\"accept\"]').click()")
+                assert evaluate("!reviewExplanation.hidden && reviewExplanation.dataset.result === 'correct'")
+                evaluate("nextReviewCase.click()")
+                assert "T-202" in evaluate("outputCase.textContent")
+                assert evaluate("document.querySelector('#outputCase .output-recommendation strong').textContent") == "Kiire tugi"
+                evaluate("document.querySelector('#reviewActions button[data-review=\"accept\"]').click()")
+                assert evaluate("reviewExplanation.dataset.result") == "incorrect"
+                assert evaluate("reviewExplanationTitle.textContent") == "Vali hinnanguks „Vajab parandamist”"
+                assert evaluate("!reviewReference.hidden && reviewReferenceLabel.textContent === 'Andmete täiendamine'")
+                assert evaluate("reviewReference.querySelector('small').textContent") == "Mudel peaks soovitama"
+                assert not evaluate("reviewReference.querySelector('button') !== null")
+                assert "Andmete täiendamine" not in evaluate("reviewExplanationText.textContent")
+                evaluate("reviewExplanation.scrollIntoView({block:'center',behavior:'instant'})")
+                screenshot("ai-andmetoo-t202-review-feedback.png")
+                evaluate("undoReviewChoice.click()")
+                assert evaluate("[...reviewActions.querySelectorAll('button')].map(button => button.textContent)") == [
+                    "Kasutatav", "Vajab parandamist", "Hinnanguks pole piisavalt infot"
+                ]
+                evaluate("document.querySelector('#reviewActions button[data-review=\"correct\"]').click()")
+                assert evaluate("!reviewExplanation.hidden && reviewExplanation.dataset.result === 'correct'")
+                evaluate("nextReviewCase.click()")
                 assert "T-203" in evaluate("outputCase.textContent")
                 assert evaluate("document.querySelector('#outputCase .output-recommendation strong').textContent") == "Kiire tugi"
                 evaluate("document.querySelector('#reviewActions button[data-review=\"accept\"]').click()")
                 assert evaluate("reviewExplanation.dataset.result") == "incorrect"
-                assert evaluate("reviewExplanationTitle.textContent") == "Sobiv hinnang on „Vajab parandamist”"
+                assert evaluate("reviewExplanationTitle.textContent") == "Vali hinnanguks „Vajab parandamist”"
                 evaluate("undoReviewChoice.click(); document.querySelector('#reviewActions button[data-review=\"correct\"]').click()")
                 assert evaluate("reviewExplanation.dataset.result") == "correct"
-                assert "Sobiv soovitus on „Tavaplaan”" in evaluate("reviewExplanationText.textContent")
+                assert evaluate("!reviewReference.hidden && reviewReferenceLabel.textContent === 'Tavaplaan'")
                 evaluate("nextReviewCase.click(); document.querySelector('#reviewActions [data-review=\"human\"]').click(); nextReviewCase.click()")
                 command("Emulation.setDeviceMetricsOverride", {"width": 390, "height": 844, "deviceScaleFactor": 1, "mobile": True})
                 confirm_quality_and_check_summary()

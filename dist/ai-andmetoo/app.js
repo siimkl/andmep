@@ -487,14 +487,6 @@ function expectedReview(item, suggestion = simulatedSuggestion(item)) {
   return suggestion === item.referenceLabel ? "accept" : "correct";
 }
 
-function reviewReason(item, rating) {
-  if (rating !== "correct") return item.reason;
-  const reason = `${item.reason} Sobiv soovitus on „${labelNames[item.referenceLabel]}”.`;
-  return state.availableLabels.has(item.referenceLabel)
-    ? reason
-    : `${reason} See märgend puudub sinu märgendusjuhisest.`;
-}
-
 function outputCaseHtml(item, index, suggestion) {
   return `<div class="case-top"><span>${item.id} · ${index + 1}/${outputCases.length}</span><b>KONTROLLKIRJE</b></div>
     <h4>${item.title}</h4><p>${item.text}</p>
@@ -520,8 +512,10 @@ function renderOutputCase() {
     explanation.hidden = false;
     explanation.dataset.result = matches ? "correct" : "incorrect";
     $("#reviewExplanationStatus").textContent = matches ? "HINNANG SOBIB" : "VAATA HINNANG ÜLE";
-    $("#reviewExplanationTitle").textContent = matches ? reviewNames[expected] : `Sobiv hinnang on „${reviewNames[expected]}”`;
-    $("#reviewExplanationText").textContent = reviewReason(item, expected);
+    $("#reviewExplanationTitle").textContent = matches ? reviewNames[expected] : `Vali hinnanguks „${reviewNames[expected]}”`;
+    $("#reviewExplanationText").textContent = item.reason;
+    $("#reviewReference").hidden = expected !== "correct";
+    $("#reviewReferenceLabel").textContent = expected === "correct" ? labelNames[item.referenceLabel] : "";
     $("#nextReviewCase").textContent = state.reviews.length === outputCases.length ? "Vaata kvaliteedihinnangute kokkuvõtet" : "Jätka järgmise väljundiga";
   } else if (state.reviews.length === outputCases.length) {
     const summary = Object.keys(reviewNames).map(key => `${reviewNames[key]}: ${state.reviews.filter(value => value === key).length}`).join(" · ");
@@ -550,7 +544,10 @@ function renderReviewImpact() {
 
   const followUps = outcomes
     .filter(outcome => outcome.review !== "accept")
-    .map(({ item, review }) => `<li><strong>${item.id} · ${reviewNames[review]}</strong><br>${reviewReason(item, review)}</li>`);
+    .map(({ item, review }) => {
+      const reference = review === "correct" ? `<br>Mudel peaks soovitama „${labelNames[item.referenceLabel]}”.` : "";
+      return `<li><strong>${item.id} · ${reviewNames[review]}</strong><br>${item.reason}${reference}</li>`;
+    });
   $("#reviewImpactDetails").innerHTML = followUps.join("");
 }
 

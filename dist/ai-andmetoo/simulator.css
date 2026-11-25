@@ -140,6 +140,22 @@ button,select{font-size:1rem}
   padding-inline-start: 1.5rem;
   line-height: 1.55;
 }
+.review-reference {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #c6d7df;
+}
+.review-reference small,
+.review-reference strong {
+  display: block;
+}
+.review-reference small {
+  color: #526c86;
+}
+.review-reference strong {
+  margin-top: 3px;
+  color: #102f55;
+}
 .control-card.summary-inactive .case-meta:has([data-relabel], [data-rereview]),
 .control-card.summary-inactive .next-action-label {
   display: none;

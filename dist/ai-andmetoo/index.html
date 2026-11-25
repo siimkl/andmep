@@ -7,7 +7,7 @@
   <title>AI andmetöö · Kes õpetab tehisaru?</title>
   <link rel="stylesheet" href="api1-base.css?v=1">
   <link rel="stylesheet" href="../api-common.css?v=13">
-  <link rel="stylesheet" href="simulator.css?v=34">
+  <link rel="stylesheet" href="simulator.css?v=35">
   <link rel="stylesheet" href="../readability.css?v=2">
 </head>
 <body>
@@ -164,10 +164,19 @@
           <div class="decision-feedback" id="stage3Feedback" aria-live="polite" hidden></div>
           <div class="case-progress"><span>AI-MUDELI VÄLJUNDID</span><b id="reviewProgress">0 / 4 kvaliteedimärget</b></div>
           <div class="output-card" id="outputCase"></div>
-          <div class="review-actions" id="reviewActions" aria-label="Lisa mudeli soovitusele kvaliteedimärge">
+          <div class="review-actions" id="reviewActions" role="group" aria-label="Vali hinnang mudeli kuvatud soovitusele">
             <button type="button" data-review="accept">Kasutatav</button><button type="button" data-review="correct">Vajab parandamist</button><button type="button" data-review="human">Hinnanguks pole piisavalt infot</button>
           </div>
-          <div class="choice-explanation" id="reviewExplanation" hidden aria-live="polite"><span id="reviewExplanationStatus"></span><h4 id="reviewExplanationTitle"></h4><p id="reviewExplanationText"></p><div class="explanation-actions"><button class="explanation-retry" id="undoReviewChoice" type="button">Muuda hinnangut</button><button class="explanation-next" id="nextReviewCase" type="button">Jätka järgmise väljundiga</button></div></div>
+          <div class="choice-explanation" id="reviewExplanation" hidden aria-live="polite">
+            <span id="reviewExplanationStatus"></span>
+            <h4 id="reviewExplanationTitle"></h4>
+            <p id="reviewExplanationText"></p>
+            <div class="review-reference" id="reviewReference" hidden>
+              <small>Mudel peaks soovitama</small>
+              <strong id="reviewReferenceLabel"></strong>
+            </div>
+            <div class="explanation-actions"><button class="explanation-retry" id="undoReviewChoice" type="button">Muuda hinnangut</button><button class="explanation-next" id="nextReviewCase" type="button">Jätka järgmise väljundiga</button></div>
+          </div>
           <div class="next-action-guide contextual"><span class="next-action-label" aria-hidden="true">JÄRGMISENA <i>↓</i></span><button class="primary-button orange" type="button" data-complete="3" disabled><span>Kinnita kvaliteedihinnangud</span></button></div>
         </section>
 
@@ -233,6 +242,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=55"></script>
+  <script src="app.js?v=56"></script>
 </body>
 </html>
