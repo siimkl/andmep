@@ -7,7 +7,7 @@
   <title>AI andmetöö · Kes õpetab tehisaru?</title>
   <link rel="stylesheet" href="api1-base.css?v=2">
   <link rel="stylesheet" href="../api-common.css?v=14">
-  <link rel="stylesheet" href="simulator.css?v=38">
+  <link rel="stylesheet" href="simulator.css?v=39">
   <link rel="stylesheet" href="../readability.css?v=3">
 </head>
 <body>
@@ -33,14 +33,32 @@
       </div>
     </header>
 
-    <section class="briefing-card" aria-label="Sinu roll ja ülesanne">
-      <div class="briefing-mark">AI</div>
-      <div class="briefing-copy">
-        <span>SINU ROLL – ARENDUSPROJEKTI MEESKONNA LIIGE / Valdkonnaspetsialist</span>
-        <p><b>Selles harjutuses arendab väljamõeldud Riiklik Tööhõiveamet süsteemi, mis soovitab igale registreeritud tööotsijale sobivat tuge.</b> Ametnik otsustab, millist tuge ja mis vormis tööotsijale pakkuda. Otsustamisel saab ta kasutada tehisarumudeli soovitust.</p>
-        <p>Valdkonnaspetsialistina valid esmalt, milliseid andmeid märgendaja näeb, ja määrad, millal iga märgendit kasutada. Seejärel märgendad viis anonüümset tööotsija kirjet ja vaatad, kuidas sinu märgendid mõjutavad mudeli soovitusi teistele tööotsijatele.</p>
-        <p>Järgmisena hindad mudeli väljundeid. Sinu tagasiside aitab arendusmeeskonnal otsustada, mida järgmises mudeliversioonis parandada.</p>
+    <section class="briefing-card" aria-labelledby="briefingRole">
+      <div class="briefing-intro">
+        <div class="briefing-role">
+          <span class="section-kicker">SINU ROLL</span>
+          <h2 id="briefingRole">Valdkonnaspetsialist</h2>
+          <p>Arendusprojekti meeskonna liige</p>
+        </div>
+        <div class="briefing-context">
+          <p><strong>Selles harjutuses arendab väljamõeldud Riiklik Tööhõiveamet süsteemi, mis soovitab igale registreeritud tööotsijale sobivat tuge.</strong></p>
+          <p>Ametnik otsustab, millist tuge ja mis vormis tööotsijale pakkuda. Otsustamisel saab ta kasutada tehisarumudeli soovitust.</p>
+        </div>
       </div>
+      <ol class="briefing-tasks" role="list" aria-label="Sinu ülesanded">
+        <li>
+          <h3>Andmete valik ja juhis</h3>
+          <p>Valid esmalt, milliseid andmeid märgendaja näeb, ja määrad, millal iga märgendit kasutada.</p>
+        </li>
+        <li>
+          <h3>Märgendamine</h3>
+          <p>Seejärel märgendad <strong>viis anonüümset tööotsija kirjet</strong> ja vaatad, kuidas sinu märgendid mõjutavad mudeli soovitusi teistele tööotsijatele.</p>
+        </li>
+        <li>
+          <h3>Väljundite hindamine</h3>
+          <p>Järgmisena hindad mudeli väljundeid. Sinu tagasiside aitab arendusmeeskonnal otsustada, mida järgmises mudeliversioonis parandada.</p>
+        </li>
+      </ol>
       <div class="briefing-question"><small>LÄBIV KÜSIMUS</small><strong>Kes otsustab, mida mudel õpib?</strong></div>
     </section>
 
