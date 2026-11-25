@@ -29,7 +29,7 @@ body {
 }
 button, select, input { font: inherit; }
 button, select { -webkit-tap-highlight-color: transparent; }
-button:focus-visible, select:focus-visible, summary:focus-visible, input:focus-visible + span { outline: 3px solid rgba(131,208,255,.5); outline-offset: 3px; }
+button:focus-visible, summary:focus-visible, input:focus-visible + span { outline: 3px solid rgba(131,208,255,.5); outline-offset: 3px; }
 .shell { width: min(1360px, calc(100% - 28px)); margin: 0 auto; padding: 26px 0 34px; }
 .card { border: 1px solid var(--line); border-radius: var(--radius); background: linear-gradient(145deg, rgba(13,41,66,.94), rgba(7,26,43,.96)); box-shadow: 0 24px 60px rgba(0,0,0,.22); }
 .section-kicker { display: block; margin-bottom: 8px; color: var(--blue-soft); font-size: 11px; font-weight: 800; letter-spacing: .18em; }
@@ -163,8 +163,7 @@ h1 span { color: var(--blue); }
 .primary-button.orange { color: #2c1205; background: linear-gradient(100deg, var(--orange), #ffad75); }
 fieldset { min-width: 0; margin: 15px 0 0; padding: 0; border: 0; }
 .select-label { display: block; margin-top: 11px; }
-.select-label > span, .period-group > span { display: block; margin: 0 0 6px 2px; color: #859cb0; font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-select { width: 100%; min-height: 43px; padding: 0 34px 0 12px; border: 1px solid var(--line); border-radius: 10px; color: #dce8f2; background: #092039; cursor: pointer; font-size: 10px; }
+.period-group > span { display: block; margin: 0 0 6px 2px; color: #859cb0; font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .period-group { margin-top: 12px; }
 .check-pills { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; }
 .check-pills input { position: absolute; opacity: 0; }
@@ -638,8 +637,7 @@ body.guide-hidden { padding-bottom: 0; }
 .primary-button { color: #fff; background: #2f60a0; }
 .primary-button i { background: rgba(255,255,255,.18); }
 .primary-button.orange { color: #fff; background: #07979a; }
-.select-label > span, .period-group > span { color: #557087; }
-select { border-color: #cbdde9; color: #173f73; background: #fff; }
+.period-group > span { color: #557087; }
 .check-pills span { border-color: #cfdee9; color: #60778a; background: #f7f9fb; }
 .check-pills input:checked + span { color: #1d5480; border-color: #78b9d8; background: #e7f4fa; }
 .selection-math { color: #637a8d; background: #eff4f7; }
@@ -766,8 +764,7 @@ body { font-size: 16px; }
 .request-line b { font-size: 11px; }
 .request-line code { font-size: 12px; }
 .primary-button { font-size: 14px; }
-.select-label > span, .period-group > span { font-size: 11px; }
-select { font-size: 13px; }
+.period-group > span { font-size: 11px; }
 .check-pills span { font-size: 12px; }
 .selection-math { font-size: 12px; }
 .json-preview summary { font-size: 12px; }
@@ -882,8 +879,7 @@ body { color: #102f55; background-color: #eef3f7; }
 .control-title p b { color: #102f55; font-weight: 750; }
 .request-line { background: #e4edf3; }
 .request-line code { color: #102f55; }
-.select-label > span, .period-group > span { color: #294d69; }
-select { border-color: #a9c1d1; color: #102f55; }
+.period-group > span { color: #294d69; }
 .check-pills span { border-color: #b4c8d6; color: #344f67; }
 .selection-math { color: #344f67; background: #e7eef3; }
 .json-preview { border-color: #b3c7d5; }
@@ -2510,10 +2506,6 @@ footer { padding-top: 24px; }
 /* Shared API course switcher. */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .api-eyebrow{flex-wrap:wrap}
-.api-version-switch{position:relative;display:inline-flex;align-items:center}
-.api-version-switch::after{content:"⌄";position:absolute;right:10px;top:50%;color:#234f88;font-size:13px;line-height:1;transform:translateY(-58%);pointer-events:none}
-.api-version-switch select{appearance:none;width:auto;min-width:82px;min-height:34px;margin:0;padding:0 28px 0 10px;border:1px solid #8fb7ce;border-radius:9px;color:#173f73;background:#fff;box-shadow:0 5px 13px rgba(16,47,85,.08);font:800 12px Manrope,system-ui,sans-serif;letter-spacing:.08em;cursor:pointer}
-.api-version-switch select:focus-visible{outline:3px solid rgba(10,167,216,.25);outline-offset:2px}
 
 /* API 3-aligned hero hierarchy. */
 .hero-copy h1.hero-title{max-width:780px;margin:18px 0 10px;font-size:clamp(38px,5.2vw,70px);line-height:.94;letter-spacing:-.055em}

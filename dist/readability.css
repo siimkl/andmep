@@ -59,7 +59,7 @@ body :is(.shell, .launcher, dialog) :is(
   .inspector-check :is(span, b), .table-head > b, .comparison-columns :is(b, span),
   .result-summary span, .quality-results b, .quality-score :is(small, span),
   .quality-dimensions :is(span, strong), .sequence-feedback b, .sequence-block-title b,
-  .sequence-brief b, .workflow-diagram li > span, .planner-fields-grid .planner-field > span,
+  .sequence-brief b, .workflow-diagram li > span,
   .result-viz .chart-label, .result-viz .chart-value, .chart-insight,
   .response-context > span, .quality-result > b, .quality-result > span,
   .response-next-cue > span, .impact-lock-note > span
@@ -82,12 +82,11 @@ body .shell .decision-stage :is(.case-prompt, .case-data-grid > div p) {
   line-height: 1.5 !important;
 }
 
-body :is(.shell, dialog) :is(button, select, input:not([type="checkbox"], [type="radio"])) {
+body :is(.shell, dialog) :is(button, input:not([type="checkbox"], [type="radio"])) {
   font-size: var(--reading-label);
 }
 
-body :is(.shell, dialog) :is(.primary-button, .label-actions button, .review-actions button),
-body .shell :is(.planner-field, .select-label, .ownership-grid, .selector-grid, .decision-inputs, .sequence-block, .stress-lab) select {
+body :is(.shell, dialog) :is(.primary-button, .label-actions button, .review-actions button) {
   font-size: var(--reading-text);
   line-height: 1.4;
 }
@@ -149,16 +148,9 @@ body .site-footer :is(.footer-author, .footer-details, .footer-note) :is(small, 
   letter-spacing: .09em;
 }
 
-.api-eyebrow .api-home-link::after,
-.api-eyebrow .api-version-switch::before {
+.api-eyebrow .api-home-link::after {
   font-size: var(--reading-meta);
   letter-spacing: .07em;
-}
-
-.api-eyebrow .api-version-switch select {
-  min-height: 3.5rem;
-  padding-top: 1.3rem;
-  font-size: var(--reading-text);
 }
 
 .launcher .api-card input:checked + .card-body::after,
@@ -200,14 +192,6 @@ body .shell .quality-dimensions > div {
   body .impact-dialog .dialog-head .flow-status {
     flex: 0 0 auto;
     text-align: left;
-  }
-
-  body .shell .api-eyebrow .api-version-switch select {
-    max-width: 100%;
-  }
-
-  body .shell .api-version-switch {
-    max-width: 100%;
   }
 
   body .shell .table-scroll th,

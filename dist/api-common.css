@@ -407,6 +407,110 @@ body { padding-bottom: 0; }
   .next-action-guide.contextual.next-target::after { display: none; }
 }
 
+/* Shared dropdowns for navigation and exercise choices. */
+:is(.shell, dialog) label:has(> select):not(.api-version-switch) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: .375rem;
+  min-width: 0;
+}
+
+:is(.shell, dialog) label:has(> select) > span:not(.sr-only) {
+  color: #294d69;
+  font: 800 var(--reading-label, .875rem)/1.4 "Manrope", system-ui, sans-serif;
+}
+
+:is(.shell, dialog) select {
+  appearance: none;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 3rem;
+  margin: 0;
+  padding: .625rem 2.5rem .625rem .875rem;
+  border: 1px solid #7997ac;
+  border-radius: 12px;
+  color: #102f55;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='%23234f88' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right .875rem center;
+  font: 500 var(--reading-text, 1rem)/1.4 "Manrope", system-ui, sans-serif;
+  cursor: pointer;
+}
+
+:is(.shell, dialog) select:where(:enabled:hover) {
+  border-color: #2f60a0;
+  background-color: #f5faff;
+}
+
+:is(.shell, dialog) select:focus-visible {
+  outline: 2px solid #087fa6;
+  outline-offset: 2px;
+}
+
+:is(.shell, dialog) select:is(.choice-correct, [data-valid="true"]) {
+  border-color: #46847f;
+  background-color: #e9f7f5;
+}
+
+:is(.shell, dialog) select:is(.choice-wrong, [aria-invalid="true"]) {
+  border-color: #b66832;
+  background-color: #fff5eb;
+}
+
+:is(.shell, dialog) select:disabled {
+  border-color: #b7c4ce;
+  color: #526570;
+  background-color: var(--inactive-panel-bg);
+  cursor: not-allowed;
+}
+
+@supports (appearance: base-select) and selector(::picker(select)) {
+  :is(.shell, dialog) select,
+  :is(.shell, dialog) select::picker(select) {
+    appearance: base-select;
+  }
+
+  :is(.shell, dialog) select::picker-icon {
+    display: none;
+  }
+
+  :is(.shell, dialog) select::picker(select) {
+    width: anchor-size(width);
+    padding: .25rem;
+    border: 1px solid #7997ac;
+    border-radius: 12px;
+    color: #102f55;
+    background: #fff;
+    box-shadow: 0 10px 24px rgba(16, 47, 85, .16);
+  }
+
+  :is(.shell, dialog) select option {
+    min-height: 2.75rem;
+    padding: .5rem .625rem;
+    gap: .5rem;
+    border-radius: 8px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  :is(.shell, dialog) select option:checked {
+    background: #e7f0fb;
+  }
+
+  :is(.shell, dialog) select option:enabled:is(:hover, :focus-visible) {
+    background: #f0f6fb;
+    outline: 2px solid #087fa6;
+    outline-offset: -2px;
+  }
+}
+
+@media (forced-colors: active) {
+  :is(.shell, dialog) select {
+    appearance: auto;
+    background-image: none;
+  }
+}
+
 /* Prominent shared navigation for all five practicums. */
 .hero-copy { position: relative; z-index: 1; }
 .api-eyebrow { position: relative; z-index: 3; isolation: isolate; }
@@ -446,57 +550,29 @@ body { padding-bottom: 0; }
   position: relative;
   display: inline-flex;
   align-items: center;
+  max-width: 100%;
 }
 
 .api-eyebrow .api-version-switch::before {
   content: "VALI PRAKTIKUM";
   position: absolute;
   left: 16px;
-  top: 7px;
+  top: .5rem;
   z-index: 1;
   color: #607b92;
-  font: 800 8px/1 "Manrope", system-ui, sans-serif;
-  letter-spacing: .13em;
+  font: 800 var(--reading-meta, .8125rem)/1 "Manrope", system-ui, sans-serif;
+  letter-spacing: .07em;
   pointer-events: none;
 }
 
-.api-eyebrow .api-version-switch::after {
-  content: "⌄";
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  color: #234f88;
-  font-size: 19px;
-  line-height: 1;
-  transform: translateY(-52%);
-  pointer-events: none;
-}
-
-.api-eyebrow .api-version-switch select {
-  appearance: none;
+.api-eyebrow .api-version-select {
   width: 218px;
-  max-width: calc(100vw - 78px);
-  min-height: 52px;
-  margin: 0;
-  padding: 16px 44px 3px 15px;
-  border: 2px solid #8fb7ce;
-  border-radius: 12px;
-  color: #173f73;
-  background: #fff;
+  max-width: 100%;
+  min-height: 3.5rem;
+  padding-block: 1.3rem .25rem;
   box-shadow: 0 9px 20px rgba(16, 47, 85, .13);
-  font: 800 14px "Manrope", system-ui, sans-serif;
+  font-weight: 800;
   letter-spacing: .01em;
-  cursor: pointer;
-}
-
-.api-eyebrow .api-version-switch select:hover {
-  border-color: #2f60a0;
-  background: #f8fcff;
-}
-
-.api-eyebrow .api-version-switch select:focus-visible {
-  outline: 3px solid rgba(10, 167, 216, .3);
-  outline-offset: 2px;
 }
 
 /* Show a result panel only when the current action has produced something to inspect. */
@@ -523,7 +599,7 @@ body { padding-bottom: 0; }
   .api-eyebrow { gap: 8px; }
   .api-eyebrow > span[aria-hidden="true"]:not(.pulse-dot) { display: none; }
   .api-eyebrow .api-home-link { min-width: 150px; }
-  .api-eyebrow .api-version-switch select { width: 210px; }
+  .api-eyebrow .api-version-select { width: 210px; }
   .lab-grid.result-pending,
   .lab-grid.impact-pending { grid-template-columns: 1fr !important; }
   .lab-grid.result-pending .control-card,

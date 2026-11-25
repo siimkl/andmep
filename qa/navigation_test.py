@@ -211,6 +211,15 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
             assert state["heading"] and state["footer"] and not state["overflow"], {route: state}
             assert state["homeHeight"] >= 52 and "AVALEHT" in state["homeAfter"], {route: state}
             assert state["selectWidth"] >= 210 and state["selectHeight"] >= 52 and "VALI PRAKTIKUM" in state["selectBefore"], {route: state}
+            assert evaluate("""(() => {
+              const fields = [...document.querySelectorAll('select')];
+              const styleKey = field => {
+                const css = getComputedStyle(field);
+                return [css.fontFamily, css.fontSize, css.borderRadius, css.paddingRight, css.backgroundImage].join('|');
+              };
+              return fields.length > 1 && new Set(fields.map(styleKey)).size === 1
+                && getComputedStyle(fields[0]).backgroundImage.startsWith('url(');
+            })()"""), route
             if route == "kraapimine":
                 assert not evaluate("Boolean(document.querySelector('.source-profile'))")
             assert state["resultHidden"] and state["resultPending"], {route: state}
