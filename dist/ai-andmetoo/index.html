@@ -133,8 +133,8 @@
           </fieldset>
           <label class="select-label" for="missingPolicy"><span>Kui soovituseks vajalik registriinfo puudub</span><select id="missingPolicy"><option value="">Vali üks tegevus</option><option value="average">Eelda, et takistust pole, ja kasuta märgendit „Tavaplaan”</option><option value="guess">Vali olemasoleva info põhjal kõige tõenäolisem toe märgend</option><option value="drop">Kasuta märgendit „Andmete täiendamine” ja saada kirje andmeomanikule täiendamiseks</option></select></label>
           <p class="availability-note" id="missingPolicyFeedback">Puuduliku info põhjal ei tohi teha kindlat toevajaduse otsust.</p>
-          <label class="select-label" for="labelRule"><span>Mille põhjal määratakse uus märgend?</span><select id="labelRule"><option value="">Vali üks reegel</option><option value="activity">Kasuta iseteeninduse aktiivsust inimese toevajaduse hinnanguna</option><option value="current">Lähtu praegusest dokumenteeritud vajadusest ja märgendusjuhisest</option></select></label>
-          <p class="availability-note" id="ruleAvailability">Õige reegel peab kirjeldama inimese praegust olukorda ja olema kõigile märgendajatele ühesugune.</p>
+          <label class="select-label" for="labelRule"><span>Mille põhjal määratakse uus märgend?</span><select id="labelRule"><option value="">Vali üks reegel</option><option value="activity">Kasuta iseteeninduse aktiivsust inimese toevajaduse hinnanguna</option><option value="current">Lähtu märgendusjuhisest</option></select></label>
+          <p class="availability-note" id="ruleAvailability">Ühine märgendusjuhis aitab sarnaseid kirjeid ühtmoodi märgendada.</p>
           <label class="select-label" for="disagreementPolicy"><span>Kui kaks märgendajat sama kirje puhul ei nõustu</span><select id="disagreementPolicy"><option value="">Vali üks tegevus</option><option value="first">Kasuta esimese märgendaja valikut</option><option value="both">Lisa sama registrikirje mõlema märgendiga treeningandmetesse</option><option value="expert">Valdkonnaspetsialist teeb põhjendatud lõppotsuse ja ebaselgus lisatakse juhisesse</option></select></label>
           <p class="availability-note" id="disagreementFeedback">Treeningandmetesse peab jõudma üks põhjendatud märgend, mitte lahendamata vastuolu.</p>
           <label class="select-label" for="representationAudit"><span>Mida kontrollitakse enne märgendamise algust?</span><select id="representationAudit"><option value="">Vali üks kontroll</option><option value="overall">Ainult seda, kas treeningkirjeid on kokku piisavalt</option><option value="technical">Ainult seda, kas kõik faili lahtrid on täidetud</option><option value="coverage">Kas registri piirkonnad, keeled ja teeninduskanalid on treeningvalimis esindatud ning kus andmed puuduvad</option></select></label>
@@ -233,6 +233,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=51"></script>
+  <script src="app.js?v=52"></script>
 </body>
 </html>

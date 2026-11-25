@@ -67,7 +67,7 @@ const requiredFieldCount = Object.keys(fieldNames).length;
 
 const ruleNames = {
   activity: "kasuta iseteeninduse aktiivsust toevajaduse hinnanguna",
-  current: "lähtu praegusest dokumenteeritud vajadusest ja märgendusjuhisest"
+  current: "lähtu märgendusjuhisest"
 };
 
 function requiredFieldsForRule() {
@@ -256,7 +256,7 @@ function consequences(scores) {
 
   if (!state.labelRule) list.push(["KATEGOORIAD", "Märgistusreegel on määramata. Sama registrikirje võib eri märgendajate käes saada erineva tähenduse."]);
   else if (state.disagreement === "expert") list.push(["KATEGOORIAD", "Eriarvamus lahendatakse põhjendatud eksperdiotsusega ja juhise ebaselgus dokumenteeritakse."]);
-  else list.push(["KATEGOORIAD", "Praegust vajadust arvestav reegel lisab konteksti, kuid vajab dokumenteeritud eksperditööd."]);
+  else list.push(["KATEGOORIAD", "Ühine märgendusjuhis aitab sarnaseid registrikirjeid ühtmoodi märgendada."]);
 
   if (!state.intervention) list.push(["VÄLJUND", "Kvaliteedimärke talletamise viis on veel määramata."]);
   else if (state.intervention === "every") list.push(["VÄLJUND", "Iga kasutatud soovitus saab kvaliteedimärke ja põhjenduse, millest tekib arendusmeeskonnale pidev tagasisidevoog."]);
@@ -404,10 +404,10 @@ function updateStage1Feedback() {
     feedback.textContent = `Vali veel ${fieldsLeft} ${fieldsLeft === 1 ? "andmeväli" : "andmevälja"}. Märgendaja peab harjutuses nägema kõiki viit välja.`;
   } else if (!state.labelRule) {
     feedback.className = "decision-feedback warn";
-    feedback.textContent = "Andmeväljad on valitud. Vali reegel, mis lähtub inimese praegusest dokumenteeritud vajadusest ja ühisest märgendusjuhisest.";
+    feedback.textContent = "Andmeväljad on valitud. Vali märgendusjuhisest lähtuv reegel.";
   } else if (state.labelRule !== "current") {
     feedback.className = "decision-feedback warn";
-    feedback.textContent = "Iseteeninduse aktiivsus ei näita inimese toevajadust. Uus märgend peab põhinema praegusel dokumenteeritud olukorral ja märgendusjuhisel.";
+    feedback.textContent = "Lähtu märgendusjuhisest, et sarnaseid juhtumeid ühtmoodi märgendada.";
   } else if (!state.missingPolicy || !state.disagreement || !state.audit) {
     feedback.className = "decision-feedback warn";
     feedback.textContent = "Vali veel, kuidas käsitleda puuduvat infot ja märgendajate eriarvamusi ning kuidas märgendusvalimit kontrollida.";
@@ -605,14 +605,14 @@ function updateRuleAvailability() {
   ruleSelect.dataset.valid = String(rule === "current");
   if (rule === "activity") {
     ruleNote.className = "availability-note warn";
-    ruleNote.textContent = "Aktiivsuse hulk ei näita, millist tuge inimene vajab. Kasuta praegust dokumenteeritud vajadust ja ühist märgendusjuhist.";
+    ruleNote.textContent = "Aktiivsuse hulk võib anda toevajadusest eksitava pildi. Lähtu märgendusjuhisest.";
   } else if (rule === "current") {
     ruleNote.className = "availability-note good";
-    ruleNote.textContent = "Õige: uus märgend põhineb praegusel dokumenteeritud infol ja kõigile märgendajatele ühisel juhisel.";
+    ruleNote.textContent = "Õige valik. Lähtu märgendi määramisel märgendusjuhisest.";
   } else {
     ruleNote.className = "availability-note";
     ruleNote.textContent = currentAvailable
-      ? "Vali reegel, mis kasutab tänast dokumenteeritud vajadust. Iseteeninduse aktiivsus võib olla ainult taustainfo."
+      ? "Ühine märgendusjuhis aitab sarnaseid kirjeid ühtmoodi märgendada."
       : "Õige reegli kasutamiseks vali andmeväljad „Nõustaja kokkuvõte” ja „Dokumenteeritud takistused”.";
   }
 }
@@ -786,7 +786,7 @@ function updateFocusState() {
     } else if (state.sources.size < requiredFieldCount) {
       title = `Vali kõik ${requiredFieldCount} andmevälja`;
       detail = "Need väljad kuvatakse igal märgendataval kirjel.";
-    } else if (!state.labelRule || state.labelRule !== "current") title = "Vali praegusel vajadusel põhinev märgendusreegel";
+    } else if (state.labelRule !== "current") title = "Vali märgendusjuhisest lähtuv reegel";
     else if (!state.missingPolicy || state.missingPolicy !== "drop") title = "Vali puuduliku info korral andmete täiendamine";
     else if (!state.disagreement || state.disagreement !== "expert") title = "Vali eriarvamuse lahendamiseks põhjendatud eksperdiotsus";
     else if (!state.audit) title = "Vali märgendusvalimi kontroll";

@@ -231,7 +231,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert choices["rules"] == [
                     "Vali üks reegel",
                     "Kasuta iseteeninduse aktiivsust inimese toevajaduse hinnanguna",
-                    "Lähtu praegusest dokumenteeritud vajadusest ja märgendusjuhisest",
+                    "Lähtu märgendusjuhisest",
                 ], choices
                 assert not evaluate("Boolean(document.querySelector('#sourceChoices input[value=\"history\"]'))"), "Varasema teenuseotsuse valik on alles"
                 assert "Varasem teenuseotsus" not in evaluate("document.querySelector('[data-stage=\"1\"]').textContent"), "Varasema teenuseotsuse tekst on alles"
@@ -287,6 +287,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 )"""))
                 assert stage1_captions == ["ANDMED JA JUHIS", "MÄRGENDAMINE", "MUDELI ÕPPIMINE"], stage1_captions
                 assert evaluate("dialogMiddle.textContent") == "Kirjeid märgendades saad kasutada 5 märgendit ja 5 andmevälja"
+                assert "lähtu märgendusjuhisest" in evaluate("dialogInsight.textContent")
                 evaluate("dialogContinue.click()")
                 time.sleep(0.25)
                 five_case_start = json.loads(evaluate("JSON.stringify({total:labelCases.length,progress:labelProgress.textContent,step:document.querySelector('[data-step=\"2\"] small').textContent,caseId:document.querySelector('#labelCase .case-top span').textContent,caseTitle:document.querySelector('#labelCase h4').textContent,trainingIds:labelCases.map(item=>item.id),trainingTitles:labelCases.map(item=>item.title),outputIds:outputCases.map(item=>item.id),outputTitles:outputCases.map(item=>item.title),briefing:document.querySelector('.briefing-copy').textContent})"))
