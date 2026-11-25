@@ -697,7 +697,7 @@ function updateLabelingBrief() {
   const fields = selectedFieldNames();
   const labels = Object.keys(labelNames).filter(key => state.availableLabels.has(key)).map(key => labelNames[key]);
   brief.innerHTML = fields.length
-    ? `<span>KINNITATUD LÄHTEÜLESANNE</span><p><b>Lubatud märgendid:</b> ${labels.join(", ") || "määramata"}. <b>Nähtavad väljad:</b> ${fields.join(", ")}. <b>Reegel:</b> ${ruleNames[state.labelRule] || "määramata"}. <b>Puuduv info:</b> registrikirje märgendatakse andmete täiendamiseks ja saadetakse andmeomanikule. Märgendaja tohib kasutada ainult kirjel kuvatud infot.</p>`
+    ? `<span>EELMISES ETAPIS KINNITATUD LÄHTEÜLESANNE / MÄRGENDUSJUHIS</span><p><b>Lubatud märgendid:</b> ${labels.join(", ") || "määramata"}. <b>Nähtavad väljad:</b> ${fields.join(", ")}. <b>Reegel:</b> ${ruleNames[state.labelRule] || "määramata"}. <b>Puuduv info:</b> registrikirje märgendatakse andmete täiendamiseks ja saadetakse andmeomanikule. Märgendaja tohib kasutada ainult kirjel kuvatud infot.</p>`
     : "";
 }
 
