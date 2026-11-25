@@ -99,6 +99,27 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
             click_element(f'.api-card[href="./{route}/"]')
             wait_for_path(f"/{route}/")
 
+        def assert_shared_footer(columns):
+            footer = evaluate("""(() => {
+              const text = nodes => [...nodes].map(node => node.textContent.trim());
+              const details = document.querySelector('.site-footer .footer-details');
+              return {
+                author: text(document.querySelectorAll('.site-footer .footer-author :is(small, strong)')),
+                details: [...details.children].map(item => text(item.children)),
+                columns: getComputedStyle(details).gridTemplateColumns.split(' ').length
+              };
+            })()""")
+            assert footer == {
+                "author": ["Õppematerjali autor", "Siim Klais"],
+                "details": [
+                    ["Tehnoloogia", "HTML5 · CSS3 · JavaScript (ES2022)", "Buildless veebirakendus, mis töötab otse brauseris."],
+                    ["Arenduskeskkond ja mudel", "VS Code · OpenAI Codex · GPT-5.6 Sol · Extra High", "Spec-driven · AI-supported coding"],
+                    ["Versioonihaldus ja avaldamine", "GitHub · GitHub Actions · GitHub Pages"],
+                    ["Andmed", "Sünteetilised andmed ja avalikud näited", "Tööotsijate andmed on väljamõeldud. Rakendus ei tee väliseid API-päringuid."],
+                ],
+                "columns": columns,
+            }, footer
+
         def confirm_quality_and_check_transition():
             click_element('[data-complete="3"]')
             transition = evaluate("""({
@@ -158,10 +179,14 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
             "mapLinks": 5,
             "apiPathLinks": 3,
             "standaloneLinks": 2,
-            "footerDetails": 3,
+            "footerDetails": 4,
             "overflow": False,
         }, landing
+        assert_shared_footer(4)
         screenshot("landing-desktop.png")
+        command("Emulation.setDeviceMetricsOverride", {"width": 1024, "height": 1000, "deviceScaleFactor": 1, "mobile": False})
+        assert_shared_footer(2)
+        command("Emulation.setDeviceMetricsOverride", {"width": 1440, "height": 1000, "deviceScaleFactor": 1, "mobile": False})
 
         modules = {
             "api1": "../api1/",
@@ -173,6 +198,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
         module_states = {}
         for route, selected in modules.items():
             open_practicum_card(route)
+            assert_shared_footer(4)
             state = json.loads(evaluate("""JSON.stringify({
               selected: document.querySelector('.api-version-select').value,
               options: document.querySelectorAll('.api-version-select option').length,
@@ -589,11 +615,13 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
           cardsFit: [...document.querySelectorAll('.api-card')].every(card => card.getBoundingClientRect().right <= innerWidth)
         })"""))
         assert mobile == {"width": 390, "cards": 5, "columns": 1, "overflow": False, "cardsFit": True}, mobile
+        assert_shared_footer(1)
         screenshot("landing-mobile.png")
 
         mobile_modules = {}
         for route in modules:
             open_practicum_card(route)
+            assert_shared_footer(1)
             state = json.loads(evaluate("""JSON.stringify({
               overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
               homeFits: document.querySelector('.api-home-link').getBoundingClientRect().right <= innerWidth,
