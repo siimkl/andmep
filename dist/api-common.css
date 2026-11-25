@@ -60,8 +60,32 @@
 .shell :is(
   .stage-card.awaiting-response, .stage-card.is-muted, .control-card.summary-inactive,
   .validation-card.locked, .practice-suite.locked, .sequence-exercise.locked, .control-section.locked
-) :is(p, small, legend, .stage-counter, .flow-status b, .status-chip b) {
+) :is(p, small, legend, .flow-status b, .status-chip b) {
   color: var(--inactive-panel-ink);
+}
+
+.control-head {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem .75rem;
+}
+
+.stage-counter {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
+  margin-inline-start: auto;
+  padding: .42rem .75rem;
+  border: 1px solid #234f88;
+  border-radius: .65rem;
+  color: #fff;
+  background: #234f88;
+  box-shadow: 0 3px 8px rgba(35, 79, 136, .14);
+  font: 800 1rem/1.2 "Manrope", system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .api-home-link {

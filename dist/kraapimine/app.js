@@ -129,7 +129,7 @@
       panel.classList.toggle("active", active);
     });
     $$(".step").forEach((button) => button.classList.toggle("active", Number(button.dataset.step) === step));
-    els.currentStepLabel.textContent = `${step}/${TOTAL_STEPS}`;
+    els.currentStepLabel.textContent = `SAMM ${step} / ${TOTAL_STEPS}`;
     els.prevLesson.disabled = step === 1;
     els.nextLesson.disabled = step === TOTAL_STEPS || step >= completed + 1;
     setResultPanelVisible(step >= 3 && completed >= 3);

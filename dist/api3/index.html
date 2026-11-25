@@ -6,8 +6,8 @@
   <meta name="description" content="API 3 interaktiivne õpirakendus: tehisaru API-de ühendamine enda rakendusega ning Statistikaameti andmete tõlgendamine Gemini API abil.">
   <title>API 3 · Tehisaru API-de ühendamine enda rakendusega</title>
   <link rel="stylesheet" href="styles.css?v=66">
-  <link rel="stylesheet" href="../api-common.css?v=12">
-  <link rel="stylesheet" href="../readability.css?v=1">
+  <link rel="stylesheet" href="../api-common.css?v=13">
+  <link rel="stylesheet" href="../readability.css?v=2">
 </head>
 <body>
   <main class="shell" id="app">
@@ -44,7 +44,10 @@
 
     <section class="lab-grid result-pending" aria-label="AI API integratsiooni labor">
       <aside class="control-card card">
-        <div class="control-head"><span class="section-kicker">KOOSTA PÄRING<b id="currentStepLabel" hidden>1/4</b></span></div>
+        <div class="control-head">
+          <span class="section-kicker">KOOSTA PÄRING</span>
+          <span class="stage-counter" id="currentStepLabel">SAMM 1 / 4</span>
+        </div>
 
         <section class="lesson-panel active" data-lesson="1">
           <div class="control-title"><span>01</span><div><h3>Vaata, mida saab küsida</h3><p>GET-päring tagastab tabeli kirjelduse ja valikud. Palgaandmeid vastuses veel ei ole.</p></div></div>
@@ -379,6 +382,6 @@ vastus_ai &lt;- request(<span class="str">"https://generativelanguage.googleapis
   </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js"></script>
-  <script src="app.js?v=69"></script>
+  <script src="app.js?v=70"></script>
 </body>
 </html>

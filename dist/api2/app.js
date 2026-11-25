@@ -7,6 +7,7 @@
 
   const els = {
     progressValue: $("#progressValue"), progressText: $("#progressText"), progressBar: $("#progressBar"), completedCount: $("#completedCount"),
+    currentStepLabel: $("#currentStepLabel"),
     resetButton: $("#resetButton"),
     labGrid: $(".lab-grid"), stageCard: $(".stage-card"), controlCard: $(".control-card"), flowStatus: $("#flowStatus"), storyIndex: $("#storyIndex"), storyText: $("#storyText"),
     flowDialog: $("#flowDialog"), flowDialogKicker: $("#flowDialogKicker"), dialogFlowStage: $("#dialogFlowStage"), dialogFlowStatus: $("#dialogFlowStatus"),
@@ -359,6 +360,7 @@
 
   function setProgress(step, completed = false) {
     state.currentStep = step;
+    els.currentStepLabel.textContent = `SAMM ${step} / 4`;
     const percent = step === 1 ? 0 : step === 2 ? 25 : step === 3 ? 50 : completed ? 100 : 75;
     const labels = { 1: "Küsi metaandmed", 2: "Vali andmed", 3: "Küsi andmed", 4: completed ? "Kontroll tehtud" : "Kontrolli vastust" };
     els.progressValue.textContent = `${percent}%`;

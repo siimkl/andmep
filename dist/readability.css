@@ -40,7 +40,7 @@ body :is(.shell, .launcher, dialog) :is(
   .path-heading b, .start-panel > div span, .mission-label, .progress-meta, .progress-value span,
   .briefing-card > div > span, .briefing-mark, .briefing-question small, .briefing-target small,
   .step b, .flow-status span, .flow-status b, .status-chip, .status-chip b, .exercise-state,
-  .stage-counter, .active-task-cue > span, .labeling-instruction-intro > span,
+  .active-task-cue > span, .labeling-instruction-intro > span,
   .labeling-brief > span, .label-guide > span, .choice-explanation > span,
   .impact-next-step > div > span, .case-progress, .case-top span, .case-top b,
   .case-meta span, .source-choice em, .label-bars > div > div, .learned-pattern b,

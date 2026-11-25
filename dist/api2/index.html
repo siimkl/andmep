@@ -6,8 +6,8 @@
   <meta name="description" content="Interaktiivne API päringulabor: uuri metaandmeid, koosta POST-päring, lahenda veakoode ja kontrolli vastust.">
   <title>API 2 · API andmed RStudio töövoos</title>
   <link rel="stylesheet" href="styles.css?v=2">
-  <link rel="stylesheet" href="../api-common.css?v=12">
-  <link rel="stylesheet" href="../readability.css?v=1">
+  <link rel="stylesheet" href="../api-common.css?v=13">
+  <link rel="stylesheet" href="../readability.css?v=2">
 </head>
 <body>
   <main class="shell" id="app">
@@ -77,6 +77,7 @@
       <aside class="control-card card">
         <div class="control-head">
           <span class="section-kicker">KOOSTA PÄRING</span>
+          <span class="stage-counter" id="currentStepLabel">SAMM 1 / 4</span>
         </div>
 
         <section class="control-section" id="metadataSection">
@@ -318,6 +319,6 @@ Accept: application/json</pre>
     </footer>
   </main>
   <script src="../api-nav.js"></script>
-  <script src="app.js?v=2"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

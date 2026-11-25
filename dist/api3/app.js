@@ -498,7 +498,7 @@
       }
     }
     $$(".step").forEach((item) => item.classList.toggle("active", Number(item.dataset.step) === step));
-    els.currentStepLabel.textContent = `${step}/${TOTAL_STEPS}`;
+    els.currentStepLabel.textContent = `SAMM ${step} / ${TOTAL_STEPS}`;
     const preserveResponseStage = step === 3 && completed === 2;
     els.storyStrip.hidden = step === 4;
     if (!preserveResponseStage) {

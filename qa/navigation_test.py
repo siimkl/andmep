@@ -75,6 +75,14 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
             result = command("Page.captureScreenshot", {"format": "png", "captureBeyondViewport": False})
             (ROOT / "qa" / name).write_bytes(base64.b64decode(result["data"]))
 
+        def wait_for_counter(expected):
+            for _ in range(75):
+                actual = evaluate("document.querySelector('.control-head .stage-counter').textContent.trim()")
+                if actual == expected:
+                    return
+                time.sleep(0.1)
+            raise AssertionError(f"Expected {expected}, got {actual}")
+
         def confirm_quality_and_check_summary():
             point = evaluate("""(() => {
               const button = document.querySelector('[data-complete="3"]');
@@ -207,6 +215,15 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert not evaluate("Boolean(document.querySelector('.source-profile'))")
             assert state["resultHidden"] and state["resultPending"], {route: state}
             assert state["controlCenterDelta"] <= 10, {route: state}
+            badge_state = evaluate("""(() => {
+                const badge = document.querySelector('.control-head .stage-counter');
+                const style = getComputedStyle(badge);
+                return {text: badge.textContent.trim(), fontSize: parseFloat(style.fontSize),
+                  height: badge.getBoundingClientRect().height, background: style.backgroundColor, color: style.color};
+            })()""")
+            expected_counter = {"kraapimine": "SAMM 1 / 5", "ai-andmetoo": "ETAPP 1 / 4"}.get(route, "SAMM 1 / 4")
+            assert badge_state["text"] == expected_counter and badge_state["fontSize"] >= 16 and badge_state["height"] >= 40, {route: badge_state}
+            assert badge_state["background"] == "rgb(35, 79, 136)" and badge_state["color"] == "rgb(255, 255, 255)", {route: badge_state}
             if route != "ai-andmetoo":
                 inactive_palette = evaluate("""(() => {
                   const panel = document.querySelector('.practice-suite.locked');
@@ -221,10 +238,12 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 evaluate("document.querySelector('#getMetadata').click()")
                 revealed = json.loads(evaluate("JSON.stringify({hidden:document.querySelector('.stage-card').hidden,pending:document.querySelector('.lab-grid').classList.contains('result-pending')})"))
                 assert revealed == {"hidden": False, "pending": False}, {route: revealed}
+                wait_for_counter("SAMM 2 / 4")
             elif route == "api3":
                 evaluate("document.querySelector('[data-run=\"1\"]').click()")
                 revealed = json.loads(evaluate("JSON.stringify({hidden:stageCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('result-pending')})"))
                 assert revealed == {"hidden": False, "pending": False}, {route: revealed}
+                wait_for_counter("SAMM 2 / 4")
             elif route == "ai-andmetoo":
                 intro = evaluate("document.querySelector('.labeling-instruction-intro').textContent.replace(/\\s+/g,' ').trim()")
                 assert intro == "MIS ON MÄRGENDUSJUHIS? Märgendusjuhis on ühine reeglistik, mis selgitab, mida iga märgend tähendab ja millise nähtava info põhjal seda kasutada. Selge juhis aitab eri märgendajatel samasuguste registriandmetega tööotsijaid ühtemoodi hinnata ning loob mudelile järjepidevad treeningandmed.", intro
@@ -368,6 +387,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 time.sleep(0.25)
                 impact_transition = json.loads(evaluate("JSON.stringify({stage:state.currentStage,dialogOpen:impactDialog.open,impactHidden:impactCard.hidden,impactTitle:impactTitle.textContent,nextHidden:impactNextStep.hidden,nextText:continueFromImpact.textContent.trim(),focused:document.activeElement===impactCard})"))
                 assert impact_transition == {"stage": 2, "dialogOpen": False, "impactHidden": False, "impactTitle": "Mida mudel sinu märgenditest õpib?", "nextHidden": False, "nextText": "Jätka mudeli väljundite hindamisega", "focused": True}, impact_transition
+                assert evaluate("stageCounter.textContent") == "ETAPP 2 / 4"
                 assert evaluate("document.querySelector('.control-card').inert")
                 inactive_palette = evaluate("""(() => {
                   const panel = document.querySelector('.control-card');
@@ -406,6 +426,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert stage3["stageTitle"] == "Kui kvaliteetsed on mudeli soovitused?" and "Teenuseotsuse eest vastutab ametnik" in stage3["stageLead"] and "varem valitud märgendid" in stage3["stageLead"], stage3
                 assert "Märgendamistöö on lõppenud." in stage3["transition"] and "uute registrikirjete" in stage3["transition"] and "arendajal ja tooteomanikul" in stage3["transition"], stage3
                 assert stage3["impactHidden"] and stage3["pending"] and stage3["centerDelta"] <= 10, stage3
+                assert evaluate("stageCounter.textContent") == "ETAPP 3 / 4"
                 assert evaluate("!document.querySelector('.control-card').inert")
                 assert "tagasisidet kogub" in stage3["cue"] and "Võrdle kuvatud soovitust kontrollkirje infoga" in stage3["cue"], stage3
                 assert stage3["policyLabel"] == "Kuidas peaks amet mudeli kohta tagasisidet koguma?" and len(stage3["policyOptions"]) == 5 and stage3["policyOptions"][1] == "Hinda iga kasutatud soovitust", stage3
@@ -518,6 +539,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
         time.sleep(0.7)
         before_scrape = json.loads(evaluate("JSON.stringify({step:document.querySelector('.lesson-panel:not([hidden])').dataset.lesson,hidden:stageCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('result-pending')})"))
         assert before_scrape == {"step": "3", "hidden": True, "pending": True}, before_scrape
+        assert evaluate("currentStepLabel.textContent") == "SAMM 3 / 5"
         evaluate("document.querySelector('[data-run=\"3\"]').click()")
         time.sleep(2.4)
         evaluate("flowDialogClose.click()")
@@ -549,6 +571,11 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
               options: document.querySelectorAll('.api-version-select option').length
             })"""))
             assert state == {"overflow": False, "homeFits": True, "selectFits": True, "options": 5}, {route: state}
+            assert evaluate("""(() => {
+              const badge = document.querySelector('.control-head .stage-counter');
+              const rect = badge.getBoundingClientRect();
+              return rect.left >= 0 && rect.right <= innerWidth && rect.height >= 40;
+            })()"""), route
             reading_sizes = evaluate("""[
               parseFloat(getComputedStyle(document.querySelector('.hero-description')).fontSize),
               parseFloat(getComputedStyle(document.querySelector('.footer-note > span')).fontSize)

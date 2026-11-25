@@ -7,8 +7,8 @@
   <title>Veebikraapimine - interaktiivne praktikum</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="styles.css?v=12">
-  <link rel="stylesheet" href="../api-common.css?v=12">
-  <link rel="stylesheet" href="../readability.css?v=1">
+  <link rel="stylesheet" href="../api-common.css?v=13">
+  <link rel="stylesheet" href="../readability.css?v=2">
 </head>
 <body>
   <main class="shell" id="app">
@@ -44,7 +44,10 @@
 
     <section class="lab-grid result-pending" aria-label="Veebikraapimise labor">
       <aside class="control-card card">
-        <div class="control-head"><span class="section-kicker">KOOSTA TÖÖVOOG<b id="currentStepLabel" hidden>1/6</b></span></div>
+        <div class="control-head">
+          <span class="section-kicker">KOOSTA TÖÖVOOG</span>
+          <span class="stage-counter" id="currentStepLabel">SAMM 1 / 5</span>
+        </div>
 
         <section class="lesson-panel active" data-lesson="1">
           <div class="control-title"><span>01</span><div><h3>Kas kraapimine on õige meetod?</h3><p>Veebikraapimine on varuvariant, kui sobivat faili või API-t pole. Avalik leht ei ole automaatselt vaba andmestik.</p></div></div>
@@ -219,6 +222,6 @@ andmed &lt;- do.call(rbind, tabelid)</code></pre>
   </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=12"></script>
+  <script src="app.js?v=13"></script>
 </body>
 </html>
