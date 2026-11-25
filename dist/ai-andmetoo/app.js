@@ -877,7 +877,10 @@ const dialogMessages = {
     endLabel: "MUDELI SOOVITUSED",
     end: "Mudel rakendab õpitud seoseid kogu registrile",
     continueText: "Vaata märgenduse mõju",
-    insight: "Mudel ei tea, milline märgend oli ekslik. Ta õpib kõigist treeningandmetesse lisatud kirjetest, mistõttu märgendaja järjepidevus mõjutab kõigile tööotsijatele antavaid soovitusi."
+    sections: [
+      { title: "Millest mudel õpib?", text: "Mudel õpib kõigist treeningkirjetest, sealhulgas neist, mis said eksliku märgendi." },
+      { title: "Mõju järgmistele soovitustele", text: "See, kui järjepidevalt sa märgendeid kasutasid, mõjutab teistele tööotsijatele antavaid soovitusi." }
+    ]
   },
   4: {
     startLabel: "VASTUTUS",
@@ -887,9 +890,39 @@ const dialogMessages = {
     endLabel: "JÄRGMINE MUDELIVERSIOON",
     end: "Järgmist mudeliversiooni saab kontrollitult parandada",
     continueText: "Vaata mudeli paranduskava",
-    insight: "Juhise versioon, vaidlustatud näidete põhjendused, hindamistulemused ja kontrollitud testprofiilid aitavad sama vea järgmises mudeliversioonis uuesti üles leida."
+    sections: [
+      {
+        title: "Mida tasub säilitada?",
+        items: ["Märgendusjuhise versioon", "Vaidlustatud näidete põhjendused", "Mudeli väljundite hindamistulemused", "Kontrollitud testkirjed"]
+      },
+      { title: "Kontroll järgmises versioonis", text: "Nende materjalide abil saad kontrollida, kas viga sai parandatud või kordub ka uues mudeliversioonis." }
+    ]
   }
 };
+
+function renderDialogInsight(sections) {
+  const content = sections.map(({ title, text, items }) => {
+    const section = document.createElement("section");
+    const heading = document.createElement("h3");
+    heading.textContent = title;
+    section.append(heading);
+    if (items) {
+      const list = document.createElement("ul");
+      items.forEach(item => {
+        const entry = document.createElement("li");
+        entry.textContent = item;
+        list.append(entry);
+      });
+      section.append(list);
+    } else {
+      const paragraph = document.createElement("p");
+      paragraph.textContent = text;
+      section.append(paragraph);
+    }
+    return section;
+  });
+  $("#dialogInsight").replaceChildren(...content);
+}
 
 function completeStage(stage) {
   if (!stageValid(stage)) return;
@@ -907,7 +940,12 @@ function completeStage(stage) {
     const fields = selectedFieldNames();
     const labels = Object.keys(labelNames).filter(key => state.availableLabels.has(key)).map(key => labelNames[key]);
     message.middle = `Kirjeid märgendades saad kasutada ${labels.length} märgendit ja ${fields.length} andmevälja`;
-    message.insight = `Valisid märgendid: ${labels.join(", ")}. Märgendajale kuvatakse väljad: ${fields.join(", ")}. Ta peab järgima reeglit „${ruleNames[state.labelRule]}”. Puuduvat märgendit ega treeningkirjest välja jäetud registriinfot ei saa mudel hiljem õppida.`;
+    message.sections = [
+      { title: "Valitud märgendid", items: labels },
+      { title: "Märgendajale nähtavad väljad", items: fields },
+      { title: "Märgendusreegel", text: `${$("#labelRule").selectedOptions[0].textContent}.` },
+      { title: "Mida mudel saab õppida?", text: "Mudel õpib seoseid treeningkirjetes olevate andmeväljade ja märgendite põhjal." }
+    ];
   }
   $("#dialogStage").textContent = `${stage} / 4`;
   $("#dialogStartLabel").textContent = message.startLabel;
@@ -916,7 +954,7 @@ function completeStage(stage) {
   $("#dialogMiddle").textContent = message.middle;
   $("#dialogEndLabel").textContent = message.endLabel;
   $("#dialogEnd").textContent = message.end;
-  $("#dialogInsight").textContent = message.insight;
+  renderDialogInsight(message.sections);
   $("#dialogContinue span").textContent = message.continueText ?? "Jätka järgmise etapiga";
   $("#impactDialog").dataset.completedStage = stage;
   $("#impactDialog").showModal();

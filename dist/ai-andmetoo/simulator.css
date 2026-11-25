@@ -156,5 +156,32 @@ button,select{font-size:1rem}
 .impact-next-actions .inline-reset {
   min-height: 42px;
 }
+.dialog-insight {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 16px 24px;
+}
+.dialog-insight h3 {
+  margin: 0 0 5px;
+  color: #102f55;
+  font-size: 1rem;
+}
+.dialog-insight p,
+.dialog-insight ul {
+  margin: 0;
+}
+.dialog-insight ul {
+  padding-inline-start: 1.25rem;
+}
+.dialog-insight li + li {
+  margin-top: 2px;
+}
+@media (max-width: 680px) {
+  .dialog-insight {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+}
 @media(max-width:900px){.lab-grid.impact-pending{grid-template-columns:1fr}.lab-grid.impact-pending .control-card{max-width:none}}
 @media(max-width:680px){.label-actions{grid-template-columns:1fr}}

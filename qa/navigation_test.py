@@ -287,7 +287,20 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 )"""))
                 assert stage1_captions == ["ANDMED JA JUHIS", "MÄRGENDAMINE", "MUDELI ÕPPIMINE"], stage1_captions
                 assert evaluate("dialogMiddle.textContent") == "Kirjeid märgendades saad kasutada 5 märgendit ja 5 andmevälja"
-                assert "lähtu märgendusjuhisest" in evaluate("dialogInsight.textContent")
+                assert evaluate("[...dialogInsight.querySelectorAll('h3')].map(title => title.textContent)") == [
+                    "Valitud märgendid", "Märgendajale nähtavad väljad", "Märgendusreegel", "Mida mudel saab õppida?"
+                ]
+                assert evaluate("[...dialogInsight.querySelectorAll('ul')].map(list => list.children.length)") == [5, 5]
+                assert "Andmete kontrollimise aeg" in evaluate("dialogInsight.textContent")
+                assert "Lähtu märgendusjuhisest." in evaluate("dialogInsight.textContent")
+                assert evaluate("getComputedStyle(dialogInsight).gridTemplateColumns.split(' ').length") == 2
+                screenshot("ai-andmetoo-choice-summary.png")
+                command("Emulation.setDeviceMetricsOverride", {"width": 390, "height": 844, "deviceScaleFactor": 1, "mobile": True})
+                assert evaluate("getComputedStyle(dialogInsight).gridTemplateColumns.split(' ').length") == 1
+                assert evaluate("impactDialog.scrollWidth <= impactDialog.clientWidth")
+                evaluate("dialogInsight.scrollIntoView({block: 'start', behavior: 'instant'})")
+                screenshot("ai-andmetoo-choice-summary-mobile.png")
+                command("Emulation.setDeviceMetricsOverride", {"width": 1440, "height": 1000, "deviceScaleFactor": 1, "mobile": False})
                 evaluate("dialogContinue.click()")
                 time.sleep(0.25)
                 five_case_start = json.loads(evaluate("JSON.stringify({total:labelCases.length,progress:labelProgress.textContent,step:document.querySelector('[data-step=\"2\"] small').textContent,caseId:document.querySelector('#labelCase .case-top span').textContent,caseTitle:document.querySelector('#labelCase h4').textContent,trainingIds:labelCases.map(item=>item.id),trainingTitles:labelCases.map(item=>item.title),outputIds:outputCases.map(item=>item.id),outputTitles:outputCases.map(item=>item.title),briefing:document.querySelector('.briefing-copy').textContent})"))
@@ -341,6 +354,9 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                     [...document.querySelectorAll('#impactDialog .flow-node small')].map(node => node.textContent)
                 )"""))
                 assert stage2_captions == ["MÄRGENDAMINE", "TREENINGANDMED", "MUDELI SOOVITUSED"], stage2_captions
+                assert evaluate("[...dialogInsight.querySelectorAll('h3')].map(title => title.textContent)") == [
+                    "Millest mudel õpib?", "Mõju järgmistele soovitustele"
+                ]
                 evaluate("dialogContinue.click()")
                 time.sleep(0.25)
                 impact_transition = json.loads(evaluate("JSON.stringify({stage:state.currentStage,dialogOpen:impactDialog.open,impactHidden:impactCard.hidden,impactTitle:impactTitle.textContent,nextHidden:impactNextStep.hidden,nextText:continueFromImpact.textContent.trim(),focused:document.activeElement===impactCard})"))
@@ -442,6 +458,10 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 time.sleep(0.25)
                 after_plan_confirmation = json.loads(evaluate("JSON.stringify({dialogOpen:impactDialog.open,completed:state.completed.has(4),completedCount:completedCount.textContent,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),impactTitle:document.querySelector('#impactTitle').textContent})"))
                 assert after_plan_confirmation == {"dialogOpen": True, "completed": True, "completedCount": "4", "impactHidden": False, "pending": False, "impactTitle": "Kuidas jõuavad parandused järgmisse versiooni?"}, after_plan_confirmation
+                assert evaluate("[...dialogInsight.querySelectorAll('h3')].map(title => title.textContent)") == [
+                    "Mida tasub säilitada?", "Kontroll järgmises versioonis"
+                ]
+                assert evaluate("dialogInsight.querySelectorAll('li').length") == 4
                 evaluate("dialogContinue.click(); document.querySelector('[data-step=\"2\"]').click()")
                 assert evaluate("document.querySelector('[data-complete=\"2\"]').disabled")
                 evaluate("retryFromImpact.click()")
