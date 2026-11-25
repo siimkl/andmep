@@ -192,43 +192,6 @@ button{font-size:1rem}
 .label-bars [data-label-bar="self"] i span{background:#07979a}
 .label-bars [data-label-bar="supplement"] i span{background:#d69218}
 .label-bars [data-label-bar="review"] i span{background:#7654a8}
-#trainingFlow[hidden], #trainingImpact[hidden], #reviewImpactSummary[hidden] {
-  display: none;
-}
-.review-impact-summary {
-  margin-top: 16px;
-}
-.review-impact-summary ul {
-  display: grid;
-  gap: 14px;
-  margin: 14px 0 0;
-  padding: 0;
-  list-style: none;
-}
-.review-impact-summary li {
-  padding-top: 12px;
-  border-top: 1px solid #c6d7df;
-}
-.review-impact-summary h4,
-.review-impact-summary li p {
-  margin: 0;
-}
-.review-impact-summary dl {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 4px 12px;
-  margin: 8px 0;
-}
-.review-impact-summary dt {
-  color: #526c86;
-}
-.review-impact-summary dd {
-  margin: 0;
-  font-weight: 700;
-}
-.review-impact-summary li p {
-  line-height: 1.55;
-}
 .review-reference {
   margin-top: 12px;
   padding-top: 10px;
@@ -245,13 +208,13 @@ button{font-size:1rem}
   margin-top: 3px;
   color: #102f55;
 }
-.control-card.summary-inactive .case-meta:has([data-relabel], [data-rereview]),
+.control-card.summary-inactive .case-meta:has([data-relabel]),
 .control-card.summary-inactive .next-action-label {
   display: none;
 }
 .control-card.summary-inactive :is(
-  .label-guide, .label-guide article, .labeling-brief, .labeling-instruction-intro,
-  .decision-feedback, .case-progress, .decision-stage .case-card, .output-card, .next-action-guide
+  .label-guide, .label-guide article, .labeling-brief,
+  .decision-feedback, .case-progress, .decision-stage .case-card, .next-action-guide
 ) {
   background: var(--inactive-panel-inner);
   border-color: var(--inactive-panel-border);
@@ -264,8 +227,7 @@ button{font-size:1rem}
   border-width: 1px;
 }
 .control-card.summary-inactive :is(.control-title > span, .primary-button:disabled),
-.control-card.summary-inactive .decision-stage .case-card .case-top b,
-.control-card.summary-inactive .output-card .case-top b {
+.control-card.summary-inactive .decision-stage .case-card .case-top b {
   color: var(--inactive-panel-heading);
   background: var(--inactive-panel-badge);
   box-shadow: none;
@@ -279,12 +241,9 @@ button{font-size:1rem}
   color: #344954;
   box-shadow: none;
 }
-.control-card.summary-inactive :is(.label-guide b, .labeling-brief > span, .labeling-instruction-intro > span, .case-progress, .decision-stage .case-card h4, .decision-stage .case-card .case-top span) {
+.control-card.summary-inactive :is(.label-guide b, .labeling-brief > span, .case-progress, .decision-stage .case-card h4, .decision-stage .case-card .case-top span) {
   color: var(--inactive-panel-heading);
   font-weight: 700;
-}
-.control-card.summary-inactive .labeling-instruction-intro p::first-line {
-  color: inherit;
 }
 .control-card.summary-inactive .primary-button:disabled {
   filter: none;
@@ -297,7 +256,8 @@ button{font-size:1rem}
 .impact-next-actions .inline-reset {
   min-height: 42px;
 }
-.dialog-head h2:focus-visible {
+.dialog-head h2:focus-visible,
+#stage4Title:focus-visible {
   outline: 2px solid #087fa6;
   outline-offset: 3px;
   border-radius: 4px;

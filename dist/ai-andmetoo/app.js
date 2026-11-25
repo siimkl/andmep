@@ -104,7 +104,7 @@ function caseDataHtml(item) {
 const stageCopy = {
   1: { title: "Vali andmed ja määra nõuded", story: "<b>Andmete valik eelneb märgendamisele.</b> Valitud väljad ja juhis määravad, mida märgendaja saab põhjendatult otsustada ning mida mudel hiljem õppida saab." },
   2: { title: "Märgenda tööotsijate kirjed", story: "<b>Iga märgendatud registrikirje lisatakse mudeli treeningandmetesse.</b> Hästi põhjendatud märgend tugineb nähtavale infole ja ühtsele juhisele. Kui kindlat soovitust ei saa teha, peab ebakindlus jääma nähtavaks." },
-  3: { title: "Hinda mudeli väljundeid", story: "<b>Hindasid mudeli nelja soovitust.</b> Sinu hinnangud aitavad arendajal ja tooteomanikul otsustada, milliseid vigu uurida ja mida järgmises mudeliversioonis parandada." },
+  3: { title: "Hinda mudeli väljundeid" },
   4: { title: "Paranda mudeli arendusprotsessi", story: "<b>Mudeli väljundite hindamine loob parandussisendi.</b> Korduv viga peab jõudma tagasi märgendusjuhisesse, treeningandmetesse, hindamiskriteeriumidesse või mudeli järgmisse versiooni." }
 };
 
@@ -295,35 +295,10 @@ function labelPatternRows() {
 }
 
 function updateImpact() {
-  const evaluating = state.currentStage === 3;
-  const reviewConfirmed = evaluating && state.completed.has(3);
-  $("#trainingFlow").hidden = evaluating;
-  $("#trainingImpact").hidden = evaluating;
-  $("#reviewImpactSummary").hidden = !reviewConfirmed;
-  if (reviewConfirmed) renderReviewImpact();
-
   const metrics = calculateLabelMetrics();
   const total = state.labels.length;
-  const nextStep = $("#impactNextStep");
-  nextStep.hidden = !(state.currentStage === 2 && state.completed.has(2)) && !reviewConfirmed;
-  if (!nextStep.hidden) {
-    $("b", nextStep).textContent = evaluating
-      ? "Vaata, millised soovitused vajavad parandamist või lisainfot."
-      : "Uuri esmalt märgendite jaotust ja mudeli õpitud seoseid.";
-    $("p", nextStep).textContent = evaluating
-      ? "Järgmises etapis otsustad, kes ja kuidas parandustega edasi tegeleb."
-      : "Kui oled valmis, liigu eraldi kontrollandmestikul mudeli soovitusi hindama.";
-    $("#continueFromImpact span").textContent = evaluating
-      ? "Jätka paranduskava juurde"
-      : "Jätka mudeli väljundite hindamisega";
-    $("#retryFromImpact").textContent = evaluating ? "Hinda väljundeid uuesti" : "Märgenda kirjed uuesti";
-  }
-  if (state.currentStage === 3) {
-    $("#impactKicker").textContent = "MUDELI VÄLJUNDITE HINDAMINE";
-    $("#impactTitle").textContent = "Mida tuleb järgmises mudeliversioonis parandada?";
-    $("#impactStatusLabel").textContent = "HINDAMISE SEIS";
-    $("#impactStatus").textContent = `${state.reviews.length} / ${outputCases.length} kvaliteedimärget`;
-  } else if (state.currentStage === 4) {
+  $("#impactNextStep").hidden = !(state.currentStage === 2 && state.completed.has(2));
+  if (state.currentStage === 4) {
     $("#impactKicker").textContent = "MUDELI EDASIARENDUS";
     $("#impactTitle").textContent = "Kuidas jõuavad parandused järgmisse versiooni?";
     $("#impactStatusLabel").textContent = "HINDAMISTULEMUS";
@@ -516,7 +491,7 @@ function renderOutputCase() {
     $("#reviewExplanationText").textContent = item.reason;
     $("#reviewReference").hidden = expected !== "correct";
     $("#reviewReferenceLabel").textContent = expected === "correct" ? labelNames[item.referenceLabel] : "";
-    $("#nextReviewCase").textContent = state.reviews.length === outputCases.length ? "Vaata kvaliteedihinnangute kokkuvõtet" : "Jätka järgmise väljundiga";
+    $("#nextReviewCase").textContent = state.reviews.length === outputCases.length ? "Jätka kinnitamisega" : "Jätka järgmise väljundiga";
   } else if (state.reviews.length === outputCases.length) {
     const summary = Object.keys(reviewNames).map(key => `${reviewNames[key]}: ${state.reviews.filter(value => value === key).length}`).join(" · ");
     const aligned = outputCases.filter((item, index) => state.reviews[index] === expectedReview(item)).length;
@@ -535,23 +510,6 @@ function renderOutputCase() {
     explanation.hidden = true;
     $$("#reviewActions button").forEach(button => { button.disabled = !state.completed.has(2); });
   }
-}
-
-function renderReviewImpact() {
-  $("#reviewImpactDetails").innerHTML = outputCases.map((item, index) => {
-    const suggestion = simulatedSuggestion(item);
-    const review = expectedReview(item, suggestion);
-    const reference = review === "correct" ? ` Mudel peaks soovitama „${labelNames[item.referenceLabel]}”.` : "";
-    return `<li>
-      <h4>${item.title}</h4>
-      <dl>
-        <dt>Mudeli soovitus</dt><dd>${labelNames[suggestion]}</dd>
-        <dt>Sinu hinnang</dt><dd>${reviewNames[state.reviews[index]]}</dd>
-        <dt>Kontrolli tulemus</dt><dd>${reviewNames[review]}</dd>
-      </dl>
-      <p>${item.reason}${reference}</p>
-    </li>`;
-  }).join("");
 }
 
 function updateStage4() {
@@ -747,12 +705,10 @@ function updateFocusState() {
 
   const impactLocked = !labelingConfirmed;
   const impactCard = $("#impactCard");
-  const impactPending = state.currentStage === 1
-    || (state.currentStage === 2 && !state.completed.has(2))
-    || (state.currentStage === 3 && !state.completed.has(3))
-    || (state.currentStage === 4 && !state.completed.has(4));
-  impactCard.hidden = impactPending;
-  $(".lab-grid").classList.toggle("impact-pending", impactPending);
+  const stageDone = state.completed.has(state.currentStage);
+  const impactVisible = stageDone && (state.currentStage === 2 || state.currentStage === 4);
+  impactCard.hidden = !impactVisible;
+  $(".lab-grid").classList.toggle("impact-pending", !impactVisible);
   impactCard.classList.toggle("is-muted", impactLocked);
   impactCard.classList.toggle("is-labeling-locked", impactLocked);
   impactCard.setAttribute("aria-disabled", String(impactLocked));
@@ -768,9 +724,8 @@ function updateFocusState() {
       : "Kinnita esmalt andmed ja märgendusjuhis. Seejärel märgenda viis tööotsija registrikirjet.";
   }
 
-  const stageDone = state.completed.has(state.currentStage);
   const controlCard = $(".control-card");
-  const summaryActive = !impactPending && (state.currentStage === 2 || state.currentStage === 3);
+  const summaryActive = impactVisible && state.currentStage === 2;
   controlCard.inert = summaryActive;
   controlCard.classList.toggle("summary-inactive", summaryActive);
   controlCard.classList.toggle("focus-active", !stageDone);
@@ -803,11 +758,15 @@ function updateFocusState() {
       ? "Kõik viis registrikirjet on märgendatud. Vajuta „Kinnita märgendus”, et avada mõjuvaade."
       : "Kasuta ainult kirjel nähtavat registriinfot ja kinnitatud juhist. Mõjuvaade avaneb pärast märgenduse kinnitamist.";
   } else if (state.currentStage === 3) {
-    if (state.pendingReview) title = "Vaata tagasisidet ja jätka järgmise väljundiga";
+    if (state.pendingReview) title = state.reviews.length === outputCases.length
+      ? "Vaata tagasisidet ja jätka kinnitamisega"
+      : "Vaata tagasisidet ja jätka järgmise väljundiga";
     else if (!state.intervention) title = "Vali, kuidas amet mudeli kohta tagasisidet kogub";
     else if (state.reviews.length === outputCases.length) title = "Kinnita neli kvaliteedihinnangut";
     else title = `Lisa väljundile kvaliteedimärge ${state.reviews.length + 1}/${outputCases.length}`;
-    detail = "Võrdle kuvatud soovitust kontrollkirje infoga. Sisu tuleb kontrollida ka siis, kui mudel on väga kindel.";
+    detail = stageValid(3)
+      ? "Vajuta „Kinnita kvaliteedihinnangud”, et liikuda paranduskava juurde."
+      : "Võrdle kuvatud soovitust kontrollkirje infoga. Sisu tuleb kontrollida ka siis, kui mudel on väga kindel.";
   } else if (state.currentStage === 4) {
     const unassigned = Object.values(state.ownership).filter(value => !value).length;
     if (unassigned) title = `Määra veel ${unassigned} vastutusala`;
@@ -834,7 +793,7 @@ function updateNavigation() {
   });
   $("#stageCounter").textContent = `ETAPP ${state.currentStage} / 4`;
   $("#storyIndex").textContent = String(state.currentStage).padStart(2, "0");
-  $("#storyText").innerHTML = stageCopy[state.currentStage].story;
+  $("#storyText").innerHTML = stageCopy[state.currentStage].story ?? "";
   $("#progressText").textContent = state.completed.size === 4 ? "Mudeli paranduskava valmis" : stageCopy[state.currentStage].title;
   const progress = state.completed.size * 25;
   $("#progressValue").textContent = `${progress}%`;
@@ -937,12 +896,14 @@ function completeStage(stage) {
   if (!stageValid(stage)) return;
   state.completed.add(stage);
   if (stage < 4) state.maxUnlocked = Math.max(state.maxUnlocked, stage + 1);
-  updateNavigation();
-  updateImpact();
   if (stage === 3) {
-    focusImpactSummary();
+    showStage(4, false);
+    $("#stage4Title").focus({ preventScroll: true });
+    $(".control-card").scrollIntoView({ behavior: "smooth", block: "start" });
     return;
   }
+  updateNavigation();
+  updateImpact();
 
   const message = { ...dialogMessages[stage] };
   if (stage === 1) {
@@ -1152,12 +1113,10 @@ $("#previousStage").addEventListener("click", () => showStage(Math.max(1, state.
 $("#nextStage").addEventListener("click", () => showStage(Math.min(state.maxUnlocked, state.currentStage + 1)));
 $("#continueFromImpact").addEventListener("click", () => showStage(state.currentStage + 1));
 $("#retryFromImpact").addEventListener("click", () => {
-  const stage = state.currentStage;
   if ($("#impactNextStep").hidden) return;
-  if (stage === 2) restartLabeling();
-  else if (stage === 3) restartReviews();
-  showStage(stage);
-  $(`[data-step="${stage}"]`).focus({ preventScroll: true });
+  restartLabeling();
+  showStage(2);
+  $('[data-step="2"]').focus({ preventScroll: true });
 });
 
 $("#dialogContinue").addEventListener("click", () => {

@@ -83,7 +83,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 time.sleep(0.1)
             raise AssertionError(f"Expected {expected}, got {actual}")
 
-        def confirm_quality_and_check_summary():
+        def confirm_quality_and_check_transition():
             point = evaluate("""(() => {
               const button = document.querySelector('[data-complete="3"]');
               button.scrollIntoView({block:'center', behavior:'instant'});
@@ -93,39 +93,37 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
             for event_type in ("mousePressed", "mouseReleased"):
                 command("Input.dispatchMouseEvent", {"type": event_type, "button": "left", "clickCount": 1, **point})
 
-            summary = evaluate("""({
+            transition = evaluate("""({
               stage: state.currentStage,
               dialogOpen: impactDialog.open,
               completed: state.completed.has(3),
               completedCount: completedCount.textContent,
-              focused: document.activeElement === impactCard,
-              impactVisible: !impactCard.hidden && !reviewImpactSummary.hidden,
-              impactTitle: impactTitle.textContent,
+              focused: document.activeElement === stage4Title,
+              impactHidden: impactCard.hidden,
+              reviewSummaryExists: Boolean(document.querySelector('#reviewImpactSummary')),
               canConfirmAgain: !document.querySelector('[data-complete="3"]').disabled,
               controlsInactive: document.querySelector('.control-card').inert,
-              controlsGray: getComputedStyle(document.querySelector('.control-card')).backgroundColor === 'rgb(238, 242, 244)',
-              retryText: retryFromImpact.textContent
+              planVisible: !document.querySelector('[data-stage="4"]').hidden
             })""")
-            assert summary == {
-                "stage": 3,
+            assert transition == {
+                "stage": 4,
                 "dialogOpen": False,
                 "completed": True,
                 "completedCount": "3",
                 "focused": True,
-                "impactVisible": True,
-                "impactTitle": "Mida tuleb järgmises mudeliversioonis parandada?",
+                "impactHidden": True,
+                "reviewSummaryExists": False,
                 "canConfirmAgain": False,
-                "controlsInactive": True,
-                "controlsGray": True,
-                "retryText": "Hinda väljundeid uuesti",
-            }, summary
+                "controlsInactive": False,
+                "planVisible": True,
+            }, transition
             for _ in range(20):
-                top = evaluate("impactTitle.getBoundingClientRect().top")
-                if 0 <= top < 140:
+                top = evaluate("document.querySelector('.control-card').getBoundingClientRect().top")
+                if -1 <= top < 140:
                     break
                 time.sleep(0.05)
             else:
-                raise AssertionError(f"Summary heading outside the top of the viewport: {top}")
+                raise AssertionError(f"Planning controls outside the top of the viewport: {top}")
 
         command("Page.enable")
         command("Runtime.enable")
@@ -492,18 +490,8 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert not before_quality_confirmation["completeDisabled"] and before_quality_confirmation["reviews"] == 4 and before_quality_confirmation["impactHidden"] and before_quality_confirmation["pending"], before_quality_confirmation
                 assert "4 / 4 sinu hinnangust" in evaluate("outputCase.textContent")
                 screenshot("ai-andmetoo-before-quality-confirmation.png")
-                confirm_quality_and_check_summary()
-                assert evaluate("trainingFlow.hidden && trainingImpact.hidden && !reviewImpactSummary.hidden")
-                assert evaluate("[...reviewImpactDetails.querySelectorAll('li')].map(row => [row.querySelector('h4').textContent, ...[...row.querySelectorAll('dd')].map(node => node.textContent)])") == [
-                    ["Tööotsija T-201", "Kiire tugi", "Vajab parandamist", "Vajab parandamist"],
-                    ["Tööotsija T-202", "Andmete täiendamine", "Kasutatav", "Kasutatav"],
-                    ["Tööotsija T-203", "Tavaplaan", "Kasutatav", "Kasutatav"],
-                    ["Tööotsija T-204", "Inimese ülevaatus", "Hinnanguks pole piisavalt infot", "Hinnanguks pole piisavalt infot"],
-                ]
-                assert "Mudel peaks soovitama „Iseseisev jätkamine”." in evaluate("reviewImpactDetails.firstElementChild.textContent")
-                assert evaluate("state.currentStage === 3 && !impactNextStep.hidden")
-                assert evaluate("continueFromImpact.textContent.trim()") == "Jätka paranduskava juurde"
-                evaluate("continueFromImpact.click()")
+                confirm_quality_and_check_transition()
+                assert evaluate("state.reviews.slice()") == ["correct", "accept", "accept", "human"]
                 time.sleep(0.25)
                 stage4 = json.loads(evaluate("JSON.stringify({stage:state.currentStage,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),centerDelta:Math.round(Math.abs((document.querySelector('.control-card').getBoundingClientRect().left+document.querySelector('.control-card').getBoundingClientRect().width/2)-innerWidth/2)),impactTitle:document.querySelector('#impactTitle').textContent})"))
                 assert stage4["stage"] == 4 and stage4["impactHidden"] and stage4["pending"] and stage4["centerDelta"] <= 10, stage4
@@ -571,15 +559,18 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 evaluate("undoReviewChoice.click(); document.querySelector('#reviewActions button[data-review=\"correct\"]').click()")
                 assert evaluate("reviewExplanation.dataset.result") == "correct"
                 assert evaluate("!reviewReference.hidden && reviewReferenceLabel.textContent === 'Tavaplaan'")
-                evaluate("nextReviewCase.click(); document.querySelector('#reviewActions [data-review=\"correct\"]').click(); nextReviewCase.click()")
+                evaluate("nextReviewCase.click(); document.querySelector('#reviewActions [data-review=\"correct\"]').click()")
+                assert evaluate("nextReviewCase.textContent") == "Jätka kinnitamisega"
+                evaluate("nextReviewCase.click()")
                 command("Emulation.setDeviceMetricsOverride", {"width": 390, "height": 844, "deviceScaleFactor": 1, "mobile": True})
-                confirm_quality_and_check_summary()
-                assert evaluate("[...reviewImpactDetails.lastElementChild.querySelectorAll('dd')].map(node => node.textContent)") == [
-                    "Inimese ülevaatus", "Vajab parandamist", "Hinnanguks pole piisavalt infot",
-                ]
+                confirm_quality_and_check_transition()
+                assert evaluate("state.reviews.slice()") == ["accept", "correct", "correct", "correct"]
                 assert evaluate("document.documentElement.scrollWidth <= innerWidth")
-                evaluate("retryFromImpact.click()")
+                evaluate("document.querySelector('[data-step=\"3\"]').click()")
+                assert evaluate("impactCard.hidden && document.querySelector('[data-complete=\"3\"]').disabled")
+                evaluate("document.querySelector('[data-rereview]').click()")
                 assert evaluate("state.currentStage === 3 && !document.querySelector('.control-card').inert && impactCard.hidden && state.reviews.length === 0")
+                assert evaluate("document.querySelector('[data-step=\"4\"]').disabled")
                 command("Emulation.setDeviceMetricsOverride", {"width": 1440, "height": 1000, "deviceScaleFactor": 1, "mobile": False})
 
         command("Page.navigate", {"url": URL + "kraapimine/"})
