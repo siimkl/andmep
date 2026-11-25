@@ -37,7 +37,7 @@ body :is(.shell, dialog) :is(
 /* Keep labels easy to scan, including those that are drawn in diagrams. */
 body :is(.shell, .launcher, dialog) :is(
   .section-kicker, .kicker, .step-label, .level, .brand, .card-body em,
-  .path-heading b, .start-panel > div span, .mission-label, .progress-meta, .progress-value span,
+  .path-heading b, .mission-label, .progress-meta, .progress-value span,
   .briefing-card > div > span, .briefing-mark, .briefing-question small, .briefing-target small,
   .step b, .flow-status span, .flow-status b, .status-chip, .status-chip b, .exercise-state,
   .active-task-cue > span, .labeling-instruction-intro > span,
@@ -153,7 +153,6 @@ body .site-footer :is(.footer-author, .footer-details, .footer-note) :is(small, 
   letter-spacing: .07em;
 }
 
-.launcher .api-card input:checked + .card-body::after,
 .site-footer .footer-monogram,
 .shell .step.active::before,
 .shell .step.active::after {

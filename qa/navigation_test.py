@@ -83,16 +83,24 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 time.sleep(0.1)
             raise AssertionError(f"Expected {expected}, got {actual}")
 
-        def confirm_quality_and_check_transition():
-            point = evaluate("""(() => {
-              const button = document.querySelector('[data-complete="3"]');
-              button.scrollIntoView({block:'center', behavior:'instant'});
-              const box = button.getBoundingClientRect();
-              return {x: box.left + box.width / 2, y: box.top + box.height / 2};
-            })()""")
+        def click_element(selector):
+            point = evaluate(f"""(() => {{
+              const element = document.querySelector({json.dumps(selector)});
+              element.scrollIntoView({{block:'center', behavior:'instant'}});
+              const box = element.getBoundingClientRect();
+              return {{x: box.left + box.width / 2, y: box.top + box.height / 2}};
+            }})()""")
             for event_type in ("mousePressed", "mouseReleased"):
                 command("Input.dispatchMouseEvent", {"type": event_type, "button": "left", "clickCount": 1, **point})
 
+        def open_practicum_card(route):
+            command("Page.navigate", {"url": URL})
+            wait_for_path("/")
+            click_element(f'.api-card[href="./{route}/"]')
+            wait_for_path(f"/{route}/")
+
+        def confirm_quality_and_check_transition():
+            click_element('[data-complete="3"]')
             transition = evaluate("""({
               stage: state.currentStage,
               dialogOpen: impactDialog.open,
@@ -134,10 +142,8 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
         landing = json.loads(evaluate("""JSON.stringify({
           title: document.title,
           heading: document.querySelector('.hero-grid h1').textContent.trim(),
-          cards: [...document.querySelectorAll('.api-card input')].map(input => input.value),
-          selected: document.querySelector('input[name="api-version"]:checked').value,
-          startHref: startButton.getAttribute('href'),
-          startText: startButton.querySelector('span').textContent,
+          cards: [...document.querySelectorAll('a.api-card')].map(card => card.getAttribute('href')),
+          hasSelectionStep: Boolean(document.querySelector('.start-panel, .api-card input')),
           mapLinks: document.querySelectorAll('.sequence .path-card').length,
           apiPathLinks: document.querySelectorAll('.api-path .path-card').length,
           standaloneLinks: document.querySelectorAll('.standalone-path .path-card').length,
@@ -147,10 +153,8 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
         assert landing == {
             "title": "Andmepädevus · interaktiivsed praktikumid",
             "heading": "Vali teema, millest alustada.",
-            "cards": ["api1", "api2", "api3", "kraapimine", "ai-andmetoo"],
-            "selected": "api1",
-            "startHref": "./api1/",
-            "startText": "Alusta API 1 praktikumi",
+            "cards": ["./api1/", "./api2/", "./api3/", "./kraapimine/", "./ai-andmetoo/"],
+            "hasSelectionStep": False,
             "mapLinks": 5,
             "apiPathLinks": 3,
             "standaloneLinks": 2,
@@ -158,20 +162,6 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
             "overflow": False,
         }, landing
         screenshot("landing-desktop.png")
-
-        expected_routes = {
-            "api1": ("./api1/", "Alusta API 1 praktikumi"),
-            "api2": ("./api2/", "Alusta API 2 praktikumi"),
-            "api3": ("./api3/", "Alusta API 3 praktikumi"),
-            "kraapimine": ("./kraapimine/", "Alusta veebikraapimise praktikumi"),
-            "ai-andmetoo": ("./ai-andmetoo/", "Alusta AI-andmetöö praktikumi"),
-        }
-        for value, expected in expected_routes.items():
-            changed = json.loads(evaluate(f"""(() => {{
-              document.querySelector('input[value="{value}"]').click();
-              return JSON.stringify({{href:startButton.getAttribute('href'),text:startButton.querySelector('span').textContent}});
-            }})()"""))
-            assert (changed["href"], changed["text"]) == expected, {value: changed}
 
         modules = {
             "api1": "../api1/",
@@ -182,8 +172,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
         }
         module_states = {}
         for route, selected in modules.items():
-            command("Page.navigate", {"url": URL + route + "/"})
-            wait_for_path(f"/{route}/")
+            open_practicum_card(route)
             state = json.loads(evaluate("""JSON.stringify({
               selected: document.querySelector('.api-version-select').value,
               options: document.querySelectorAll('.api-version-select option').length,
@@ -597,15 +586,14 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
           cards: document.querySelectorAll('.api-card').length,
           columns: getComputedStyle(document.querySelector('.api-options')).gridTemplateColumns.split(' ').length,
           overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
-          startFits: startButton.getBoundingClientRect().right <= innerWidth
+          cardsFit: [...document.querySelectorAll('.api-card')].every(card => card.getBoundingClientRect().right <= innerWidth)
         })"""))
-        assert mobile == {"width": 390, "cards": 5, "columns": 1, "overflow": False, "startFits": True}, mobile
+        assert mobile == {"width": 390, "cards": 5, "columns": 1, "overflow": False, "cardsFit": True}, mobile
         screenshot("landing-mobile.png")
 
         mobile_modules = {}
         for route in modules:
-            command("Page.navigate", {"url": URL + route + "/"})
-            wait_for_path(f"/{route}/")
+            open_practicum_card(route)
             state = json.loads(evaluate("""JSON.stringify({
               overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
               homeFits: document.querySelector('.api-home-link').getBoundingClientRect().right <= innerWidth,
