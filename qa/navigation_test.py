@@ -288,8 +288,9 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert five_case_start["outputIds"] == ["T-201", "T-202", "T-203", "T-204"] and five_case_start["outputTitles"] == ["Tööotsija T-201", "Tööotsija T-202", "Tööotsija T-203", "Tööotsija T-204"], five_case_start
                 briefing = five_case_start["briefing"]
                 assert "igale registreeritud tööotsijale" in briefing, briefing
-                assert "Ametnik otsustab" in briefing and "arendusmeeskonnal mudelit parandada" in briefing, briefing
-                assert "märgenda viis anonüümset tööotsija kirjet" in briefing and ".csv" not in briefing, briefing
+                assert "Ametnik otsustab" in briefing and "kasutada tehisarumudeli soovitust" in briefing, briefing
+                assert "märgendad viis anonüümset tööotsija kirjet" in briefing and ".csv" not in briefing, briefing
+                assert "hindad mudeli väljundeid" in briefing and "mida järgmises mudeliversioonis parandada" in briefing, briefing
                 assert not evaluate("Boolean(document.querySelector('.case-rule-hint'))"), "Kinnitatud reegli plokk on alles"
                 evaluate("document.querySelector('#labelActions button[data-label=\"supplement\"]').click()")
                 label_feedback = json.loads(evaluate("JSON.stringify({result:labelExplanation.dataset.result,status:labelExplanationStatus.textContent,title:labelExplanationTitle.textContent,text:labelExplanationText.textContent,summary:stage2Feedback.textContent,summaryHidden:stage2Feedback.hidden})"))
