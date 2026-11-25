@@ -538,17 +538,20 @@ function renderOutputCase() {
 }
 
 function renderReviewImpact() {
-  const outcomes = outputCases.map(item => ({ item, review: expectedReview(item) }));
-  const usable = outcomes.filter(outcome => outcome.review === "accept").length;
-  $("#reviewImpactCounts").textContent = `Sobivad soovitused · ${usable} / ${outputCases.length}`;
-
-  const followUps = outcomes
-    .filter(outcome => outcome.review !== "accept")
-    .map(({ item, review }) => {
-      const reference = review === "correct" ? `<br>Mudel peaks soovitama „${labelNames[item.referenceLabel]}”.` : "";
-      return `<li><strong>${item.id} · ${reviewNames[review]}</strong><br>${item.reason}${reference}</li>`;
-    });
-  $("#reviewImpactDetails").innerHTML = followUps.join("");
+  $("#reviewImpactDetails").innerHTML = outputCases.map((item, index) => {
+    const suggestion = simulatedSuggestion(item);
+    const review = expectedReview(item, suggestion);
+    const reference = review === "correct" ? ` Mudel peaks soovitama „${labelNames[item.referenceLabel]}”.` : "";
+    return `<li>
+      <h4>${item.title}</h4>
+      <dl>
+        <dt>Mudeli soovitus</dt><dd>${labelNames[suggestion]}</dd>
+        <dt>Sinu hinnang</dt><dd>${reviewNames[state.reviews[index]]}</dd>
+        <dt>Harjutuse tagasiside</dt><dd>${reviewNames[review]}</dd>
+      </dl>
+      <p>${item.reason}${reference}</p>
+    </li>`;
+  }).join("");
 }
 
 function updateStage4() {

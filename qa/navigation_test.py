@@ -470,9 +470,13 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 screenshot("ai-andmetoo-before-quality-confirmation.png")
                 confirm_quality_and_check_summary()
                 assert evaluate("trainingFlow.hidden && trainingImpact.hidden && !reviewImpactSummary.hidden")
-                assert evaluate("[...reviewImpactDetails.querySelectorAll('strong')].map(node => node.textContent)") == [
-                    "T-201 · Vajab parandamist", "T-204 · Hinnanguks pole piisavalt infot"
+                assert evaluate("[...reviewImpactDetails.querySelectorAll('li')].map(row => [row.querySelector('h4').textContent, ...[...row.querySelectorAll('dd')].map(node => node.textContent)])") == [
+                    ["Tööotsija T-201", "Kiire tugi", "Vajab parandamist", "Vajab parandamist"],
+                    ["Tööotsija T-202", "Andmete täiendamine", "Kasutatav", "Kasutatav"],
+                    ["Tööotsija T-203", "Tavaplaan", "Kasutatav", "Kasutatav"],
+                    ["Tööotsija T-204", "Inimese ülevaatus", "Hinnanguks pole piisavalt infot", "Hinnanguks pole piisavalt infot"],
                 ]
+                assert "Mudel peaks soovitama „Iseseisev jätkamine”." in evaluate("reviewImpactDetails.firstElementChild.textContent")
                 assert evaluate("state.currentStage === 3 && !impactNextStep.hidden")
                 assert evaluate("continueFromImpact.textContent.trim()") == "Jätka paranduskava juurde"
                 evaluate("continueFromImpact.click()")
@@ -541,9 +545,13 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 evaluate("undoReviewChoice.click(); document.querySelector('#reviewActions button[data-review=\"correct\"]').click()")
                 assert evaluate("reviewExplanation.dataset.result") == "correct"
                 assert evaluate("!reviewReference.hidden && reviewReferenceLabel.textContent === 'Tavaplaan'")
-                evaluate("nextReviewCase.click(); document.querySelector('#reviewActions [data-review=\"human\"]').click(); nextReviewCase.click()")
+                evaluate("nextReviewCase.click(); document.querySelector('#reviewActions [data-review=\"correct\"]').click(); nextReviewCase.click()")
                 command("Emulation.setDeviceMetricsOverride", {"width": 390, "height": 844, "deviceScaleFactor": 1, "mobile": True})
                 confirm_quality_and_check_summary()
+                assert evaluate("[...reviewImpactDetails.lastElementChild.querySelectorAll('dd')].map(node => node.textContent)") == [
+                    "Inimese ülevaatus", "Vajab parandamist", "Hinnanguks pole piisavalt infot",
+                ]
+                assert evaluate("document.documentElement.scrollWidth <= innerWidth")
                 evaluate("retryFromImpact.click()")
                 assert evaluate("state.currentStage === 3 && !document.querySelector('.control-card').inert && impactCard.hidden && state.reviews.length === 0")
                 command("Emulation.setDeviceMetricsOverride", {"width": 1440, "height": 1000, "deviceScaleFactor": 1, "mobile": False})

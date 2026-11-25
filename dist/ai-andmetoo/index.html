@@ -7,7 +7,7 @@
   <title>AI andmetöö · Kes õpetab tehisaru?</title>
   <link rel="stylesheet" href="api1-base.css?v=1">
   <link rel="stylesheet" href="../api-common.css?v=13">
-  <link rel="stylesheet" href="simulator.css?v=35">
+  <link rel="stylesheet" href="simulator.css?v=36">
   <link rel="stylesheet" href="../readability.css?v=2">
 </head>
 <body>
@@ -89,7 +89,10 @@
         </div>
 
         <section class="label-distribution-panel review-impact-summary" id="reviewImpactSummary" aria-labelledby="reviewImpactTitle" hidden>
-          <div class="panel-heading"><h3 id="reviewImpactTitle">Mida nelja soovituse kontroll näitas?</h3><p id="reviewImpactCounts"></p></div>
+          <div class="panel-heading">
+            <h3 id="reviewImpactTitle">Nelja soovituse hindamise kokkuvõte</h3>
+            <p>Hindasid nelja soovitust, mis põhinesid eelnevalt märgendatud treeningkirjetel. Iga kirje juures saad võrrelda oma hinnangut harjutuse tagasisidega.</p>
+          </div>
           <ul id="reviewImpactDetails"></ul>
         </section>
 
@@ -242,6 +245,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=57"></script>
+  <script src="app.js?v=58"></script>
 </body>
 </html>

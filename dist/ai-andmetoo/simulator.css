@@ -135,9 +135,33 @@ button,select{font-size:1rem}
 }
 .review-impact-summary ul {
   display: grid;
-  gap: 8px;
-  margin-bottom: 0;
-  padding-inline-start: 1.5rem;
+  gap: 14px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.review-impact-summary li {
+  padding-top: 12px;
+  border-top: 1px solid #c6d7df;
+}
+.review-impact-summary h4,
+.review-impact-summary li p {
+  margin: 0;
+}
+.review-impact-summary dl {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 12px;
+  margin: 8px 0;
+}
+.review-impact-summary dt {
+  color: #526c86;
+}
+.review-impact-summary dd {
+  margin: 0;
+  font-weight: 700;
+}
+.review-impact-summary li p {
   line-height: 1.55;
 }
 .review-reference {
