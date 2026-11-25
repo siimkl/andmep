@@ -900,44 +900,31 @@ const dialogMessages = {
   }
 };
 
-function confirmedRuleSection(select, feedback) {
-  const options = [...select.options].filter(option => option.value);
+function confirmedRuleSection(select) {
   return {
     title: select.labels[0].querySelector("span").textContent,
-    items: options.map(option => option.textContent),
-    selectedIndex: options.indexOf(select.selectedOptions[0]),
-    text: feedback.textContent
+    text: select.selectedOptions[0].textContent,
+    confirmed: true
   };
 }
 
 function renderDialogInsight(sections) {
-  const content = sections.map(({ title, text, items, selectedIndex }) => {
+  const content = sections.map(({ title, text, items, confirmed }) => {
     const section = document.createElement("section");
     const heading = document.createElement("h3");
     heading.textContent = title;
     section.append(heading);
     if (items) {
       const list = document.createElement("ul");
-      if (selectedIndex !== undefined) {
-        list.className = "dialog-rule-options";
-        list.setAttribute("role", "list");
-      }
-      items.forEach((item, index) => {
+      items.forEach(item => {
         const entry = document.createElement("li");
-        if (index === selectedIndex) {
-          entry.className = "dialog-rule-selected";
-          const label = document.createElement("strong");
-          label.textContent = "Sinu valik";
-          entry.append(label, item);
-        } else {
-          entry.textContent = item;
-        }
+        entry.textContent = item;
         list.append(entry);
       });
       section.append(list);
-    }
-    if (text) {
+    } else {
       const paragraph = document.createElement("p");
+      if (confirmed) paragraph.className = "dialog-rule-selected";
       paragraph.textContent = text;
       section.append(paragraph);
     }
@@ -965,10 +952,10 @@ function completeStage(stage) {
     message.sections = [
       { title: "Valitud märgendid", items: labels },
       { title: "Märgendajale nähtavad väljad", items: fields },
-      confirmedRuleSection($("#missingPolicy"), $("#missingPolicyFeedback")),
-      confirmedRuleSection($("#labelRule"), $("#ruleAvailability")),
-      confirmedRuleSection($("#disagreementPolicy"), $("#disagreementFeedback")),
-      confirmedRuleSection($("#representationAudit"), $("#auditAvailability")),
+      confirmedRuleSection($("#missingPolicy")),
+      confirmedRuleSection($("#labelRule")),
+      confirmedRuleSection($("#disagreementPolicy")),
+      confirmedRuleSection($("#representationAudit")),
       { title: "Mida mudel saab õppida?", text: "Mudel õpib seoseid treeningkirjetes olevate andmeväljade ja märgendite põhjal." }
     ];
   }

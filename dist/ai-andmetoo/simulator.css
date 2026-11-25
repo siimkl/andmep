@@ -323,24 +323,12 @@ button{font-size:1rem}
 .dialog-insight li + li {
   margin-top: 2px;
 }
-.dialog-insight .dialog-rule-options {
-  padding: 0;
-  list-style: none;
-}
-.dialog-rule-options li {
-  padding: 5px 10px;
-}
 .dialog-rule-selected {
+  padding: 8px 10px;
   border-inline-start: 3px solid #07979a;
   border-radius: 8px;
   color: #155556;
   background: #eaf7f4;
-}
-.dialog-rule-selected strong {
-  display: block;
-}
-.dialog-insight .dialog-rule-options + p {
-  margin-top: 8px;
 }
 #impactDialog[data-completed-stage="1"] .dialog-insight > section:last-child {
   grid-column: 1 / -1;

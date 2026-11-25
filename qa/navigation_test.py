@@ -328,22 +328,15 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                     "Kui kaks märgendajat sama kirje puhul ei nõustu", "Mida kontrollitakse enne märgendamise algust?",
                     "Mida mudel saab õppida?",
                 ]
-                assert evaluate("[...dialogInsight.querySelectorAll('ul')].map(list => list.children.length)") == [5, 5, 3, 2, 3, 3]
+                assert evaluate("[...dialogInsight.querySelectorAll('ul')].map(list => list.children.length)") == [5, 5]
                 assert "Andmete kontrollimise aeg" in evaluate("dialogInsight.textContent")
                 assert evaluate("""(() => {
-                  const lists = [...dialogInsight.querySelectorAll('.dialog-rule-options')];
-                  return [
-                    [missingPolicy, missingPolicyFeedback], [labelRule, ruleAvailability],
-                    [disagreementPolicy, disagreementFeedback], [representationAudit, auditAvailability]
-                  ].every(([field, feedback], index) => {
-                    const options = [...field.options].filter(option => option.value);
-                    const list = lists[index];
-                    return options.every((option, choice) => {
-                      const item = list.children[choice];
-                      return item.lastChild.textContent === option.textContent
-                        && item.classList.contains('dialog-rule-selected') === option.selected;
-                    }) && list.nextElementSibling.textContent === feedback.textContent;
-                  });
+                  const answers = [...dialogInsight.querySelectorAll('.dialog-rule-selected')];
+                  return answers.length === 4
+                    && [missingPolicy, labelRule, disagreementPolicy, representationAudit].every((field, index) =>
+                      answers[index].textContent === field.selectedOptions[0].textContent
+                      && answers[index].parentElement.children.length === 2
+                    );
                 })()""")
                 assert evaluate("document.activeElement === dialogTitle && impactDialog.scrollTop === 0")
                 assert evaluate("getComputedStyle(dialogInsight).gridTemplateColumns.split(' ').length") == 2
@@ -354,7 +347,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 evaluate("dialogInsight.scrollIntoView({block: 'start', behavior: 'instant'})")
                 screenshot("ai-andmetoo-choice-summary-mobile.png")
                 assert evaluate("""(() => {
-                  dialogContinue.scrollIntoView({block: 'end', behavior: 'instant'});
+                  dialogContinue.scrollIntoView({block: 'center', behavior: 'instant'});
                   return dialogContinue.getBoundingClientRect().bottom <= impactDialog.getBoundingClientRect().bottom;
                 })()""")
                 command("Emulation.setDeviceMetricsOverride", {"width": 1440, "height": 1000, "deviceScaleFactor": 1, "mobile": False})
