@@ -460,7 +460,7 @@ function renderLabelCase() {
       $("#labelExplanationTitle").textContent = `Õige vastus: „${labelNames[ideal]}”`;
       $("#labelExplanationText").textContent = `Sinu valik: „${labelNames[choice]}”. ${labelReason(item)} Jätkamisel lisatakse vale märgend treeningandmetesse.`;
     }
-    $("#nextLabelCase").textContent = state.labels.length === labelCases.length ? "Vaata märgenduse kokkuvõtet" : "Jätka järgmise kirjega";
+    $("#nextLabelCase").textContent = state.labels.length === labelCases.length ? "Vaata märgenduse kokkuvõtet" : "Jätka järgmise märgendiga";
   } else if (state.labels.length === labelCases.length) {
     const counts = Object.keys(labelNames).map(key => `${labelNames[key]}: ${state.labels.filter(value => value === key).length}`).join(" · ");
     const aligned = calculateLabelMetrics().aligned;
@@ -796,7 +796,7 @@ function updateFocusState() {
       detail = "Mõjuvaade avaneb pärast viie registrikirje märgendamist ja märgenduse kinnitamist.";
     }
   } else if (state.currentStage === 2) {
-    if (state.pendingLabel) title = "Vaata tagasisidet ja jätka järgmise kirjega";
+    if (state.pendingLabel) title = "Vaata tagasisidet ja jätka järgmise märgendiga";
     else if (state.labels.length === labelCases.length) title = "Kinnita viie registrikirje märgendus";
     else title = `Märgenda registrikirje ${state.labels.length + 1}/${labelCases.length}`;
     detail = state.labels.length === labelCases.length && !state.pendingLabel
