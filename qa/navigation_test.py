@@ -222,10 +222,11 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 intro = evaluate("document.querySelector('.labeling-instruction-intro').textContent.replace(/\\s+/g,' ').trim()")
                 assert intro == "MIS ON MÄRGENDUSJUHIS? Märgendusjuhis on ühine reeglistik, mis selgitab, mida iga märgend tähendab ja millise nähtava info põhjal seda kasutada. Selge juhis aitab eri märgendajatel samasuguste registriandmetega tööotsijaid ühtemoodi hinnata ning loob mudelile järjepidevad treeningandmed.", intro
                 label_requirement = json.loads(evaluate("JSON.stringify({cue:activeTaskCue.querySelector('b').textContent,intro:document.querySelector('#availableLabelChoices .choice-intro').textContent})"))
-                assert label_requirement == {"cue": "Vali vähemalt 3 märgendit", "intro": "Vali vähemalt kolm märgendit."}, label_requirement
+                assert label_requirement == {"cue": "Vali kõik 5 märgendit", "intro": "Vali kõik viis märgendit."}, label_requirement
+                assert evaluate("document.querySelector('#sourceChoices .choice-intro').textContent") == "Vali kõik viis andmevälja."
                 evaluate("document.querySelector('#availableLabelChoices input[value=\"fast\"]').click(); document.querySelector('#availableLabelChoices input[value=\"standard\"]').click()")
                 two_labels = json.loads(evaluate("JSON.stringify({button:document.querySelector('[data-complete=\"1\"]').disabled,cue:activeTaskCue.querySelector('b').textContent,feedback:stage1Feedback.textContent})"))
-                assert two_labels["button"] and two_labels["cue"] == "Vali vähemalt 3 märgendit" and "Vali veel 1 märgend" in two_labels["feedback"], two_labels
+                assert two_labels["button"] and two_labels["cue"] == "Vali kõik 5 märgendit" and "Vali veel 3 märgendit" in two_labels["feedback"], two_labels
                 choices = json.loads(evaluate("JSON.stringify({rules:[...labelRule.options].map(option=>option.textContent),audits:[...representationAudit.options].map(option=>option.textContent),missing:[...missingPolicy.options].map(option=>option.textContent),disagreement:[...disagreementPolicy.options].map(option=>option.textContent)})"))
                 assert choices["rules"] == [
                     "Vali üks reegel",
@@ -256,7 +257,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 ], choices
                 evaluate("""(() => {
                   ['self','supplement','review'].forEach(value=>document.querySelector(`#availableLabelChoices input[value="${value}"]`).click());
-                  ['notes','barriers','activity'].forEach(value=>document.querySelector(`#sourceChoices input[value="${value}"]`).click());
+                  ['profile','notes','barriers','activity'].forEach(value=>document.querySelector(`#sourceChoices input[value="${value}"]`).click());
                   missingPolicy.value='average'; missingPolicy.dispatchEvent(new Event('change',{bubbles:true}));
                   disagreementPolicy.value='first'; disagreementPolicy.dispatchEvent(new Event('change',{bubbles:true}));
                   labelRule.value='activity'; labelRule.dispatchEvent(new Event('change',{bubbles:true}));
@@ -266,6 +267,14 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert wrong["button"] and wrong["ruleInvalid"] == "true" and wrong["auditInvalid"] == "true" and wrong["missingInvalid"] == "true" and wrong["disagreementInvalid"] == "true", wrong
                 assert "aktiivsuse hulk" in wrong["ruleHint"].lower() and "koguarv" in wrong["auditHint"].lower() and "teadmata" in wrong["missingHint"].lower() and "ei lahenda" in wrong["disagreementHint"].lower(), wrong
                 evaluate("labelRule.value='current'; labelRule.dispatchEvent(new Event('change',{bubbles:true})); representationAudit.value='coverage'; representationAudit.dispatchEvent(new Event('change',{bubbles:true})); missingPolicy.value='drop'; missingPolicy.dispatchEvent(new Event('change',{bubbles:true})); disagreementPolicy.value='expert'; disagreementPolicy.dispatchEvent(new Event('change',{bubbles:true}))")
+                assert evaluate("document.querySelector('[data-complete=\"1\"]').disabled")
+                assert evaluate("activeTaskCue.querySelector('b').textContent") == "Vali kõik 5 andmevälja"
+                assert "Vali veel 1 andmeväli" in evaluate("stage1Feedback.textContent")
+                evaluate("document.querySelector('#sourceChoices input[value=\"freshness\"]').click()")
+                evaluate("document.querySelector('#availableLabelChoices input[value=\"self\"]').click()")
+                assert evaluate("document.querySelector('[data-complete=\"1\"]').disabled")
+                assert "Vali veel 1 märgend" in evaluate("stage1Feedback.textContent")
+                evaluate("document.querySelector('#availableLabelChoices input[value=\"self\"]').click()")
                 correct = json.loads(evaluate("JSON.stringify({button:document.querySelector('[data-complete=\"1\"]').disabled,ruleInvalid:labelRule.getAttribute('aria-invalid'),auditInvalid:representationAudit.getAttribute('aria-invalid'),missingInvalid:missingPolicy.getAttribute('aria-invalid'),disagreementInvalid:disagreementPolicy.getAttribute('aria-invalid'),ruleGood:ruleAvailability.classList.contains('good'),auditGood:auditAvailability.classList.contains('good'),missingGood:missingPolicyFeedback.classList.contains('good'),disagreementGood:disagreementFeedback.classList.contains('good')})"))
                 assert correct == {"button": False, "ruleInvalid": "false", "auditInvalid": "false", "missingInvalid": "false", "disagreementInvalid": "false", "ruleGood": True, "auditGood": True, "missingGood": True, "disagreementGood": True}, correct
                 evaluate("labelRule.scrollIntoView({block:'center'})")
@@ -277,12 +286,15 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                     [...document.querySelectorAll('#impactDialog .flow-node small')].map(node => node.textContent)
                 )"""))
                 assert stage1_captions == ["ANDMED JA JUHIS", "MÄRGENDAMINE", "MUDELI ÕPPIMINE"], stage1_captions
-                assert evaluate("dialogMiddle.textContent") == "Kirjeid märgendades saad kasutada 5 märgendit ja 3 andmevälja"
+                assert evaluate("dialogMiddle.textContent") == "Kirjeid märgendades saad kasutada 5 märgendit ja 5 andmevälja"
                 evaluate("dialogContinue.click()")
                 time.sleep(0.25)
                 five_case_start = json.loads(evaluate("JSON.stringify({total:labelCases.length,progress:labelProgress.textContent,step:document.querySelector('[data-step=\"2\"] small').textContent,caseId:document.querySelector('#labelCase .case-top span').textContent,caseTitle:document.querySelector('#labelCase h4').textContent,trainingIds:labelCases.map(item=>item.id),trainingTitles:labelCases.map(item=>item.title),outputIds:outputCases.map(item=>item.id),outputTitles:outputCases.map(item=>item.title),briefing:document.querySelector('.briefing-copy').textContent})"))
                 assert evaluate("parseFloat(getComputedStyle(activeTaskCue.querySelector('small')).fontSize)") >= 16
                 assert five_case_start["total"] == 5 and five_case_start["progress"] == "0 / 5 märgendatud", five_case_start
+                assert evaluate("document.querySelectorAll('#labelCase .case-data-grid > div').length") == 5
+                assert evaluate("labelCases.every(item => Object.keys(fieldNames).every(key => item.fields[key]))")
+                assert "Andmete kontrollimise aeg" in evaluate("labelCase.textContent")
                 assert five_case_start["step"] == "5 registrikirjet · valik, põhjendus ja parandus" and five_case_start["caseId"] == "T-101 · 1/5" and five_case_start["caseTitle"] == "Tööotsija T-101", five_case_start
                 assert five_case_start["trainingIds"] == ["T-101", "T-102", "T-103", "T-104", "T-105"] and five_case_start["trainingTitles"] == ["Tööotsija T-101", "Tööotsija T-102", "Tööotsija T-103", "Tööotsija T-104", "Tööotsija T-105"], five_case_start
                 assert five_case_start["outputIds"] == ["T-201", "T-202", "T-203", "T-204"] and five_case_start["outputTitles"] == ["Tööotsija T-201", "Tööotsija T-202", "Tööotsija T-203", "Tööotsija T-204"], five_case_start

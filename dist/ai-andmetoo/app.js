@@ -13,11 +13,11 @@ const labelNames = { fast: "Kiire tugi", standard: "Tavaplaan", self: "Iseseisev
 const reviewNames = { accept: "Kasutatav", correct: "Vajab parandamist", human: "Hinnanguks pole piisavalt infot" };
 
 const labelCases = [
-  { id: "T-101", title: "Tööotsija T-101", pattern: "hiljutine töökaotus", fields: { profile: "Registris on aktiivne tööotsija. Töösuhe lõppes kaks nädalat tagasi.", notes: "Töötuna registreerimine vajab lõpuleviimist.", barriers: "Registreerimine ja toetuste taotlemine on pooleli.", activity: "Pärast töösuhte lõppu pole iseteeninduses tegevust." }, expected: "fast", currentReason: "Hiljutine töökaotus ning pooleli olev registreerimine takistavad tööotsingu alustamist ja vajavad ametniku sihitud abi." },
-  { id: "T-102", title: "Tööotsija T-102", pattern: "selge tavapärane vajadus", fields: { profile: "Registris olevad oskused vastavad soovitud töökohtade nõuetele.", notes: "Märgitud on tavapärase töövahenduse toe vajadus.", barriers: "Dokumenteeritud takistused puuduvad.", activity: "Tööotsija kandideerib regulaarselt sobivatele töökohtadele." }, expected: "standard", currentReason: "Registriinfo on täielik ja kooskõlaline ning ükski nähtav takistus ei vaja kiiret sekkumist." },
-  { id: "T-103", title: "Tööotsija T-103", pattern: "puuduv registriinfo", fields: { profile: "Töösoov on märgitud, kuid oskuste väli on tühi.", notes: "Toe vajadust pole registris kirjeldatud.", barriers: "— väärtus puudub", activity: "Üks sisselogimine viimase kuu jooksul." }, expected: "supplement", currentReason: "Takistuste väli ja toe vajaduse kirjeldus puuduvad, mistõttu ei ole kindla soovituse andmiseks piisavalt infot." },
-  { id: "T-104", title: "Tööotsija T-104", pattern: "ajakohane positiivne muutus", fields: { profile: "Nõutud kutsetunnistus lisati registrisse sel kuul.", notes: "Oskused vastavad nüüd soovitud töökohtade nõuetele.", barriers: "Dokumenteeritud takistused puuduvad.", activity: "Tööotsija kandideerib sobivatele töökohtadele." }, expected: "self", currentReason: "Koolitus on lõpetatud, registriandmed on ajakohased ja nähtavaid takistusi pole. Tööotsija saab tööotsingut iseseisvalt jätkata." },
-  { id: "T-105", title: "Tööotsija T-105", pattern: "vastuolulised eksperdihinnangud", fields: { profile: "Registri põhiandmed on ajakohased.", notes: "Kaks nõustajat on sisestanud erineva soovituse: kiire tugi ja tavaplaan.", barriers: "Takistuse mõju pole registris üheselt kirjeldatud.", activity: "Iseteeninduse kasutus vastab tavapärasele mustrile." }, expected: "review", currentReason: "Nõustajate hinnangud on vastuolus ja takistuse mõju pole selge, seega peab soovituse üle vaatama ametnik." }
+  { id: "T-101", title: "Tööotsija T-101", pattern: "hiljutine töökaotus", fields: { profile: "Registris on aktiivne tööotsija. Töösuhe lõppes kaks nädalat tagasi.", notes: "Töötuna registreerimine vajab lõpuleviimist.", barriers: "Registreerimine ja toetuste taotlemine on pooleli.", activity: "Pärast töösuhte lõppu pole iseteeninduses tegevust.", freshness: "Kirjet kontrolliti pärast töösuhte lõppu." }, expected: "fast", currentReason: "Hiljutine töökaotus ning pooleli olev registreerimine takistavad tööotsingu alustamist ja vajavad ametniku sihitud abi." },
+  { id: "T-102", title: "Tööotsija T-102", pattern: "selge tavapärane vajadus", fields: { profile: "Registris olevad oskused vastavad soovitud töökohtade nõuetele.", notes: "Märgitud on tavapärase töövahenduse toe vajadus.", barriers: "Dokumenteeritud takistused puuduvad.", activity: "Tööotsija kandideerib regulaarselt sobivatele töökohtadele.", freshness: "Töösoov ja toevajadus kinnitati eelmisel nädalal." }, expected: "standard", currentReason: "Registriinfo on täielik ja kooskõlaline ning ükski nähtav takistus ei vaja kiiret sekkumist." },
+  { id: "T-103", title: "Tööotsija T-103", pattern: "puuduv registriinfo", fields: { profile: "Töösoov on märgitud, kuid oskuste väli on tühi.", notes: "Toe vajadust pole registris kirjeldatud.", barriers: "— väärtus puudub", activity: "Üks sisselogimine viimase kuu jooksul.", freshness: "Töösoovi uuendati sel kuul. Takistuste info kontrollimise aeg puudub." }, expected: "supplement", currentReason: "Takistuste väli ja toe vajaduse kirjeldus puuduvad, mistõttu ei ole kindla soovituse andmiseks piisavalt infot." },
+  { id: "T-104", title: "Tööotsija T-104", pattern: "ajakohane positiivne muutus", fields: { profile: "Nõutud kutsetunnistus lisati registrisse sel kuul.", notes: "Oskused vastavad nüüd soovitud töökohtade nõuetele.", barriers: "Dokumenteeritud takistused puuduvad.", activity: "Tööotsija kandideerib sobivatele töökohtadele.", freshness: "Profiili kontrolliti pärast kutsetunnistuse lisamist." }, expected: "self", currentReason: "Koolitus on lõpetatud, registriandmed on ajakohased ja nähtavaid takistusi pole. Tööotsija saab tööotsingut iseseisvalt jätkata." },
+  { id: "T-105", title: "Tööotsija T-105", pattern: "vastuolulised eksperdihinnangud", fields: { profile: "Registri põhiandmed on ajakohased.", notes: "Kaks nõustajat on sisestanud erineva soovituse: kiire tugi ja tavaplaan.", barriers: "Takistuse mõju pole registris üheselt kirjeldatud.", activity: "Iseteeninduse kasutus vastab tavapärasele mustrile.", freshness: "Mõlemad nõustajad vaatasid kirje üle sel nädalal." }, expected: "review", currentReason: "Nõustajate hinnangud on vastuolus ja takistuse mõju pole selge, seega peab soovituse üle vaatama ametnik." }
 ];
 
 const outputCases = [
@@ -58,8 +58,12 @@ const fieldNames = {
   profile: "Põhiandmed",
   notes: "Nõustaja kokkuvõte",
   barriers: "Dokumenteeritud takistused",
-  activity: "Iseteeninduse tegevus"
+  activity: "Iseteeninduse tegevus",
+  freshness: "Andmete kontrollimise aeg"
 };
+
+const requiredLabelCount = Object.keys(labelNames).length;
+const requiredFieldCount = Object.keys(fieldNames).length;
 
 const ruleNames = {
   activity: "kasuta iseteeninduse aktiivsust toevajaduse hinnanguna",
@@ -93,7 +97,6 @@ function labelReason(item) {
   return item.currentReason;
 }
 function selectedFieldNames() { return [...state.sources].map(key => fieldNames[key]); }
-function hasMissingInfoRoute() { return ["standard", "supplement", "review"].some(label => state.availableLabels.has(label)); }
 function caseDataHtml(item) {
   return `<div class="case-data-grid">${[...state.sources].map(key => `<div><small>${fieldNames[key]}</small><p>${item.fields[key]}</p></div>`).join("")}</div>`;
 }
@@ -136,7 +139,7 @@ function calculateScores() {
     barriers: { data: 13, output: 11, bias: 9, labor: 8 },
     activity: { data: 9, output: 5, bias: -7, labor: -2 }
   };
-  state.sources.forEach(key => Object.entries(sourceEffects[key]).forEach(([metric, value]) => { s[metric] += value; }));
+  state.sources.forEach(key => Object.entries(sourceEffects[key] ?? {}).forEach(([metric, value]) => { s[metric] += value; }));
   if (state.sources.size >= 3) { s.data += 4; s.bias += 3; }
 
   const missingEffects = {
@@ -378,7 +381,11 @@ function invalidateFrom(stage) {
 }
 
 function stageValid(stage) {
-  if (stage === 1) return state.availableLabels.size >= 3 && hasMissingInfoRoute() && state.sources.size >= 2 && state.missingPolicy === "drop" && state.audit === "coverage" && state.labelRule === "current" && state.disagreement === "expert";
+  if (stage === 1) {
+    return state.availableLabels.size === requiredLabelCount && state.sources.size === requiredFieldCount
+      && state.missingPolicy === "drop" && state.audit === "coverage"
+      && state.labelRule === "current" && state.disagreement === "expert";
+  }
   if (stage === 2) return state.labels.length === labelCases.length && !state.pendingLabel;
   if (stage === 3) return state.completed.has(2) && state.intervention && state.reviews.length === outputCases.length && !state.pendingReview;
   if (stage === 4) return Object.values(state.ownership).every(Boolean) && state.cadence && state.appeal && state.assets.size >= 2;
@@ -387,15 +394,14 @@ function stageValid(stage) {
 
 function updateStage1Feedback() {
   const feedback = $("#stage1Feedback");
-  if (state.availableLabels.size < 3) {
+  const labelsLeft = requiredLabelCount - state.availableLabels.size;
+  const fieldsLeft = requiredFieldCount - state.sources.size;
+  if (labelsLeft > 0) {
     feedback.className = "decision-feedback";
-    feedback.textContent = `Vali veel ${3 - state.availableLabels.size} ${3 - state.availableLabels.size === 1 ? "märgend" : "märgendit"}. Märgendite loetelu määrab, milliseid erinevusi saab andmestikus talletada.`;
-  } else if (!hasMissingInfoRoute()) {
-    feedback.className = "decision-feedback warn";
-    feedback.textContent = "Lisa vähemalt üks märgend puuduliku info käsitlemiseks: „Tavaplaan”, „Andmete täiendamine” või „Inimese ülevaatus”. Ilma selleta ei saa puuduliku registrikirje kohta järjepidevat soovitust õpetada.";
-  } else if (state.sources.size < 2) {
+    feedback.textContent = `Vali veel ${labelsLeft} ${labelsLeft === 1 ? "märgend" : "märgendit"}. Harjutuses on vaja kõiki viit märgendit.`;
+  } else if (fieldsLeft > 0) {
     feedback.className = "decision-feedback";
-    feedback.textContent = `Vali samast andmestikust veel ${2 - state.sources.size} väli. Märgendaja ei saa arvestada infoga, mida märgendusfailis pole.`;
+    feedback.textContent = `Vali veel ${fieldsLeft} ${fieldsLeft === 1 ? "andmeväli" : "andmevälja"}. Märgendaja peab harjutuses nägema kõiki viit välja.`;
   } else if (!state.labelRule) {
     feedback.className = "decision-feedback warn";
     feedback.textContent = "Andmeväljad on valitud. Vali reegel, mis lähtub inimese praegusest dokumenteeritud vajadusest ja ühisest märgendusjuhisest.";
@@ -417,19 +423,8 @@ function updateStage1Feedback() {
       ? "Treeningkirjete koguarv ei näita, kas mõni registri piirkond, keelerühm või teeninduskanal on valimist puudu."
       : "Täidetud lahtrid ei näita, kas valim katab erinevaid piirkondi, keeli ja teeninduskanaleid. Kontrolli korraga nii katvust kui ka puuduvaid väärtusi.";
   } else {
-    const missingCoreLabels = ["fast", "standard"].filter(label => !state.availableLabels.has(label));
-    const uncertaintyHidden = !state.availableLabels.has("review");
-    const risky = missingCoreLabels.length || uncertaintyHidden || state.missingPolicy !== "drop" || state.disagreement !== "expert";
-    feedback.className = risky ? "decision-feedback warn" : "decision-feedback good";
-    if (missingCoreLabels.length) {
-      feedback.textContent = `Juhisest puudub märgend „${labelNames[missingCoreLabels[0]]}”. Seda vajavad registrikirjed tuleb suunata ülevaatusele või paigutada mõnda teise kategooriasse.`;
-    } else if (uncertaintyHidden) {
-      feedback.textContent = "Juhisest puudub märgend „Inimese ülevaatus”. Puudulikele ja vastuolulistele registrikirjetele tuleb seetõttu anda kindel märgend või need treeningvalimist eemaldada.";
-    } else {
-      feedback.textContent = risky
-        ? "Andmed ja juhis on valmis, kuid valitud nõue võib anda puudulikule või vastuolulisele registrikirjele põhjendamatult kindla märgendi."
-        : "Märgendid, andmeväljad ja juhis on valmis. Järgmises etapis tohib märgendaja kasutada ainult kirjel kuvatud registriinfot.";
-    }
+    feedback.className = "decision-feedback good";
+    feedback.textContent = "Kõik märgendid ja andmeväljad on valitud. Juhis on kinnitamiseks valmis.";
   }
   $('[data-complete="1"]').disabled = !stageValid(1);
 }
@@ -785,23 +780,21 @@ function updateFocusState() {
   let title = "Tee järgmine valik";
   let detail = "Jätka selles paneelis. Siin on kõik selle etapi valikud.";
   if (state.currentStage === 1) {
-    if (state.availableLabels.size < 3) {
-      title = "Vali vähemalt 3 märgendit";
+    if (state.availableLabels.size < requiredLabelCount) {
+      title = `Vali kõik ${requiredLabelCount} märgendit`;
       detail = "Märgendid määravad, milliseid soovitusi saab mudel hiljem eristada.";
-    } else if (!hasMissingInfoRoute()) {
-      title = "Lisa puuduliku info jaoks sobiv märgend";
-      detail = "Vali „Tavaplaan”, „Andmete täiendamine” või „Inimese ülevaatus”.";
-    } else if (state.sources.size < 2) {
-      const remaining = 2 - state.sources.size;
-      title = `Vali veel ${remaining} ${remaining === 1 ? "andmeväli" : "andmevälja"}`;
-    }
-    else if (!state.labelRule || state.labelRule !== "current") title = "Vali praegusel vajadusel põhinev märgendusreegel";
+    } else if (state.sources.size < requiredFieldCount) {
+      title = `Vali kõik ${requiredFieldCount} andmevälja`;
+      detail = "Need väljad kuvatakse igal märgendataval kirjel.";
+    } else if (!state.labelRule || state.labelRule !== "current") title = "Vali praegusel vajadusel põhinev märgendusreegel";
     else if (!state.missingPolicy || state.missingPolicy !== "drop") title = "Vali puuduliku info korral andmete täiendamine";
     else if (!state.disagreement || state.disagreement !== "expert") title = "Vali eriarvamuse lahendamiseks põhjendatud eksperdiotsus";
     else if (!state.audit) title = "Vali märgendusvalimi kontroll";
     else if (state.audit !== "coverage") title = "Vali kontroll, mis näitab valimi katvust ja puuduvaid andmeid";
     else title = "Kinnita andmed ja märgendusjuhis";
-    if (impactLocked && state.availableLabels.size >= 3) detail = "Mõjuvaade avaneb pärast viie registrikirje märgendamist ja märgenduse kinnitamist.";
+    if (state.availableLabels.size === requiredLabelCount && state.sources.size === requiredFieldCount) {
+      detail = "Mõjuvaade avaneb pärast viie registrikirje märgendamist ja märgenduse kinnitamist.";
+    }
   } else if (state.currentStage === 2) {
     if (state.pendingLabel) title = "Vaata tagasisidet ja jätka järgmise kirjega";
     else if (state.labels.length === labelCases.length) title = "Kinnita viie registrikirje märgendus";

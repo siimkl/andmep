@@ -105,7 +105,7 @@
 
       <aside class="control-card card focus-active" aria-labelledby="decisionTitle">
         <div class="control-head"><span class="section-kicker">TEE ESMALT OTSUSED</span><span class="stage-counter" id="stageCounter">ETAPP 1 / 4</span></div>
-        <div class="active-task-cue" id="activeTaskCue" role="status" aria-live="polite"><span>TEE JÄRGMISENA</span><b>Vali vähemalt 3 märgendit</b><small>Märgendid määravad, milliseid soovitusi saab mudel hiljem eristada.</small></div>
+        <div class="active-task-cue" id="activeTaskCue" role="status" aria-live="polite"><span>TEE JÄRGMISENA</span><b>Vali kõik 5 märgendit</b><small>Märgendid määravad, milliseid soovitusi saab mudel hiljem eristada.</small></div>
 
         <section class="decision-stage active" data-stage="1">
           <div class="control-title"><span>01</span><div><h3 id="decisionTitle">Vali andmed ja määra märgendusnõuded</h3><p>See etapp tuleb <b>enne märgendamist</b>. Siin otsustad, millist infot märgendaja näeb ja millise reegli järgi ta märgendi valib.</p></div></div>
@@ -115,7 +115,7 @@
           </div>
           <fieldset class="choice-fieldset label-definition-fieldset" id="availableLabelChoices">
             <legend>Milliseid märgendeid ehk kategooriaid saab märgendaja valida?</legend>
-            <p class="choice-intro">Vali vähemalt kolm märgendit.</p>
+            <p class="choice-intro">Vali kõik viis märgendit.</p>
             <label class="source-choice"><input type="checkbox" value="fast"><span><b>Kiire tugi</b><small>Konkreetne takistus peatab tööotsingu ja vajab ametniku sihitud abi.</small><strong class="provenance">Ilma selle märgendita ei saa sihitud toevajadust tavaplaanist eristada.</strong><em>sihitud sekkumine</em></span></label>
             <label class="source-choice"><input type="checkbox" value="standard"><span><b>Tavaplaan</b><small>Info on piisav ja kooskõlaline ning kiiret sekkumist pole vaja.</small><strong class="provenance">Ilma selle märgendita võib mudel hakata tavapäraseid tööotsijaid üle hindama.</strong><em>tavapärane teenindus</em></span></label>
             <label class="source-choice"><input type="checkbox" value="self"><span><b>Iseseisev jätkamine</b><small>Inimene saab järgmise sammu teha ilma ameti lisatoeta.</small><strong class="provenance">See märgend eristab iseseisvalt jätkajaid tavapärast teenust vajavatest tööotsijatest.</strong><em>lisatuge pole vaja</em></span></label>
@@ -124,10 +124,12 @@
           </fieldset>
           <fieldset class="choice-fieldset" id="sourceChoices">
             <legend>Millised väljad jõuavad märgendajale?</legend>
-            <label class="source-choice"><input type="checkbox" value="profile"><span><b>Põhiandmed</b><small>Töösoov, oskused ja profiili ajakohasus</small><strong class="provenance">Kirjeldab registri hetkeseisu, mis võib olla aegunud.</strong><em>taust, mitte otsus</em></span></label>
+            <p class="choice-intro">Vali kõik viis andmevälja.</p>
+            <label class="source-choice"><input type="checkbox" value="profile"><span><b>Põhiandmed</b><small>Töösoov, oskused ja tööalane olukord</small><strong class="provenance">Annab tausta, mille põhjal saab mõista tööotsija olukorda.</strong><em>tööotsija taust</em></span></label>
             <label class="source-choice"><input type="checkbox" value="notes"><span><b>Nõustaja kokkuvõte</b><small>Struktureeritud kirjeldus inimese tänasest olukorrast</small><strong class="provenance">Lisab konteksti, kuid sisaldab ka nõustaja tõlgendust.</strong><em>vajab ühtset sõnavara</em></span></label>
             <label class="source-choice"><input type="checkbox" value="barriers"><span><b>Dokumenteeritud takistused</b><small>Ligipääsu-, aja-, oskuse- ja hoolduspiirangud</small><strong class="provenance">Puuduv väärtus tähendab „teadmata”, mitte „takistust pole”.</strong><em>oluline praeguse vajaduse jaoks</em></span></label>
             <label class="source-choice"><input type="checkbox" value="activity"><span><b>Iseteeninduse tegevus</b><small>Otsingud, sisselogimised ja kandideerimised</small><strong class="provenance">Mõõdab tegevust, mitte motivatsiooni ega töö sobivust.</strong><em>asendustunnuse kasutamise risk</em></span></label>
+            <label class="source-choice"><input type="checkbox" value="freshness"><span><b>Andmete kontrollimise aeg</b><small>Millal kirje olulised andmed viimati üle vaadati?</small><strong class="provenance">Aitab märgata, kui info võib olla aegunud.</strong><em>andmete ajakohasus</em></span></label>
           </fieldset>
           <label class="select-label" for="missingPolicy"><span>Kui soovituseks vajalik registriinfo puudub</span><select id="missingPolicy"><option value="">Vali üks tegevus</option><option value="average">Eelda, et takistust pole, ja kasuta märgendit „Tavaplaan”</option><option value="guess">Vali olemasoleva info põhjal kõige tõenäolisem toe märgend</option><option value="drop">Kasuta märgendit „Andmete täiendamine” ja saada kirje andmeomanikule täiendamiseks</option></select></label>
           <p class="availability-note" id="missingPolicyFeedback">Puuduliku info põhjal ei tohi teha kindlat toevajaduse otsust.</p>
@@ -137,7 +139,7 @@
           <p class="availability-note" id="disagreementFeedback">Treeningandmetesse peab jõudma üks põhjendatud märgend, mitte lahendamata vastuolu.</p>
           <label class="select-label" for="representationAudit"><span>Mida kontrollitakse enne märgendamise algust?</span><select id="representationAudit"><option value="">Vali üks kontroll</option><option value="overall">Ainult seda, kas treeningkirjeid on kokku piisavalt</option><option value="technical">Ainult seda, kas kõik faili lahtrid on täidetud</option><option value="coverage">Kas registri piirkonnad, keeled ja teeninduskanalid on treeningvalimis esindatud ning kus andmed puuduvad</option></select></label>
           <p class="availability-note" id="auditAvailability">Kontroll peab näitama nii valimi katvust kui ka kohti, kus otsustamiseks vajalik info puudub.</p>
-          <div class="decision-feedback" id="stage1Feedback" aria-live="polite">Vali vähemalt kolm märgendit ja kaks andmevälja. Seejärel otsusta, kuidas käsitleda puuduvat infot ja eriarvamusi ning kuidas märgendusvalimit kontrollida.</div>
+          <div class="decision-feedback" id="stage1Feedback" aria-live="polite">Vali kõik viis märgendit ja viis andmevälja. Seejärel määra märgendamisreeglid.</div>
           <div class="next-action-guide contextual"><span class="next-action-label" aria-hidden="true">JÄRGMISENA <i>↓</i></span><button class="primary-button orange" type="button" data-complete="1" disabled><span>Kinnita andmed ja juhis</span></button></div>
         </section>
 
@@ -231,6 +233,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=50"></script>
+  <script src="app.js?v=51"></script>
 </body>
 </html>
