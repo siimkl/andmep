@@ -7,10 +7,10 @@ Avalik rakendus: https://siimkl.github.io/andmep/
 ## Moodulid
 
 - API 1: API kaudu andmete pärimise näide
-- API 2: API-andmed R-is
-- API 3: tehisaru API ühendamine
-- Veebikraapimine R-i ja `rvest`-iga
-- AI-andmetöö: andmete valik, märgendamine ja mõju mudeli soovitustele
+- API 2: API-andmete töötlemine R-is
+- API 3: keelemudeli kasutamine API kaudu
+- Veebikraapimine R-is
+- Treeningandmete märgendamine
 
 ## Kohalik käivitus
 

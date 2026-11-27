@@ -6,7 +6,7 @@
   <meta name="description" content="Statistikaameti API vastuse töötlemine R-is, Gemini API päringu koostamine ja mudeli selgituse kontrollimine.">
   <title>API 3 · Keelemudeli kasutamine API kaudu</title>
   <link rel="stylesheet" href="styles.css?v=68">
-  <link rel="stylesheet" href="../api-common.css?v=15">
+  <link rel="stylesheet" href="../api-common.css?v=16">
   <link rel="stylesheet" href="../readability.css?v=3">
 </head>
 <body>
@@ -186,7 +186,7 @@ Accept: application/json</pre></div>
               <span class="sequence-grip" aria-hidden="true">⠿</span>
               <div class="sequence-block-body">
                 <div class="sequence-block-title"><span class="block-order">1</span><div><small>ANDMED</small><b>Andmete küsimine</b></div></div>
-                <label><span>Mis selles sammus toimub?</span><select data-answer="statistics-post"><option value="">Vali tegevus</option><option value="statistics-post">Statistikaameti API tagastab päringuga valitud väärtused</option><option value="show-result">Kasutajale kuvatakse AI vastus ja lähteandmed</option><option value="ask-ai">Gemini API-le saadetakse arvud ja selge ülesanne</option></select></label>
+                <label><span>Mis selles sammus toimub?</span><select data-answer="statistics-post"><option value="">Vali tegevus</option><option value="statistics-post">Statistikaameti API tagastab päringuga valitud väärtused</option><option value="show-result">Kasutajale kuvatakse mudeli vastus ja lähteandmed</option><option value="ask-ai">Gemini API-le saadetakse arvud ja selge ülesanne</option></select></label>
               </div>
               <div class="sequence-move"><button type="button" data-sequence-move="up">Üles</button><button type="button" data-sequence-move="down">Alla</button></div>
             </article>
@@ -195,7 +195,7 @@ Accept: application/json</pre></div>
               <span class="sequence-grip" aria-hidden="true">⠿</span>
               <div class="sequence-block-body">
                 <div class="sequence-block-title"><span class="block-order">2</span><div><small>TULEMUS</small><b>Vastuse kuvamine</b></div></div>
-                <label><span>Mis selles sammus toimub?</span><select data-answer="show-result"><option value="">Vali tegevus</option><option value="calculate-change">R arvutab muutuse ja koostab mudeli sisendi</option><option value="show-result">Kasutajale kuvatakse AI vastus, lähteandmed ja arvutus</option><option value="start-button">Kasutaja käivitab töövoo nupuga</option></select></label>
+                <label><span>Mis selles sammus toimub?</span><select data-answer="show-result"><option value="">Vali tegevus</option><option value="calculate-change">R arvutab muutuse ja koostab mudeli sisendi</option><option value="show-result">Kasutajale kuvatakse mudeli vastus, lähteandmed ja arvutus</option><option value="start-button">Kasutaja käivitab töövoo nupuga</option></select></label>
               </div>
               <div class="sequence-move"><button type="button" data-sequence-move="up">Üles</button><button type="button" data-sequence-move="down">Alla</button></div>
             </article>
@@ -213,7 +213,7 @@ Accept: application/json</pre></div>
               <span class="sequence-grip" aria-hidden="true">⠿</span>
               <div class="sequence-block-body">
                 <div class="sequence-block-title"><span class="block-order">4</span><div><small>KEELEMUDELI API</small><b>Tõlgenduse küsimine</b></div></div>
-                <label><span>Mis selles sammus toimub?</span><select data-answer="ask-ai"><option value="">Vali tegevus</option><option value="show-result">Kasutajale kuvatakse AI vastus</option><option value="ask-ai">Gemini API-le saadetakse arvutatud muutus ja selge ülesanne</option><option value="calculate-change">R arvutab muutuse ja koostab mudeli sisendi</option></select></label>
+                <label><span>Mis selles sammus toimub?</span><select data-answer="ask-ai"><option value="">Vali tegevus</option><option value="show-result">Kasutajale kuvatakse mudeli vastus</option><option value="ask-ai">Gemini API-le saadetakse arvutatud muutus ja selge ülesanne</option><option value="calculate-change">R arvutab muutuse ja koostab mudeli sisendi</option></select></label>
               </div>
               <div class="sequence-move"><button type="button" data-sequence-move="up">Üles</button><button type="button" data-sequence-move="down">Alla</button></div>
             </article>
@@ -222,7 +222,7 @@ Accept: application/json</pre></div>
               <span class="sequence-grip" aria-hidden="true">⠿</span>
               <div class="sequence-block-body">
                 <div class="sequence-block-title"><span class="block-order">5</span><div><small>R-TÖÖTLUS</small><b>Arvutamine ja ettevalmistus</b></div></div>
-                <label><span>Mis selles sammus toimub?</span><select data-answer="calculate-change"><option value="">Vali tegevus</option><option value="start-button">Kasutaja käivitab töövoo nupuga</option><option value="calculate-change">R arvutab muutuse ja koostab mudeli sisendi</option><option value="show-result">Kasutajale kuvatakse AI vastus koos lähteandmetega</option></select></label>
+                <label><span>Mis selles sammus toimub?</span><select data-answer="calculate-change"><option value="">Vali tegevus</option><option value="start-button">Kasutaja käivitab töövoo nupuga</option><option value="calculate-change">R arvutab muutuse ja koostab mudeli sisendi</option><option value="show-result">Kasutajale kuvatakse mudeli vastus koos lähteandmetega</option></select></label>
               </div>
               <div class="sequence-move"><button type="button" data-sequence-move="up">Üles</button><button type="button" data-sequence-move="down">Alla</button></div>
             </article>
@@ -238,7 +238,7 @@ Accept: application/json</pre></div>
     <section class="practice-suite locked" id="practiceSuite" aria-labelledby="practiceTitle" aria-disabled="true" inert>
       <header class="practice-suite-head">
         <h2 id="practiceTitle">Keelemudeli töövoo kavand</h2>
-        <p>Rippmenüüde valikutest koostatakse töövoo skeem. Tagasiside aitab hinnata andmete sobivust, inimese rolli ja tegevust tõrke korral.</p>
+        <p>Valikute põhjal koostatakse töövoo skeem. Mõni valik piirab järgmisi valikuid. Näiteks andmeallikas määrab, millised käivitusviisid sobivad.</p>
       </header>
 
       <div class="planner-grid">
@@ -255,11 +255,11 @@ Accept: application/json</pre></div>
 
           <section class="planner-section">
             <div class="planner-number">2</div>
-            <div><span class="section-kicker">ANDMED JA AI ROLL</span><h3>Mida saadad ja mida mudel täpselt teeb?</h3></div>
+            <div><span class="section-kicker">ANDMED JA MUDELI ÜLESANNE</span><h3>Mida saadad ja mida mudel täpselt teeb?</h3></div>
             <div class="planner-fields-grid">
               <label class="planner-field"><span>Andmeallikas</span><select id="sourceInput"><option value="">Vali andmeallikas</option><option value="statistics-api">Statistikaameti API</option><option value="database-api">Andmebaasi või infosüsteemi API</option><option value="csv">CSV- või Exceli fail</option><option value="form">Veebivormi vastused</option><option value="email">E-kirjad meiliteenuse API-st</option><option value="documents">Dokumendid faililaost</option><option value="crm">CRM-i või kasutajatoe API</option></select></label>
               <label class="planner-field"><span>Andmete tundlikkus</span><select id="sensitivityInput"><option value="">Vali tundlikkus</option><option value="public">Avalikud andmed</option><option value="internal">Asutusesisesed andmed</option><option value="personal">Isikuandmed</option><option value="sensitive">Eriliiki või väga tundlikud isikuandmed</option></select></label>
-              <label class="planner-field"><span>AI piiratud ülesanne</span><select id="aiRoleInput"><option value="">Vali üks selge ülesanne</option><option value="explain">Selgitab muutust etteantud andmete põhjal</option><option value="classify">Liigitab etteantud kategooriatesse</option><option value="extract">Eraldab kokkulepitud väljad</option><option value="summarize">Võtab sisu kokku</option><option value="draft">Koostab inimesele mustandi</option><option value="translate">Tõlgib teksti</option><option value="detect">Tuvastab reeglite järgi erandid</option></select></label>
+              <label class="planner-field"><span>Keelemudeli ülesanne</span><select id="aiRoleInput"><option value="">Vali üks selge ülesanne</option><option value="explain">Selgitab muutust etteantud andmete põhjal</option><option value="classify">Liigitab etteantud kategooriatesse</option><option value="extract">Eraldab kokkulepitud väljad</option><option value="summarize">Võtab sisu kokku</option><option value="draft">Koostab inimesele mustandi</option><option value="translate">Tõlgib teksti</option><option value="detect">Tuvastab reeglite järgi erandid</option></select></label>
               <label class="planner-field"><span>Keelemudeli teenus</span><select id="modelInput"><option value="">Vali teenus</option><option value="gemini">Gemini API (pilvteenus)</option><option value="openai">OpenAI API (pilvteenus)</option><option value="anthropic">Anthropic API (pilvteenus)</option><option value="azure">Azure OpenAI (organisatsiooni pilv)</option><option value="local">Asutuse hallatav lokaalne mudeli-API</option></select></label>
             </div>
           </section>
@@ -278,20 +278,19 @@ Accept: application/json</pre></div>
           <div class="planner-actions">
             <button class="secondary-button" id="clearWorkflow" type="button">Tühjenda</button>
           </div>
-          <p class="planner-privacy"><b>Privaatsus:</b> valikud jäävad ainult sellesse brauseri vaatesse ja neid ei saadeta ühelegi API-le.</p>
+          <p class="planner-privacy">Kavandi valikud jäävad sellesse brauserivaatesse.</p>
         </form>
 
         <article class="workflow-preview card" aria-live="polite">
-          <div class="preview-head"><div><span class="section-kicker">VÄLJUND · 5 SAMMU</span><h3>Sinu töövoo visand</h3></div><span class="exercise-state" id="plannerState">0 / 11 valikut</span></div>
-          <section class="quality-dashboard" aria-labelledby="qualityTitle">
-            <div class="quality-score"><strong id="qualityScore">0</strong><span>/ 100</span><small id="qualityTitle">VALMIDUS</small></div>
-            <div class="quality-dimensions">
-              <div><span>Selgus</span><i><b id="clarityBar"></b></i><strong id="clarityScore">0</strong></div>
-              <div><span>Andmekaitse</span><i><b id="privacyBar"></b></i><strong id="privacyScore">0</strong></div>
-              <div><span>Kontroll</span><i><b id="controlBar"></b></i><strong id="controlScore">0</strong></div>
-              <div><span>Töökindlus</span><i><b id="reliabilityBar"></b></i><strong id="reliabilityScore">0</strong></div>
-            </div>
-            <p id="qualityHint">Alusta kasutusjuhust ja määra AI-le üks piiratud roll.</p>
+          <div class="preview-head"><div><h3>Sinu töövoo visand</h3></div><span class="exercise-state" id="plannerState">0 / 11 valikut</span></div>
+          <section class="planner-feedback" aria-labelledby="qualityTitle" id="plannerFeedback" hidden>
+            <h4 id="qualityTitle">Kavandi tagasiside</h4>
+            <dl>
+              <div><dt>Ülesanne ja vorming</dt><dd id="clarityFeedback"></dd></div>
+              <div><dt>Andmekaitse</dt><dd id="privacyFeedback"></dd></div>
+              <div><dt>Inimese roll</dt><dd id="controlFeedback"></dd></div>
+              <div><dt>Tegevus tõrke korral</dt><dd id="fallbackFeedback"></dd></div>
+            </dl>
           </section>
           <ol class="workflow-diagram" id="workflowDiagram">
             <li><span>1</span><div><b>Käivitus ja keskkond</b><small id="previewTrigger">Vali kasutusjuht, käivitaja ja keskkond</small></div></li>
@@ -303,8 +302,8 @@ Accept: application/json</pre></div>
         </article>
         <section class="stress-lab" aria-labelledby="stressTitle">
           <div><h4 id="stressTitle">Tõrkeolukorra läbimäng</h4><p>Olukorra valimisel hinnatakse kavandatud kontrolli ja varuplaani sobivust.</p></div>
-          <label><span>Testolukord</span><select id="stressInput"><option value="">Vali olukord</option><option value="rate-limit">AI API vastab „429 Too Many Requests”</option><option value="invalid-output">Mudeli vastus ei vasta oodatud vormingule</option><option value="personal-data">Sisend sisaldab ootamatult isikuandmeid</option><option value="model-outage">AI teenus ei ole ajutiselt saadaval</option><option value="low-confidence">Mudeli vastuse kindlus on madal</option></select></label>
-          <div class="stress-result pending" id="stressResult"><span>○</span><div><b>Vali testolukord</b><p>Siin näed, kas kavandatud kontroll ja varuplaan aitavad.</p></div></div>
+          <label><span>Testolukord</span><select id="stressInput"><option value="">Vali olukord</option><option value="rate-limit">Mudeli API vastab „429 Too Many Requests”</option><option value="invalid-output">Mudeli vastus ei vasta oodatud vormingule</option><option value="personal-data">Sisend sisaldab ootamatult isikuandmeid</option><option value="model-outage">Mudeliteenus ei ole ajutiselt saadaval</option><option value="low-confidence">Vastuses on väide, mida allikas ei kinnita</option></select></label>
+          <div class="stress-result" id="stressResult" aria-live="polite" hidden><span aria-hidden="true"></span><div><b></b><p></p></div></div>
         </section>
       </div>
     </section>
@@ -318,12 +317,12 @@ Accept: application/json</pre></div>
         <div class="footer-detail">
           <small>Tehnoloogia</small>
           <strong>HTML5 · CSS3 · JavaScript (ES2022)</strong>
-          <span>Buildless veebirakendus, mis töötab otse brauseris.</span>
+          <span>Harjutused töötavad brauseris.</span>
         </div>
         <div class="footer-detail">
-          <small>Arenduskeskkond ja mudel</small>
-          <strong>VS Code · OpenAI Codex · GPT-5.6 Sol · Extra High</strong>
-          <span>Spec-driven · AI-supported coding</span>
+          <small>Arendustööriistad</small>
+          <strong>Visual Studio Code · OpenAI Codex</strong>
+          <span>Rakenduse arendamisel kasutati tehisaru abi.</span>
         </div>
         <div class="footer-detail">
           <small>Versioonihaldus ja avaldamine</small>
@@ -331,8 +330,8 @@ Accept: application/json</pre></div>
         </div>
         <div class="footer-detail">
           <small>Andmed</small>
-          <strong>Sünteetilised andmed ja avalikud näited</strong>
-          <span>Tööotsijate andmed on väljamõeldud. Rakendus ei tee väliseid API-päringuid.</span>
+          <strong>Õppeandmed ja avalikud allikad</strong>
+          <span>Brauser kasutab kohalikke näidisvastuseid.</span>
         </div>
       </div>
       <div class="footer-note"><small>Harjutuse andmed</small><span>Põhinäite palgaväärtused pärinevad Statistikaameti tabelist PA111. Muude valikutega võib vastus sisaldada näidisväärtusi.</span></div>
@@ -378,6 +377,6 @@ Accept: application/json</pre></div>
     </div>
   </dialog>
   <script src="../api-nav.js"></script>
-  <script src="app.js?v=71"></script>
+  <script src="app.js?v=72"></script>
 </body>
 </html>

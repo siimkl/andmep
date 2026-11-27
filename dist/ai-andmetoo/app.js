@@ -433,7 +433,7 @@ function renderOutputCase() {
     const summary = Object.keys(reviewNames).map(key => `${reviewNames[key]}: ${state.reviews.filter(value => value === key).length}`).join(" · ");
     const aligned = outputCases.filter((item, index) => state.reviews[index] === expectedReview(item)).length;
     container.innerHTML = `<div class="case-top"><span>HINDAMINE VALMIS</span><b>${outputCases.length} väljundit</b></div>
-      <h4>Sinu kvaliteedimärked</h4><p>${summary}</p>
+      <h4>Kontrollkirjete hinnangud</h4><p>${summary}</p>
       <p>Harjutuse kontrolliga kattus ${aligned} / ${outputCases.length} sinu hinnangust.</p>
       <div class="case-meta"><button class="inline-reset" type="button" data-rereview>Hinda väljundeid uuesti</button></div>`;
     actions.hidden = true;
@@ -696,7 +696,7 @@ const dialogMessages = {
     startLabel: "TREENINGKIRJED",
     start: "Valisid viiele kirjele märgendi.",
     middleLabel: "TREENINGANDMED",
-    middle: "Kinnitamisel salvestati sinu valitud märgendid.",
+    middle: "Valitud märgendid jäävad selles harjutuses treeningkirjete juurde.",
     endLabel: "KONTROLLKIRJED",
     end: "Nende põhjal kuvatakse näidissoovitused.",
     continueText: "Märgenduse kokkuvõtte juurde",
@@ -808,7 +808,7 @@ function renderResults() {
   const alignedReviews = outputCases.filter((item, index) => state.reviews[index] === expectedReview(item)).length;
   const tradeoffs = [
     ["Märgenduse vastavus juhisele", `Kinnitatud juhisele vastas ${metrics.aligned} märgendit ${labelCases.length}-st.`],
-    ["Puudulik või vastuoluline info", `Sinu märgendite järgi suunati andmete täiendamisele ${metrics.supplement} kirjet ja inimese ülevaatusele ${metrics.review} kirjet.`],
+    ["Puudulik või vastuoluline info", `Sinu märgendite järgi vajab andmete täiendamist ${metrics.supplement} kirjet ning inimese ülevaatust ${metrics.review} kirjet.`],
     ["Kontrollkirjete hinnangud", `Harjutuse kontrolliga kattus ${alignedReviews} hinnangut ${outputCases.length}-st.`],
     ["Vaidlustusest paranduse kavandamiseni", state.appeal === "owned"
       ? "Sinu valitud korras lisatakse parandus seirelogisse. Logi põhjal saab otsustada, mida juhises, treeningandmetes või kontrollkirjetes muuta."

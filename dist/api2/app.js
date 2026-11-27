@@ -196,7 +196,7 @@
         },
         {
           prompt: "API puudub, kuid vajalik avalik info on veebilehel nähtav.",
-          options: ["Käsitsi alati", "Faili väljamõtlemine", "API", "Võimalusel kraapimine"], correct: 3,
+          options: ["Käsitsi alati", "CSV-faili allalaadimine", "API", "Võimalusel kraapimine"], correct: 3,
           why: "Kraapimist võib kaaluda pärast kasutustingimuste ja eetiliste piiride kontrolli."
         },
         {
@@ -225,7 +225,7 @@
           why: "429 tähendab päringulimiidi ületamist. Oota, järgi juhiseid ja aeglusta päringuid."
         },
         {
-          prompt: "Miks kasutatakse Maailmapanga vastuses vastus_wb[[2]]?",
+          prompt: "Maailmapanga API näidisvastus koosneb kahest osast. Esimeses on metaandmed ja teises vaatlused. Mida valib R-is vastus_wb[[2]]?",
           options: ["Et valida vaatluste osa", "Et korrutada rahvaarv kahega", "Et valida teine riik", "Et muuta POST GET-iks"], correct: 0,
           why: "Maailmapanga JSON-vastuse esimene osa sisaldab metaandmeid ja teine vaatlusi."
         },

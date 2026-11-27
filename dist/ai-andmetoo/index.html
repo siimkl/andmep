@@ -6,7 +6,7 @@
   <meta name="description" content="Märgendusjuhise koostamine, treeningkirjete märgendamine ja soovituste hindamine väljamõeldud tööotsijate näitel.">
   <title>Treeningandmete märgendamine</title>
   <link rel="stylesheet" href="api1-base.css?v=2">
-  <link rel="stylesheet" href="../api-common.css?v=15">
+  <link rel="stylesheet" href="../api-common.css?v=16">
   <link rel="stylesheet" href="simulator.css?v=44">
   <link rel="stylesheet" href="../readability.css?v=3">
 </head>
@@ -34,7 +34,7 @@
 
     <section class="briefing-card" aria-labelledby="task-title">
       <h2 id="task-title">Praktikumi ülesanne</h2>
-      <p>Väljamõeldud tööhõiveamet katsetab süsteemi, mis soovitab tööotsijatele sobivat tuge. Lõpliku otsuse teeb ametnik. Õppija tegutseb valdkonnaspetsialistina, märgendab juhise järgi viis treeningkirjet, hindab nelja eraldi kontrollkirje soovitusi ja koostab paranduskava.</p>
+      <p>Väljamõeldud tööhõiveamet katsetab süsteemi, mis soovitab tööotsijatele sobivat tuge. Lõpliku otsuse teeb ametnik. Valdkonnaspetsialisti rollis märgendad juhise järgi viis treeningkirjet, hindad nelja eraldi kontrollkirje soovitusi ja koostad paranduskava.</p>
       <p>Kõik kirjed on väljamõeldud. Simulatsioon seob iga kontrollkirje ühe treeningkirjega ja kasutab selle märgendit näidissoovitusena. Väike andmestik teeb selle seose jälgitavaks. Päris mudeli kvaliteedi hindamiseks oleks vaja suuremat ja mitmekesisemat valimit.</p>
     </section>
 
@@ -157,7 +157,7 @@
         </section>
 
         <section class="decision-stage" data-stage="4" hidden>
-          <div class="control-title"><div><h3 id="stage4Title" tabindex="-1">Paranduskava koostamine</h3><p>Kava määrab vastutajad, juhise ülevaatamise sageduse ja vea vaidlustamise korra. Säilitamiseks tuleb valida vähemalt kaks materjali, mille järgi saab hiljem parandusi kontrollida.</p></div></div>
+          <div class="control-title"><div><h3 id="stage4Title" tabindex="-1">Paranduskava koostamine</h3><p>Kava määrab vastutajad, juhise ülevaatamise sageduse ning korra, mille järgi inimene saab soovituse vaidlustada. Säilitamiseks tuleb valida vähemalt kaks materjali, mille järgi saab hiljem parandusi kontrollida.</p></div></div>
           <div class="ownership-grid" id="ownershipGrid">
             <label><span>Märgendusjuhise mõisted ja näited</span><select data-owner="data"><option value="">Määra vastutaja</option><option value="internal">Ameti valdkonnaeksperdid</option><option value="shared">Amet ja arenduspartner ühiselt</option><option value="vendor">Ainult arenduspartner</option><option value="none">Vastutaja puudub</option></select></label>
             <label><span>Vaidlustatud märgendite lõplik lahendamine</span><select data-owner="rules"><option value="">Määra vastutaja</option><option value="internal">Ameti vanemekspert</option><option value="shared">Amet ja arenduspartner ühiselt</option><option value="vendor">Ainult arenduspartner</option><option value="none">Vastutaja puudub</option></select></label>
@@ -195,12 +195,12 @@
         <div class="footer-detail">
           <small>Tehnoloogia</small>
           <strong>HTML5 · CSS3 · JavaScript (ES2022)</strong>
-          <span>Buildless veebirakendus, mis töötab otse brauseris.</span>
+          <span>Harjutused töötavad brauseris.</span>
         </div>
         <div class="footer-detail">
-          <small>Arenduskeskkond ja mudel</small>
-          <strong>VS Code · OpenAI Codex · GPT-5.6 Sol · Extra High</strong>
-          <span>Spec-driven · AI-supported coding</span>
+          <small>Arendustööriistad</small>
+          <strong>Visual Studio Code · OpenAI Codex</strong>
+          <span>Rakenduse arendamisel kasutati tehisaru abi.</span>
         </div>
         <div class="footer-detail">
           <small>Versioonihaldus ja avaldamine</small>
@@ -208,8 +208,8 @@
         </div>
         <div class="footer-detail">
           <small>Andmed</small>
-          <strong>Sünteetilised andmed ja avalikud näited</strong>
-          <span>Tööotsijate andmed on väljamõeldud. Rakendus ei tee väliseid API-päringuid.</span>
+          <strong>Õppeandmed ja avalikud allikad</strong>
+          <span>Tööotsijate andmed on väljamõeldud.</span>
         </div>
       </div>
       <div class="footer-note"><small>Harjutuse andmed</small><span>Simulatsioon kasutab väljamõeldud kirjeid ja lihtsat näidisreeglit, et näidata treeningmärgendite mõju soovitustele.</span></div>
@@ -232,6 +232,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=64"></script>
+  <script src="app.js?v=65"></script>
 </body>
 </html>

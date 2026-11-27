@@ -61,7 +61,7 @@
     few: { method: "manual", title: "Sobib käsitsi kopeerimine", text: "Kolme väärtuse ühekordseks kogumiseks piisab enamasti veebilehelt kopeerimisest." },
     file: { method: "file", title: "Sobib ametlik CSV-fail", text: "Valmis failist saab andmed tabelina otse sisse lugeda." },
     api: { method: "api", title: "Sobib dokumenteeritud API", text: "Dokumentatsioon kirjeldab, milliselt aadressilt ja milliste parameetritega andmeid küsida." },
-    static: { method: "rvest", title: "Sobib veebikraapimine R-is", text: "Korduvaid HTML-kirjeid saab koguda skriptiga. Enne kraapimist tuleb veenduda, et veebilehte tohib selleks kasutada." },
+    static: { method: "rvest", title: "Sobib veebikraapimine R-is", text: "Skript võimaldab kogumist korrata samade reeglitega. Enne kraapimist tuleb veenduda, et veebilehte tohib selleks kasutada." },
     restricted: { method: "stop", title: "Esmalt on vaja volitust", text: "Siseveebi andmete kogumise, säilitamise ja edastamise tingimused tuleb volituse andjaga kokku leppida." }
   };
 
@@ -282,7 +282,7 @@
     els.selectorFeedback.textContent = correct
       ? "Kõik neli selektorit sobivad näite HTML-iga."
       : selected === 4
-        ? "Vähemalt üks selektor valib vale elemendi. Näite HTML-is tähistab klass quote kogu kirjet."
+        ? "Vähemalt üks selektor ei sobi. Kontrolli näite HTML-ist eraldi plokki ja selle sees olevaid välju."
         : `${selected}/4 selektorit valitud.`;
     $('[data-run="2"]').disabled = !correct;
   }

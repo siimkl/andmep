@@ -909,7 +909,6 @@
   function plannerCompatibility(values) {
     const profile = workflowProfiles[values.useCaseInput];
     return {
-      profile,
       roles: profile?.roles || null,
       sources: profile?.sources || null,
       visuals: profile?.visuals || null,
@@ -935,100 +934,58 @@
     restrictPlannerSelect("modelInput", refreshedCompatibility.models);
   }
 
-  function plannerOptionList(id, values) {
-    const labels = values.slice(0, 3).map((value) => $(`#${id} option[value="${value}"]`).textContent.trim());
-    if (labels.length < 2) return labels[0] || "sobiv valik";
-    return `${labels.slice(0, -1).join(", ")} või ${labels.at(-1)}`;
-  }
+  function renderPlannerFeedback(values) {
+    const hasChoices = Object.values(values).some(Boolean);
+    $("#plannerFeedback").hidden = !hasChoices;
+    if (!hasChoices) return;
+    const { aiRoleInput, formatInput, sensitivityInput, modelInput, controlInput, fallbackInput } = values;
+    $("#clarityFeedback").textContent = aiRoleInput && formatInput
+      ? "Kavandis on mudelil üks ülesanne ja vastuseks määratud vorming. Töökindlust saab hinnata näidisvastustega."
+      : "Vastuse hindamiseks peab olema teada mudeli ülesanne ja oodatav vorming.";
 
-  function updateQuality(values) {
-    const compatibility = plannerCompatibility(values);
-    const profile = compatibility.profile;
-    const roleFits = plannerValueAllowed(values.aiRoleInput, compatibility.roles);
-    const sourceFits = plannerValueAllowed(values.sourceInput, compatibility.sources);
-    const visualFits = plannerValueAllowed(values.visualInput, compatibility.visuals);
-    const environmentFits = plannerValueAllowed(values.environmentInput, compatibility.environments);
-    const triggerFits = plannerValueAllowed(values.triggerInput, compatibility.triggers);
-    const modelFits = plannerValueAllowed(values.modelInput, compatibility.models);
-    const roleFormatFits = !values.aiRoleInput || !values.formatInput || roleFormats[values.aiRoleInput].includes(values.formatInput);
-    const visualFormatFits = !values.visualInput || !values.formatInput || visualFormats[values.visualInput].includes(values.formatInput);
+    const privacyNotes = {
+      public: "Allikas on avalik. Enne päringut tasub kontrollida, milliseid välju mudel ülesande täitmiseks vajab.",
+      internal: ["gemini", "openai", "anthropic"].includes(modelInput)
+        ? "Asutusesiseste andmete saatmine pilvteenusesse eeldab teenuse tingimuste ja ligipääsude kontrolli."
+        : "Asutusesiseste andmete puhul tuleb kontrollida, kellel on ligipääs sisendile ja vastusele.",
+      personal: "Enne isikuandmete saatmist tuleb kontrollida töötlemise alust ja piirduda ülesandeks vajalike andmetega.",
+      sensitive: "Tundlike andmete puhul vajavad enne saatmist eraldi hindamist töötlemise alus, andmete vajalikkus ja turvameetmed."
+    };
+    $("#privacyFeedback").textContent = privacyNotes[sensitivityInput] || "Andmete töötlemise tingimused sõltuvad sellest, millist teavet sisend sisaldab.";
 
-    let clarity = (values.useCaseInput ? 5 : 0) + (values.aiRoleInput ? 8 : 0) + (values.formatInput ? 6 : 0) + (values.visualInput ? 6 : 0);
-    if (!roleFits) clarity -= 7;
-    if (!sourceFits) clarity -= 5;
-    if (!visualFits) clarity -= 4;
-    if (!roleFormatFits) clarity -= 4;
-    if (!visualFormatFits) clarity -= 4;
-    clarity = Math.max(0, clarity);
-    if (![roleFits, sourceFits, visualFits, roleFormatFits, visualFormatFits].every(Boolean)) clarity = Math.min(clarity, 9);
-
-    let privacy = (values.sourceInput ? 3 : 0) + (values.modelInput ? 2 : 0);
-    if (values.sensitivityInput === "public") privacy = (values.sourceInput ? 5 : 0) + 5 + (values.modelInput ? 5 : 0) + 10;
-    if (values.sensitivityInput === "internal") {
-      const serviceFit = values.modelInput === "local" ? 5 : values.modelInput === "azure" ? 3 : 0;
-      privacy = (values.sourceInput ? 4 : 0) + 5 + (values.modelInput ? 4 : 0) + serviceFit;
-    }
-    if (values.sensitivityInput === "personal") privacy = (values.sourceInput ? 2 : 0) + 5 + (values.modelInput ? 2 : 0);
-    if (values.sensitivityInput === "sensitive") privacy = (values.sourceInput ? 1 : 0) + 5 + (values.modelInput ? 1 : 0);
-
-    const strongControl = ["approve", "facts", "owner"].includes(values.controlInput);
-    const control = (values.controlInput ? 10 : 0) + (values.formatInput ? 5 : 0) + (strongControl ? 7 : values.controlInput ? 5 : 0) + (values.modelInput ? 3 : 0);
-    let reliability = (values.fallbackInput ? 10 : 0) + (values.triggerInput ? 5 : 0) + (values.environmentInput ? 5 : 0) + (values.modelInput ? 5 : 0);
-    if (!environmentFits) reliability -= 8;
-    if (!triggerFits) reliability -= 7;
-    if (!modelFits) reliability -= 5;
-    reliability = Math.max(0, reliability);
-    if (![environmentFits, triggerFits, modelFits].every(Boolean)) reliability = Math.min(reliability, 9);
-    const dimensions = { clarity, privacy, control, reliability };
-    Object.entries(dimensions).forEach(([key, score]) => {
-      $(`#${key}Score`).textContent = String(score);
-      $(`#${key}Bar`).style.width = `${score * 4}%`;
-    });
-    const total = Object.values(dimensions).reduce((sum, score) => sum + score, 0);
-    const scoreElement = $("#qualityScore");
-    scoreElement.textContent = String(total);
-    scoreElement.parentElement.className = `quality-score ${total >= 85 ? "strong" : total >= 55 ? "developing" : "starting"}`;
-    scoreElement.parentElement.style.setProperty("--quality", `${total}%`);
-
-    const labels = { clarity: "selgus", privacy: "andmekaitse", control: "kontroll", reliability: "töökindlus" };
-    const weakest = Object.entries(dimensions).sort((a, b) => a[1] - b[1])[0][0];
-    let hint = `Järgmine arengukoht on ${labels[weakest]}.`;
-    if (values.sensitivityInput === "sensitive") hint = "Eriliiki või väga tundlike isikuandmete korral ei piisa mudeliteenuse valimisest. Enne saatmist on vaja õiguslikku alust, andmete minimeerimist ja turvameetmete kontrolli.";
-    else if (values.sensitivityInput === "personal") hint = "Isikuandmete korral kontrolli enne saatmist õiguslikku alust, andmete vajalikkust, teenuse lepingut, säilitamist ja ligipääse.";
-    else if (!values.useCaseInput) hint = "Alusta kasutusjuhust: millise otsuse või tööetapi jaoks on tulemust vaja?";
-    else if (!environmentFits) hint = `Valitud käituskeskkond ei sobi selle kasutusjuhu ja andmeallikaga. Sobib ${plannerOptionList("environmentInput", compatibility.environments)}.`;
-    else if (!triggerFits) hint = `Valitud käivitaja ei sobi selle andmeallikaga. Sobib ${plannerOptionList("triggerInput", compatibility.triggers)}.`;
-    else if (!modelFits) hint = "Google Sheetsi töövoog ei pääse tavaliselt asutuse lokaalsele mudeli-API-le. Vali ligipääsetav teenus või teine käituskeskkond.";
-    else if (!values.aiRoleInput) hint = "Anna AI-le üks piiratud tegevus: liigita, eralda, võta kokku, tõlgi või selgita.";
-    else if (!roleFits) hint = `Valitud AI ülesanne ei sobi hästi selle kasutusjuhuga. Loogilisem on ${plannerOptionList("aiRoleInput", profile.roles)}.`;
-    else if (!sourceFits) hint = `Valitud andmeallikas ei sobi hästi selle kasutusjuhuga. Loogilisem on ${plannerOptionList("sourceInput", profile.sources)}.`;
-    else if (!roleFormatFits) hint = `Valitud ülesanne vajab teistsugust vastuse vormingut. Sobib ${plannerOptionList("formatInput", roleFormats[values.aiRoleInput])}.`;
-    else if (!visualFormatFits) hint = `Valitud kasutajavaadet ei saa sellest vormingust usaldusväärselt koostada. Sobib ${plannerOptionList("formatInput", visualFormats[values.visualInput])}.`;
-    else if (!visualFits) hint = `Valitud kasutajavaade ei ole selle kasutusjuhu jaoks kõige selgem. Sobib ${plannerOptionList("visualInput", profile.visuals)}.`;
-    else if (values.sensitivityInput === "internal" && ["gemini", "openai", "anthropic"].includes(values.modelInput)) hint = "Asutusesiseste andmete puhul kontrolli enne pilvteenuse kasutamist lepingut, säilitamist, kasutuspiirkonda ja ligipääse.";
-    else if (total >= 90) hint = "Tugev visand. Katseta nüüd allpool üht tõrkeolukorda ja vaata, kas plaan peab vastu.";
-    $("#qualityHint").textContent = hint;
-    return total;
+    const controlNotes = {
+      approve: "Inimene otsustab enne kasutamist, kas tulemus sobib. Kavas võiks olla kirjas, mille põhjal ta otsustab.",
+      facts: "Inimene võrdleb mudeli väiteid algallikaga.",
+      exceptions: "Erandjuhtumid jõuavad inimeseni siis, kui töövoos on selge reegel nende tuvastamiseks.",
+      sample: "Juhuvalim aitab märgata korduvaid vigu. Üksiku vastuse kontroll sõltub sellest, kas see satub valimisse.",
+      owner: "Tulemust kontrollib valdkonna eest vastutav inimene."
+    };
+    $("#controlFeedback").textContent = controlNotes[controlInput] || "Kontrolli valik määrab, millal ja mille põhjal inimene tulemust hindab.";
+    $("#fallbackFeedback").textContent = fallbackInput
+      ? "Valitud tegevuse sobivust saab proovida alloleva tõrkeolukorraga."
+      : "Tõrke korral peab olema teada, mis saab pooleli jäänud tööst.";
   }
 
   function renderStressTest(values) {
     const scenario = $("#stressInput").value;
     const result = $("#stressResult");
-    let state = "pending";
-    let title = "Vali testolukord";
-    let text = "Siin näed, kas kavandatud kontroll ja varuplaan aitavad.";
+    result.hidden = !scenario;
+    if (!scenario) return;
+    let state;
+    let title;
+    let text;
 
     if (scenario === "rate-limit") {
       const ready = ["retry", "queue", "cache"].includes(values.fallbackInput);
       state = ready ? "good" : "warn";
-      title = ready ? "Plaan peab vastu" : "Lisa tehniline varuplaan";
+      title = ready ? "Päringulimiidi arvestamine" : "Päringulimiit vajab varuplaani";
       text = ready ? "Valitud tõrkeplaan väldib päringu lõputut kordamist ja säilitab töövoo kontrolli." : "429 vastus vajab piiratud korduskatseid, järjekorda või viimast kontrollitud tulemust.";
     } else if (scenario === "invalid-output") {
       const structured = values.formatInput === "schema";
       const reviewed = ["approve", "facts", "owner", "exceptions"].includes(values.controlInput);
       state = structured && reviewed ? "good" : "warn";
-      title = state === "good" ? "Viga avastatakse enne kasutamist" : "Vastus võib märkamatult edasi liikuda";
-      text = state === "good" ? "JSON-skeem tuvastab vormivea ja inimkontroll püüab kinni sisulise vea." : "Kasuta struktureeritud skeemi ning määra, kes vigase või puuduliku vastuse üle vaatab.";
+      title = state === "good" ? "Vormingut saab kontrollida enne kasutamist" : "Vastus võib märkamatult edasi liikuda";
+      text = state === "good" ? "JSON-skeemi järgi saab tuvastada vormivea. Inimene saab üle vaadata vastuse sisu." : "Kasuta struktureeritud skeemi ning määra, kes vigase või puuduliku vastuse üle vaatab.";
     } else if (scenario === "personal-data") {
       const declared = ["personal", "sensitive"].includes(values.sensitivityInput);
       state = "warn";
@@ -1044,8 +1001,8 @@
     } else if (scenario === "low-confidence") {
       const reviewed = ["approve", "facts", "exceptions", "owner"].includes(values.controlInput);
       state = reviewed ? "good" : "warn";
-      title = reviewed ? "Ebakindel tulemus jõuab inimeseni" : "Madal kindlus vajab eskaleerimist";
-      text = reviewed ? "Valitud kontroll sobib ebakindlate juhtumite peatamiseks või ülevaatamiseks." : "Lisa reegel, mis suunab madala kindlusega vastused inimesele, mitte automaatsele kasutamisele.";
+      title = reviewed ? "Inimene saab väite üle vaadata" : "Kontrollimata väide võib edasi liikuda";
+      text = reviewed ? "Valitud kontroll sobib ebakindlate juhtumite peatamiseks või ülevaatamiseks." : "Kavas on vaja kirjeldada, kuidas tuvastada allikata väide ja suunata see enne kasutamist inimesele.";
     }
 
     result.className = `stress-result ${state}`;
@@ -1064,7 +1021,7 @@
     $("#previewOutput").textContent = [plannerLabel("formatInput", "Vorming valimata"), plannerLabel("visualInput", "vaade valimata")].join(" · ");
     $("#previewControl").textContent = [plannerLabel("controlInput", "Kontroll valimata"), plannerLabel("fallbackInput", "varuplaan valimata")].join(" · ");
 
-    updateQuality(values);
+    renderPlannerFeedback(values);
     renderStressTest(values);
     syncHeight();
   }

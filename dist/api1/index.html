@@ -6,7 +6,7 @@
   <meta name="description" content="Õppematerjal Statistikaameti API-st andmete pärimise, JSON-vastuse lugemise ja tulemuse kontrollimise kohta.">
   <title>API 1 · API kaudu andmete pärimise näide</title>
   <link rel="stylesheet" href="styles.css?v=4">
-  <link rel="stylesheet" href="../api-common.css?v=15">
+  <link rel="stylesheet" href="../api-common.css?v=16">
   <link rel="stylesheet" href="../readability.css?v=3">
 </head>
 <body>
@@ -18,7 +18,7 @@
         <p class="hero-description"><b>Harjutuse eesmärk on mõista Statistikaameti API näitel,</b> kuidas tabeli kirjeldusest leitakse sobivad valikud, kuidas koostatakse andmepäring ning kuidas kontrollitakse saadud vastust.</p>
       </div>
       <div class="hero-side">
-        <div class="mission-label">HARJUTUSE EDENEMINE</div>
+        <div class="mission-label">PÕHIÜLESANDE EDENEMINE</div>
         <div class="progress-value"><strong id="progressValue">0%</strong><span id="progressText">1. Tabeli kirjeldus</span></div>
         <div class="progress-track" aria-hidden="true"><span id="progressBar"></span></div>
         <div class="progress-meta"><span><b id="completedCount">0</b> / 4 sammu</span><span>≈ 20 min</span></div>
@@ -26,36 +26,31 @@
       </div>
     </header>
 
-    <section class="briefing-card" aria-label="Ülesanne">
-      <div class="briefing-mark">API</div>
+    <section class="briefing-card" aria-labelledby="task-title">
       <div>
-        <span>HARJUTUSE ÜLESANNE</span>
-        <p><b>Statistikaameti tabelist PA111 otsitakse vastus küsimusele: kui suur oli kõigi tegevusalade keskmine brutokuupalk 2024., 2025. ja 2026. aasta II kvartalis?</b> Harjutus hõlmab kolme väärtuse pärimist ning vastuse sisu, ühiku ja tähenduse kontrollimist.</p>
+        <h2 id="task-title">Praktikumi ülesanne</h2>
+        <p><strong>Kui suur oli kõigi tegevusalade keskmine brutokuupalk 2024., 2025. ja 2026. aasta II kvartalis ning kuidas see muutus?</strong> Vastus leitakse Statistikaameti tabeli PA111 põhjal. Brauser kuvab valmis näidisvastused.</p>
         <p class="briefing-context"><b>Miks kasutatakse siin API-t?</b> Kolm väärtust leiaks ühekordse ülesande puhul kiiremini Statistikaameti veebitabelist. Siin kasutatakse väikest andmehulka teadlikult, et API-päringu ehitus ja vastuse kuju oleksid lihtsasti jälgitavad. API eelis ilmneb eelkõige mahukate või korduvate päringute korral.</p>
       </div>
     </section>
 
-    <nav class="stepper" aria-label="Päringulabori sammud">
-      <div class="step active" data-step="1"><span>1</span><div><b>Tabeli kirjeldus</b><small>GET-vastus sisaldab muutujaid ja valikuid</small></div></div>
-      <div class="step" data-step="2"><span>2</span><div><b>Andmevalik</b><small>Näitaja, tegevusala ja periood määravad päringu sisu</small></div></div>
-      <div class="step" data-step="3"><span>3</span><div><b>Andmepäring</b><small>POST-päring tagastab valitud väärtused</small></div></div>
-      <div class="step" data-step="4"><span>4</span><div><b>Vastuse kontroll</b><small>Kontroll hõlmab sisu, ühikut ja tähendust</small></div></div>
+    <nav class="stepper" aria-label="Põhiülesande sammud">
+      <div class="step active" data-step="1"><span>1</span><div><b>Tabeli kirjeldus</b></div></div>
+      <div class="step" data-step="2"><span>2</span><div><b>Andmevalik</b></div></div>
+      <div class="step" data-step="3"><span>3</span><div><b>Andmepäring</b></div></div>
+      <div class="step" data-step="4"><span>4</span><div><b>Vastuse kontroll</b></div></div>
     </nav>
 
     <section class="lab-grid result-pending" aria-label="API päringu simulatsioon">
       <div class="stage-card card awaiting-response" aria-disabled="true" hidden>
         <div class="card-heading">
-          <div><span class="section-kicker">PÄRINGU VASTUS</span><h2>API vastuse sisu</h2></div>
+          <h2>Päringu vastus</h2>
           <div class="flow-status" role="status" aria-live="polite">
             <span>VASTUSE OLEK</span>
             <b id="flowStatus">Päringut pole veel saadetud</b>
           </div>
         </div>
 
-        <div class="story-strip" aria-live="polite">
-          <span class="story-index" id="storyIndex">01</span>
-          <p id="storyText"><b>Esimene vastus kirjeldab tabelit.</b> GET-päring näitab, milliseid andmeid saab järgmises päringus valida.</p>
-        </div>
 
         <div class="response-context neutral" id="responseContext" aria-live="polite">
           <span id="responseContextLabel">API VASTUS</span>
@@ -64,7 +59,7 @@
 
         <div class="result-summary" id="resultSummary" hidden>
           <div class="result-summary-head"><span class="section-kicker">ARVULINE KOKKUVÕTE</span><h3 id="resultSummaryTitle">Päringuga saadud väärtused</h3></div>
-          <p class="result-summary-note" id="resultSummaryNote">Kolme väärtuse puhul on arvud ja nende erinevused joonisest täpsemad.</p>
+          <p class="result-summary-note" id="resultSummaryNote"></p>
           <dl class="result-values" id="resultValues" aria-label="API vastusest saadud väärtused"></dl>
           <div class="result-comparison" id="resultComparison"></div>
         </div>
@@ -95,11 +90,10 @@ Accept: application/json</pre>
             </div>
             <div class="request-part request-part-explanation">
               <span class="request-part-label">SELGITUS</span>
-              <p class="full-request-note"><b>GET</b> on päringumeetod ja sellele järgneb täielik aadress. Päis <b>Accept</b> määrab vastuse vorminguks JSON-i. Sellel päringul ei ole päringukeha.</p>
+              <p class="full-request-note"><b>GET</b> on päringumeetod ja sellele järgneb täielik aadress. Päisega <b>Accept</b> küsib klient vastust JSON-vormingus. Sellel päringul ei ole päringukeha.</p>
             </div>
           </details>
           <div class="next-action-guide contextual">
-            <span class="next-action-label" aria-hidden="true">JÄRGMISENA <i>↓</i></span>
             <button class="primary-button" id="getMetadata" type="button"><span>Ava tabeli kirjeldus (GET)</span><i>→</i></button>
           </div>
         </section>
@@ -134,7 +128,6 @@ Accept: application/json</pre>
               </div>
             </details>
             <div class="next-action-guide contextual">
-              <span class="next-action-label" aria-hidden="true">JÄRGMISENA <i>↓</i></span>
               <button class="primary-button orange" id="sendRequest" type="button"><span>Saada valitud andmete päring (POST)</span><i>→</i></button>
             </div>
           </fieldset>
@@ -200,13 +193,13 @@ Accept: application/json</pre>
         <label class="check-card"><input type="checkbox"><span class="checkmark">✓</span><span><b>Ajakohasus</b><small>Kas tead, millal andmeid uuendati?</small></span></label>
         <label class="check-card"><input type="checkbox"><span class="checkmark">✓</span><span><b>Kasutustingimused</b><small>Kas kasutamine ja päringu maht on lubatud?</small></span></label>
       </fieldset>
-      <div class="takeaway" id="takeaway" hidden><span>✓</span><p><b>Kontroll tehtud.</b> API on ligipääsutee andmetele, mitte andmekvaliteedi garantii.</p></div>
+      <div class="takeaway" id="takeaway" hidden><span>✓</span><p><b>Kontroll tehtud.</b> Enne andmete kasutamist tuleb kontrollida nende tähendust ja sobivust uurimisküsimusega.</p></div>
     </section>
 
     <section class="practice-suite locked" aria-labelledby="practiceTitle" aria-disabled="true">
       <header class="practice-suite-head">
-        <div><span class="section-kicker">KINNISTA ÕPITU</span><h2 id="practiceTitle">Kolm lühitesti</h2></div>
-        <p>Vali igas olukorras parim vastus. Pärast valikut näed kohe selgitust.</p>
+        <div><h2 id="practiceTitle">Kolm lühitesti</h2></div>
+        <p>Igal küsimusel on üks sobiv vastus. Vastamise järel kuvatakse selgitus. Küsimuste vahel saab liikuda omas tempos.</p>
       </header>
       <div class="practice-grid">
 
@@ -217,14 +210,15 @@ Accept: application/json</pre>
       </div>
       <div class="test-progress-line test-progress" aria-hidden="true"><i id="decoderBar"></i></div>
       <div class="decoder-challenge">
-        <div class="decoder-signal test-question question-tone-0"><span class="question-label">KÜSIMUS <b id="decoderQuestionNumber">1 / 4</b></span><p><b>OLUKORD:</b> <span id="decoderPrompt">Päringu JSON on vigases vormingus.</span></p></div>
+        <div class="decoder-signal test-question question-tone-0"><span class="question-label">KÜSIMUS <b id="decoderQuestionNumber">1 / 4</b></span><p><span id="decoderPrompt">Päringu JSON on vigases vormingus.</span></p></div>
         <div class="decoder-options test-options" id="decoderOptions">
           <button type="button" data-code="400"><b>400</b><span>Bad Request</span></button>
           <button type="button" data-code="401"><b>401</b><span>Unauthorized</span></button>
           <button type="button" data-code="404"><b>404</b><span>Not Found</span></button>
-          <button type="button" data-code="429"><b>429</b><span>Too Many</span></button>
+          <button type="button" data-code="429"><b>429</b><span>Too Many Requests</span></button>
         </div>
-        <div class="test-feedback" id="decoderHint" aria-live="polite">Vali kõige sobivam olekukood.</div>
+        <div class="test-feedback" id="decoderHint" aria-live="polite" hidden></div>
+      <button class="quiz-next" id="decoderNext" type="button" hidden>Järgmine küsimus</button>
       </div>
     </section>
 
@@ -241,7 +235,8 @@ Accept: application/json</pre>
         <button type="button" data-method="api"><span>03</span><b>API</b><small>Korduv andmevahetus</small></button>
         <button type="button" data-method="scrape"><span>04</span><b>Kraapimine</b><small>Kui API puudub</small></button>
       </div>
-      <div class="method-feedback" id="methodFeedback" aria-live="polite">Tee valik, et saada kohe tagasisidet.</div>
+      <div class="method-feedback" id="methodFeedback" aria-live="polite" hidden></div>
+      <button class="quiz-next" id="methodNext" type="button" hidden>Järgmine küsimus</button>
     </section>
 
     <section class="concept-card practice-card card">
@@ -257,7 +252,8 @@ Accept: application/json</pre>
           <button type="button" data-answer="2"><b>C</b><span>Ainult tabeli nime</span></button>
           <button type="button" data-answer="3"><b>D</b><span>Valmis joonise</span></button>
       </div>
-      <div class="concept-feedback test-feedback" id="conceptFeedback" aria-live="polite">Vali üks vastus.</div>
+      <div class="concept-feedback test-feedback" id="conceptFeedback" aria-live="polite" hidden></div>
+      <button class="quiz-next" id="conceptNext" type="button" hidden>Järgmine küsimus</button>
     </section>
 
       </div>
@@ -272,12 +268,12 @@ Accept: application/json</pre>
         <div class="footer-detail">
           <small>Tehnoloogia</small>
           <strong>HTML5 · CSS3 · JavaScript (ES2022)</strong>
-          <span>Buildless veebirakendus, mis töötab otse brauseris.</span>
+          <span>Harjutused töötavad brauseris.</span>
         </div>
         <div class="footer-detail">
-          <small>Arenduskeskkond ja mudel</small>
-          <strong>VS Code · OpenAI Codex · GPT-5.6 Sol · Extra High</strong>
-          <span>Spec-driven · AI-supported coding</span>
+          <small>Arendustööriistad</small>
+          <strong>Visual Studio Code · OpenAI Codex</strong>
+          <span>Rakenduse arendamisel kasutati tehisaru abi.</span>
         </div>
         <div class="footer-detail">
           <small>Versioonihaldus ja avaldamine</small>
@@ -285,14 +281,14 @@ Accept: application/json</pre>
         </div>
         <div class="footer-detail">
           <small>Andmed</small>
-          <strong>Sünteetilised andmed ja avalikud näited</strong>
-          <span>Tööotsijate andmed on väljamõeldud. Rakendus ei tee väliseid API-päringuid.</span>
+          <strong>Õppeandmed ja avalikud allikad</strong>
+          <span>Brauser kasutab kohalikke näidisvastuseid.</span>
         </div>
       </div>
-      <div class="footer-note"><small>Metoodiline märkus</small><span><b>Õppesimulatsioon.</b> Põhinäite <code>GR_W_AVG</code> + <code>TOTAL</code> kolme II kvartali arvud vastavad tabelile PA111; muude valikute tulemused on näitlikud.</span></div>
+      <div class="footer-note"><small>Metoodiline märkus</small><span><b>Õppesimulatsioon.</b> Põhinäite palgaväärtused pärinevad Statistikaameti tabelist PA111. Muude valikute vastused võivad sisaldada näidisväärtusi.</span></div>
     </footer>
   </main>
   <script src="../api-nav.js"></script>
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>

@@ -6,7 +6,7 @@
   <meta name="description" content="Statistikaameti API vastusest R-i andmetabeli koostamine ja palgamuutuse arvutamine.">
   <title>API 2 · API-andmete töötlemine R-is</title>
   <link rel="stylesheet" href="styles.css?v=4">
-  <link rel="stylesheet" href="../api-common.css?v=15">
+  <link rel="stylesheet" href="../api-common.css?v=16">
   <link rel="stylesheet" href="../readability.css?v=3">
 </head>
 <body>
@@ -15,7 +15,7 @@
       <div class="hero-copy">
         <div class="eyebrow api-eyebrow"><span class="pulse-dot" aria-hidden="true"></span><a class="api-home-link" href="../" aria-label="Mine Andmepädevuse avalehele">ANDMEPÄDEVUS</a> <span aria-hidden="true">·</span><label class="api-version-switch"><span class="sr-only">Vali praktikum</span><select class="api-version-select" aria-label="Vali praktikum"><option value="../api1/">API 1</option><option value="../api2/" selected>API 2</option><option value="../api3/">API 3</option><option value="../kraapimine/">Veebikraapimine</option><option value="../ai-andmetoo/">Märgendamine</option></select></label></div>
         <h1 class="hero-title" aria-label="API-andmete töötlemine R-is">API-andmete töötlemine R-is</h1>
-        <p class="hero-description">Praktikumi eesmärk on mõista, kuidas seostada Statistikaameti API vastuses olevad arvud nende vaatlusperioodidega ning arvutada muutust R-is. Brauseris toimub päringu simulatsioon. Näite R-koodi saab käivitada näiteks RStudios.</p>
+        <p class="hero-description">Praktikumi eesmärk on mõista, kuidas seostada Statistikaameti API vastuses olevad arvud nende vaatlusperioodidega ning arvutada muutust R-is. Brauser kuvab API näidisvastused. Näite R-koodi saab käivitada näiteks RStudios.</p>
       </div>
       <div class="hero-side">
         <div class="mission-label">PÕHIÜLESANDE EDENEMINE</div>
@@ -255,7 +255,8 @@ Accept: application/json</pre>
             <div class="test-score"><span id="urlRound">1 / 4</span><b id="urlScore">0 õiget</b></div>
           </div>
           <div class="test-progress-line test-progress" aria-hidden="true"><i id="urlBar"></i></div>
-          <p>Harjutuses koostatakse Tallinna seitsme päeva ilmaprognoosi päringu aadress. Tallinna näidiskoordinaadid on 59,44° põhjalaiust ja 24,75° idapikkust. URL-is kirjutatakse kümnendmurrud punktiga.</p>
+          <p>Näidispäring küsib Tallinna järgmise seitsme päeva kõrgeimaid õhutemperatuure. Tallinna ligikaudne asukoht on 59,44° põhjalaiust ja 24,75° idapikkust. URL-is kasutatakse kümnendpunkti.</p>
+          <details class="practice-example"><summary>Open-Meteo näidispäring</summary><pre><code>https://api.open-meteo.com/v1/forecast?latitude=59.44&amp;longitude=24.75&amp;daily=temperature_2m_max&amp;forecast_days=7&amp;timezone=Europe%2FTallinn</code></pre></details>
           <div class="test-question question-tone-0"><span class="question-label">KÜSIMUS <b id="urlQuestionNumber">1 / 4</b></span><p id="urlPrompt"></p></div>
           <div class="quiz-support"><button class="hint-button" id="urlHint" type="button">Kuva vihje</button><p class="hint-panel" id="urlHintPanel" hidden></p></div>
           <div class="test-options quiz-options code-options" id="urlOptions"></div>
@@ -304,12 +305,12 @@ Accept: application/json</pre>
         <div class="footer-detail">
           <small>Tehnoloogia</small>
           <strong>HTML5 · CSS3 · JavaScript (ES2022)</strong>
-          <span>Buildless veebirakendus, mis töötab otse brauseris.</span>
+          <span>Harjutused töötavad brauseris.</span>
         </div>
         <div class="footer-detail">
-          <small>Arenduskeskkond ja mudel</small>
-          <strong>VS Code · OpenAI Codex · GPT-5.6 Sol · Extra High</strong>
-          <span>Spec-driven · AI-supported coding</span>
+          <small>Arendustööriistad</small>
+          <strong>Visual Studio Code · OpenAI Codex</strong>
+          <span>Rakenduse arendamisel kasutati tehisaru abi.</span>
         </div>
         <div class="footer-detail">
           <small>Versioonihaldus ja avaldamine</small>
@@ -317,14 +318,14 @@ Accept: application/json</pre>
         </div>
         <div class="footer-detail">
           <small>Andmed</small>
-          <strong>Sünteetilised andmed ja avalikud näited</strong>
-          <span>Tööotsijate andmed on väljamõeldud. Rakendus ei tee väliseid API-päringuid.</span>
+          <strong>Õppeandmed ja avalikud allikad</strong>
+          <span>Brauser kasutab kohalikke näidisvastuseid.</span>
         </div>
       </div>
       <div class="footer-note"><small>Harjutuse andmed</small><span>Põhinäite palgaväärtused pärinevad Statistikaameti tabelist PA111. Muude valikutega võib vastus sisaldada näidisväärtusi.</span></div>
     </footer>
   </main>
   <script src="../api-nav.js"></script>
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
 </body>
 </html>

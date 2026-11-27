@@ -7,7 +7,7 @@
   <title>Veebikraapimine R-is</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="styles.css?v=14">
-  <link rel="stylesheet" href="../api-common.css?v=15">
+  <link rel="stylesheet" href="../api-common.css?v=16">
   <link rel="stylesheet" href="../readability.css?v=3">
 </head>
 <body>
@@ -187,7 +187,7 @@ write.csv(andmed, "tsitaadid.csv", row.names = FALSE, fileEncoding = "UTF-8")</c
       </header>
       <div class="decision-lab card">
         <div class="decision-inputs">
-          <label><span>Olukord</span><select id="scenarioInput"><option value="">Vali olukord</option><option value="few">Vajan ühekordselt kolme avalikku väärtust</option><option value="file">Veebis on ametlik CSV-fail</option><option value="api">Teenusel on dokumenteeritud API</option><option value="static">Staatilisel lehel on 20 kirjet, faili ega API-t pole</option><option value="restricted">Siseveebile puudub kogumiseks volitus</option></select></label>
+          <label><span>Olukord</span><select id="scenarioInput"><option value="">Vali olukord</option><option value="few">Vajan ühekordselt kolme avalikku väärtust</option><option value="file">Veebis on ametlik CSV-fail</option><option value="api">Teenusel on dokumenteeritud API</option><option value="static">Samal veebilehel olevaid kirjeid tuleb korduvalt koguda. Ametlik fail ja API puuduvad.</option><option value="restricted">Siseveebile puudub kogumiseks volitus</option></select></label>
           <label><span>Andmete hankimise viis</span><select id="methodInput"><option value="">Vali meetod</option><option value="manual">Käsitsi kopeerimine</option><option value="file">Ametlik fail</option><option value="api">API</option><option value="rvest">Veebikraapimine R-is</option><option value="stop">Volituse küsimine</option></select></label>
         </div>
         <div class="decision-preview pending" id="decisionPreview" aria-live="polite" hidden><span aria-hidden="true"></span><div><h3>Tagasiside</h3><p></p></div></div>
@@ -203,12 +203,12 @@ write.csv(andmed, "tsitaadid.csv", row.names = FALSE, fileEncoding = "UTF-8")</c
         <div class="footer-detail">
           <small>Tehnoloogia</small>
           <strong>HTML5 · CSS3 · JavaScript (ES2022)</strong>
-          <span>Buildless veebirakendus, mis töötab otse brauseris.</span>
+          <span>Harjutused töötavad brauseris.</span>
         </div>
         <div class="footer-detail">
-          <small>Arenduskeskkond ja mudel</small>
-          <strong>VS Code · OpenAI Codex · GPT-5.6 Sol · Extra High</strong>
-          <span>Spec-driven · AI-supported coding</span>
+          <small>Arendustööriistad</small>
+          <strong>Visual Studio Code · OpenAI Codex</strong>
+          <span>Rakenduse arendamisel kasutati tehisaru abi.</span>
         </div>
         <div class="footer-detail">
           <small>Versioonihaldus ja avaldamine</small>
@@ -216,8 +216,8 @@ write.csv(andmed, "tsitaadid.csv", row.names = FALSE, fileEncoding = "UTF-8")</c
         </div>
         <div class="footer-detail">
           <small>Andmed</small>
-          <strong>Sünteetilised andmed ja avalikud näited</strong>
-          <span>Tööotsijate andmed on väljamõeldud. Rakendus ei tee väliseid API-päringuid.</span>
+          <strong>Õppeandmed ja avalikud allikad</strong>
+          <span>Brauser kuvab väljavõtte harjutusveebi andmetest.</span>
         </div>
       </div>
       <div class="footer-note"><small>Harjutuse andmed</small><span>Brauserisimulatsioon kasutab kohalikke näidisandmeid. R-kood loeb andmed harjutusveebist <code>quotes.toscrape.com</code>.</span></div>
@@ -231,10 +231,10 @@ write.csv(andmed, "tsitaadid.csv", row.names = FALSE, fileEncoding = "UTF-8")</c
       </div>
       <div class="inspector-help-body">
         <div class="inspect-guide" aria-label="HTML-struktuuri uurimise sammud">
-          <article><span>1</span><div><b>Ava sihtleht</b><p>Ava <a href="https://quotes.toscrape.com/" target="_blank" rel="noopener noreferrer">quotes.toscrape.com</a> ja vali üks nähtav tsitaat.</p></div></article>
-          <article><span>2</span><div><b>Käivita elemendi valimine</b><p>Tee tsitaadil paremklõps ja vali <b>Inspect</b>. Alternatiivina vajuta <kbd>F12</kbd> ning seejärel <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd>.</p></div></article>
-          <article><span>3</span><div><b>Leia vanemplokk</b><p>Liigu Elements-vaates üles lähima <code>&lt;div class="quote"&gt;</code>-plokini. See plokk vastab ühele tulevase tabeli reale.</p></div></article>
-          <article><span>4</span><div><b>Kontrolli välju</b><p>Laienda plokk ning leia selle seest <code>.text</code>, <code>.author</code> ja <code>.tags .tag</code>.</p></div></article>
+          <article><span>1</span><div><b>Veebileht</b><p>Ava <a href="https://quotes.toscrape.com/" target="_blank" rel="noopener noreferrer">quotes.toscrape.com</a> ja vali üks nähtav tsitaat.</p></div></article>
+          <article><span>2</span><div><b>Elemendi valimine</b><p>Tee tsitaadil paremklõps ja vali <b>Inspect</b>. Alternatiivina vajuta <kbd>F12</kbd> ning seejärel <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>C</kbd>.</p></div></article>
+          <article><span>3</span><div><b>Tsitaadiplokk</b><p>Liigu Elements-vaates üles lähima <code>&lt;div class="quote"&gt;</code>-plokini. See plokk vastab ühele tulevase tabeli reale.</p></div></article>
+          <article><span>4</span><div><b>Ploki väljad</b><p>Laienda plokk ning leia selle seest <code>.text</code>, <code>.author</code> ja <code>.tags .tag</code>.</p></div></article>
         </div>
         <div class="inspector-check"><span>KÄSK BRAUSERI KONSOOLIS</span><b>Oodatud tulemus on 10</b><code>document.querySelectorAll(".quote").length</code></div>
       </div>
@@ -261,6 +261,6 @@ write.csv(andmed, "tsitaadid.csv", row.names = FALSE, fileEncoding = "UTF-8")</c
     </div>
   </dialog>
   <script src="../api-nav.js?v=2"></script>
-  <script src="app.js?v=14"></script>
+  <script src="app.js?v=15"></script>
 </body>
 </html>

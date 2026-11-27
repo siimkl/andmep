@@ -153,6 +153,24 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
               && !validationFields.disabled""")
             evaluate("[...validationFields.querySelectorAll('input')].forEach(input => input.click())")
             assert evaluate("!document.querySelector('.practice-suite').inert && practiceCompleted.textContent === '1 / 5'")
+            complete_quiz = """([id, answers, next]) => {
+              const options = document.getElementById(id + 'Options');
+              const button = document.getElementById(id + 'Next');
+              for (const answer of answers) {
+                options.querySelector('[data-answer="' + answer + '"]').click();
+                if (button.hidden) return false;
+                button.click();
+              }
+              if (next) button.click();
+              return true;
+            }"""
+            assert evaluate(f"({complete_quiz})(['rcode', [1, 2, 0, 2], true])")
+            assert evaluate("""!document.querySelector('[data-test=url]').hidden
+                && document.querySelector('.practice-example code').textContent.includes('forecast_days=7')""")
+            assert evaluate(f"({complete_quiz})(['url', [0, 2, 1, 2], true])")
+            assert evaluate(f"({complete_quiz})(['method', [0, 1, 2, 3, 2], true])")
+            assert evaluate(f"({complete_quiz})(['detective', [1, 0, 1, 0, 1, 1], false])")
+            assert evaluate("practiceCompleted.textContent === '5 / 5' && !restartTests.closest('[hidden]')")
             return result["example"]
 
         def run_dialog_step(step):
@@ -209,6 +227,15 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
               });
             })()""")
             assert evaluate("sequenceFeedback.classList.contains('complete')")
+            assert evaluate("plannerFeedback.hidden && stressResult.hidden && !document.querySelector('.quality-score')")
+            evaluate("""sensitivityInput.value='personal';
+              sensitivityInput.dispatchEvent(new Event('change', {bubbles: true}));
+              stressInput.value='personal-data';
+              stressInput.dispatchEvent(new Event('change', {bubbles: true}));""")
+            assert evaluate("""!plannerFeedback.hidden && privacyFeedback.textContent.includes('isikuandmete')
+              && !stressResult.hidden && stressResult.classList.contains('warn')""")
+            evaluate("clearWorkflow.click()")
+            assert evaluate("plannerFeedback.hidden && stressResult.hidden")
             evaluate("resetButton.click()")
             assert evaluate("!selectionFields.disabled && progressValue.textContent === '0%' && dataSummary.hidden && modelResult.hidden")
             run_dialog_step(1)
@@ -235,16 +262,22 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
               return {
                 author: text(document.querySelectorAll('.site-footer .footer-author :is(small, strong)')),
                 details: [...details.children].map(item => text(item.children)),
+                route: location.pathname,
                 columns: getComputedStyle(details).gridTemplateColumns.split(' ').length
               };
             })()""")
+            source_copy = {
+                "/": "Brauser kuvab harjutuste näidisvastused.",
+                "/kraapimine/": "Brauser kuvab väljavõtte harjutusveebi andmetest.",
+                "/ai-andmetoo/": "Tööotsijate andmed on väljamõeldud.",
+            }.get(footer.pop("route"), "Brauser kasutab kohalikke näidisvastuseid.")
             assert footer == {
                 "author": ["Õppematerjali autor", "Siim Klais"],
                 "details": [
-                    ["Tehnoloogia", "HTML5 · CSS3 · JavaScript (ES2022)", "Buildless veebirakendus, mis töötab otse brauseris."],
-                    ["Arenduskeskkond ja mudel", "VS Code · OpenAI Codex · GPT-5.6 Sol · Extra High", "Spec-driven · AI-supported coding"],
+                    ["Tehnoloogia", "HTML5 · CSS3 · JavaScript (ES2022)", "Harjutused töötavad brauseris."],
+                    ["Arendustööriistad", "Visual Studio Code · OpenAI Codex", "Rakenduse arendamisel kasutati tehisaru abi."],
                     ["Versioonihaldus ja avaldamine", "GitHub · GitHub Actions · GitHub Pages"],
-                    ["Andmed", "Sünteetilised andmed ja avalikud näited", "Tööotsijate andmed on väljamõeldud. Rakendus ei tee väliseid API-päringuid."],
+                    ["Andmed", "Õppeandmed ja avalikud allikad", source_copy],
                 ],
                 "columns": columns,
             }, footer

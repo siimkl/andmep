@@ -9,7 +9,7 @@
     progressValue: $("#progressValue"), progressText: $("#progressText"), progressBar: $("#progressBar"), completedCount: $("#completedCount"),
     currentStepLabel: $("#currentStepLabel"),
     resetButton: $("#resetButton"),
-    labGrid: $(".lab-grid"), stageCard: $(".stage-card"), controlCard: $(".control-card"), flowStatus: $("#flowStatus"), storyIndex: $("#storyIndex"), storyText: $("#storyText"),
+    labGrid: $(".lab-grid"), stageCard: $(".stage-card"), controlCard: $(".control-card"), flowStatus: $("#flowStatus"),
     flowDialog: $("#flowDialog"), flowDialogKicker: $("#flowDialogKicker"), dialogFlowStage: $("#dialogFlowStage"), dialogFlowStatus: $("#dialogFlowStatus"),
     flowDialogResult: $("#flowDialogResult"), flowDialogClose: $("#flowDialogClose"),
     responseContext: $("#responseContext"), responseContextLabel: $("#responseContextLabel"), responseContextText: $("#responseContextText"),
@@ -133,7 +133,7 @@
   const conceptRounds = [
     {
       prompt: "Mida saad teada GET-päringuga tabelile PA111?",
-      options: ["Palgaandmed kohe", "Tabeli muutujad ja valikud", "Ainult tabeli nime", "Valmis joonise"],
+      options: ["Palgaandmed", "Tabeli muutujad ja valikud", "Ainult tabeli nime", "Valmis joonise"],
       correct: 1,
       why: "GET-vastus kirjeldab tabeli muutujaid ja lubatud valikuid."
     },
@@ -258,10 +258,6 @@
     syncHeight();
   }
 
-  function setStory(index, html) {
-    els.storyIndex.textContent = String(index).padStart(2, "0");
-    els.storyText.innerHTML = html;
-  }
   function setResultPanelVisible(visible) {
     els.stageCard.hidden = !visible;
     els.labGrid.classList.toggle("result-pending", !visible);
@@ -285,7 +281,7 @@
 
     const responseLines = JSON.stringify(data, null, 2).split("\n").map(line => {
       const trimmed = line.trim();
-      if (trimmed === '"values": [') {
+      if (trimmed === '"value": [') {
         insideValues = true;
         return escapeHtml(line);
       }
@@ -336,19 +332,13 @@
     els.stageCard.classList.add(`response-${kind}`);
     els.stageCard.style.height = fillDesktopHeight ? `${controlHeight}px` : "";
   }
-  function setGuide(_text, target, _buttonText = "Näita kohta") {
+  function highlightNext(target = null) {
     $$(".next-target").forEach(item => item.classList.remove("next-target"));
     const guideTarget = target?.closest(".next-action-guide.contextual") || target;
     if (guideTarget) guideTarget.classList.add("next-target");
     syncHeight();
   }
 
-  function hideGuide(target = null) {
-    $$(".next-target").forEach(item => item.classList.remove("next-target"));
-    const guideTarget = target?.closest(".next-action-guide.contextual") || target;
-    if (guideTarget) guideTarget.classList.add("next-target");
-    syncHeight();
-  }
 
   function advanceToValidation() {
     if (!state.successfulPost) return;
@@ -360,14 +350,12 @@
     }
     if (state.checks === 4) {
       setProgress(4, true);
-      setStory(4, "<b>Vastus on vaadatud ja kontrollitud.</b> Järgmisena harjuta API olekukoode.");
-      setGuide("Vastus on kontrollitud. Järgmisena harjuta olekukoode", els.decoderKicker, "Näita testi");
+      highlightNext(els.decoderKicker);
       return;
     }
     setProgress(4);
-    setStory(4, "<b>Vastus on vaadatud.</b> Nüüd kontrolli vastuse sisu ja tähendust.");
     const firstCheck = $("#validationFields .check-card:not(:has(input:checked))") || $("#validationFields .check-card");
-    setGuide("Nüüd kontrolli vastuse sisu ja tähendust", firstCheck, "Alusta kontrolli");
+    highlightNext(firstCheck);
   }
 
   function openFlowDialog(method) {
@@ -386,8 +374,8 @@
     els.flowStatus.textContent = "Vastus käes";
     els.dialogFlowStatus.textContent = "200 OK · Vastus on käes";
     els.flowDialogResult.innerHTML = method === "GET"
-      ? "<b>200 OK.</b> Statistikaameti API saatis tabeli kirjelduse ja valikud kliendile tagasi."
-      : "<b>200 OK.</b> Statistikaameti API saatis valitud andmed kliendile tagasi.";
+      ? "<b>200 OK.</b> Näidisvastus sisaldab tabeli kirjeldust ja valikuid."
+      : "<b>200 OK.</b> Näidisvastus sisaldab valitud andmeid.";
     els.flowDialogResult.className = "success";
     els.flowDialogClose.querySelector("span").textContent = method === "GET" ? "Vaata tabeli kirjeldust" : "Vaata andmepäringu vastust";
     els.flowDialogClose.disabled = false;
@@ -455,14 +443,12 @@
     els.stageCard.removeAttribute("aria-disabled");
     els.getMetadata.disabled = true;
     els.getMetadata.querySelector("span").textContent = "GET-päring on töötlemisel…";
-    setStory(1, "<b>GET-päringu aadress osutab tabelile PA111.</b> Selle päringu jaoks ei ole päringukeha vaja.");
-    hideGuide(els.getMetadata);
+    highlightNext(els.getMetadata);
     await animateFlow("GET liigub", "GET");
     showResponse(metadataResponse);
     els.terminalTitle.textContent = "metaandmed.json";
     setStatus("200 OK", "success");
-    setResponseContext("GET-PÄRINGU VASTUS", "Vastus sisaldab tabeli PA111 kirjeldust: muutujaid, koode ja lubatud valikuid. Kõik väärtused on nähtavad JSON-i sees kerides.", "metadata");
-    setStory(2, "<b>GET-vastus sisaldab tabeli kirjeldust ehk metaandmeid.</b> Need kirjeldavad muutujaid ja lubatud valikuid; palgaandmeid selles vastuses veel ei ole.");
+    setResponseContext("GET-PÄRINGU VASTUS", "Väljal variables on tabeli muutujad. Iga muutuja koodid on väljal values ja nende nimetused väljal valueTexts.", "metadata");
     state.metadata = true;
     els.selectionSection.classList.remove("locked");
     els.selectionFields.disabled = false;
@@ -472,7 +458,7 @@
     award("metadata", 15);
     setProgress(2);
     updateRequestPreview();
-    setGuide("Vali soovitud andmed", els.selectionSection, "Näita valikuid");
+    highlightNext(els.selectionSection);
     completeFlowDialog("GET", els.responseContext);
   }
 
@@ -482,7 +468,7 @@
   }
 
   function indicatorUnit() {
-    if (els.indicatorSelect.value === "NR_EMPL") return "tuh";
+    if (els.indicatorSelect.value === "NR_EMPL") return "inimest";
     if (els.indicatorSelect.value === "GR_W_AVG_SM") return "%";
     return "€";
   }
@@ -508,7 +494,7 @@
     const year = Number(period.slice(0, 4));
     const quarter = Number(period.slice(-1));
     const timeIndex = (year - 2024) * 4 + quarter - 2;
-    if (indicator === "NR_EMPL") return Number((100 + timeIndex * .7 + activityIndex * 1.2).toFixed(1));
+    if (indicator === "NR_EMPL") return Math.round(100000 + timeIndex * 700 + activityIndex * 1200);
     if (indicator === "GR_W_AVG_SM") return Number((5.2 + timeIndex * .08 - activityIndex * .05).toFixed(1));
     const wageBase = {
       GR_W_AVG: 2007, GR_W_D1: 1150, GR_W_D2: 1320, GR_W_D3: 1490, GR_W_D4: 1660,
@@ -522,8 +508,8 @@
     const indicatorName = els.indicatorSelect.selectedOptions[0].textContent.split(" · ")[0];
     els.resultSummaryTitle.textContent = indicatorName;
     els.resultSummaryNote.textContent = officialValues
-      ? "Need on Statistikaameti tabeli PA111 kontrollväärtused. Kolme arvu puhul näitavad täpsed väärtused ja erinevused muutust selgemalt kui joonis."
-      : "See valik kasutab simulatsiooni õppeandmeid, mitte ametlikku statistikat. Täpsed väärtused ja erinevused on esitatud arvudena.";
+      ? "Need on Statistikaameti tabeli PA111 kontrollväärtused."
+      : "Selle valiku vastus sisaldab õppimiseks loodud näidisväärtusi.";
     els.resultValues.innerHTML = periods.map((period, index) => {
       return `<div><dt>${escapeHtml(formatPeriod(period))}</dt><dd>${escapeHtml(formatValue(values[index]))} <span>${escapeHtml(unit)}</span></dd></div>`;
     }).join("");
@@ -563,16 +549,25 @@
     els.sendRequest.querySelector("span").textContent = "POST-päring on töötlemisel…";
     els.requestFeedback.hidden = true;
     els.resultSummary.hidden = true;
+    state.successfulPost = false;
+    state.responseViewed = false;
+    state.checks = 0;
+    els.validationSection.classList.add("locked");
+    els.validationSection.setAttribute("aria-disabled", "true");
+    els.validationFields.disabled = true;
+    $$("#validationFields input").forEach(input => { input.checked = false; });
+    els.checkScore.textContent = "0/4";
+    els.takeaway.hidden = true;
+    setPracticeLocked(true);
     setProgress(3);
-    setStory(3, "<b>POST-päring saadab sinu valiku JSON-vormingus.</b> API tagastab valikule vastavad andmed.");
-    setGuide("POST-päring liigub kliendist API otspunkti ja vastus tagasi", null, "Päring liigub");
+    highlightNext(null);
     await animateFlow("POST liigub", "POST");
 
     const periods = selectedPeriods();
     const values = periods.map(simulatedValue);
     const officialValues = usesOfficialPa111Values(periods);
     const postResponse = {
-      class: "dataset", label: officialValues ? "PA111 vastus" : "Näitlik vastus",
+      version: "2.0", class: "dataset", label: officialValues ? "PA111 vastus" : "Näitlik vastus",
       id: ["Näitaja", "Tegevusala", "Vaatlusperiood"],
       size: [1, 1, periods.length],
       dimension: {
@@ -580,10 +575,10 @@
         Tegevusala: { category: { index: [els.activitySelect.value] } },
         Vaatlusperiood: { category: { index: periods } }
       },
-      values,
+      value: values,
       note: officialValues
         ? "PA111 ametliku tabeli kontrollväärtused"
-        : "Õppeandmed — mitte ametlik statistika"
+        : "Õppimiseks loodud näidisväärtused"
     };
     showPostResponse(postResponse, periods, values);
     renderResultSummary(periods, values, officialValues);
@@ -592,13 +587,12 @@
     els.requestFeedback.hidden = false;
     els.requestFeedback.className = "feedback success";
     els.requestFeedback.innerHTML = "<b>Päring õnnestus tehniliselt.</b> JSON-vastus ja arvuline kokkuvõte näitavad API tagastatud andmeid.";
-    setStory(3, "<b>POST-vastus sisaldab valitud andmeid.</b> Esiletõstetud arvud on samas järjekorras nagu vastuses loetletud vaatlusperioodid.");
     state.successfulPost = true;
     award("post", 25);
     els.sendRequest.disabled = false;
     els.sendRequest.querySelector("span").textContent = "Saada andmepäring uuesti";
     setResponseContext("POST-PÄRINGU VASTUS", "Esiletõstetud arvud on API tagastatud väärtused. Arvule liikudes kuvatakse sellega seotud näitaja, tegevusala ja perioodi kood.", "data");
-    setGuide("Vaata kõigepealt POST-päringu vastust", els.responseContext, "Näita vastust");
+    highlightNext(els.responseContext);
     completeFlowDialog("POST", els.responseContext);
     syncHeight();
   }
@@ -612,13 +606,13 @@
       setPracticeLocked(false);
       award("validation", 25);
       setProgress(4, true);
-      setStory(4, "<b>Sisu ja tähendus on kontrollitud.</b> Järgmisena harjuta API olekukoode.");
-      setGuide("Kontroll on tehtud. Järgmisena harjuta olekukoode", els.decoderKicker, "Näita testi");
+      highlightNext(els.decoderKicker);
       window.setTimeout(() => els.decoderOptions.scrollIntoView({ behavior: "smooth", block: "center" }), 220);
     } else if (state.successfulPost) {
+      setPracticeLocked(true);
       setProgress(4);
       const nextCheck = $("#validationFields .check-card:not(:has(input:checked))");
-      setGuide(`Kontrollitud ${state.checks}/4. Jätka järgmise küsimusega`, nextCheck, "Näita järgmist");
+      highlightNext(nextCheck);
     }
     syncHeight();
   }
@@ -627,7 +621,7 @@
     els.practiceSuite.classList.toggle("locked", locked);
     if (locked) els.practiceSuite.setAttribute("aria-disabled", "true");
     else els.practiceSuite.removeAttribute("aria-disabled");
-    $$("button", els.practiceSuite).forEach(button => { button.disabled = locked; });
+    els.practiceSuite.inert = locked;
   }
 
   function updateQuestionVisual(question, numberLabel, index, total) {
@@ -647,13 +641,14 @@
     els.decoderBar.style.width = `${((state.decoderRound + 1) / decoderRounds.length) * 100}%`;
     els.decoderScore.textContent = `${state.decoderScore} ${state.decoderScore === 1 ? "õige" : "õiget"}`;
     els.decoderHint.className = "test-feedback";
-    els.decoderHint.textContent = "Vali kõige sobivam olekukood.";
+    els.decoderHint.hidden = true;
+    $("#decoderNext").hidden = true;
     state.decoderLocked = false;
     $$('button', els.decoderOptions).forEach(button => {
       button.disabled = false;
       button.classList.remove("correct", "wrong");
     });
-    setGuide(`Olekukood ${state.decoderRound + 1}/4. Vali olukorrale sobiv kood`, els.decoderKicker, "Näita küsimust");
+    highlightNext(els.decoderKicker);
   }
 
   function chooseDecoder(event) {
@@ -673,20 +668,29 @@
     if (!correct) button.classList.add("wrong");
     els.decoderScore.textContent = `${state.decoderScore} ${state.decoderScore === 1 ? "õige" : "õiget"}`;
     els.decoderHint.className = `test-feedback ${correct ? "good" : "bad"}`;
-    els.decoderHint.textContent = `${correct ? "Õige." : "Vaata õiget vastust."} ${round.why}`;
-    window.setTimeout(() => {
-      if (state.decoderRound < decoderRounds.length - 1) {
-        state.decoderRound += 1;
-        renderDecoderRound();
-      } else {
-        els.decoderPrompt.textContent = `Harjutus tehtud: ${state.decoderScore}/${decoderRounds.length} õiget`;
-        els.decoderHint.className = "test-feedback good";
-        els.decoderHint.textContent = "Olekukood näitab, mida järgmisena kontrollida.";
-        setGuide("Olekukoodid on tehtud. Järgmisena vali olukorrale sobiv meetod", els.methodKicker, "Näita testi");
-      }
-      syncHeight();
-    }, 1800);
+    els.decoderHint.textContent = `${correct ? "Õige." : "Sobiv vastus on esile tõstetud."} ${round.why}`;
+    els.decoderHint.hidden = false;
+    const next = $("#decoderNext");
+    next.textContent = state.decoderRound + 1 < decoderRounds.length ? "Järgmine küsimus" : "Lõpeta test";
+    next.hidden = false;
+    next.focus({ preventScroll: true });
+    syncHeight();
   }
+
+  $("#decoderNext").addEventListener("click", () => {
+    $("#decoderNext").hidden = true;
+    if (state.decoderRound < decoderRounds.length - 1) {
+      state.decoderRound += 1;
+      renderDecoderRound();
+      els.decoderOptions.querySelector("button").focus();
+    } else {
+      els.decoderPrompt.textContent = `Harjutus tehtud: ${state.decoderScore}/${decoderRounds.length} õiget`;
+      els.decoderHint.className = "test-feedback good";
+      els.decoderHint.textContent = "Olekukood näitab, mida järgmisena kontrollida.";
+      highlightNext(els.methodKicker);
+    }
+    syncHeight();
+  });
 
   function renderMethodRound() {
     const round = methodRounds[state.methodRound];
@@ -696,13 +700,14 @@
     els.methodBar.style.width = `${((state.methodRound + 1) / methodRounds.length) * 100}%`;
     els.methodScore.textContent = `${state.methodScore} ${state.methodScore === 1 ? "punkt" : "punkti"}`;
     els.methodFeedback.className = "method-feedback";
-    els.methodFeedback.textContent = "Tee valik, et saada kohe tagasisidet.";
+    els.methodFeedback.hidden = true;
+    $("#methodNext").hidden = true;
     state.methodLocked = false;
     $$('button', els.methodOptions).forEach(button => {
       button.disabled = false;
       button.classList.remove("correct", "wrong");
     });
-    setGuide(`Meetodi valik ${state.methodRound + 1}/5. Vali olukorrale sobiv meetod`, els.methodKicker, "Näita küsimust");
+    highlightNext(els.methodKicker);
   }
 
   function chooseMethod(event) {
@@ -722,20 +727,29 @@
     if (!correct) button.classList.add("wrong");
     els.methodScore.textContent = `${state.methodScore} ${state.methodScore === 1 ? "punkt" : "punkti"}`;
     els.methodFeedback.className = `method-feedback ${correct ? "good" : "bad"}`;
-    els.methodFeedback.textContent = `${correct ? "Õige." : "Mõtle veel."} ${round.why}`;
-    window.setTimeout(() => {
-      if (state.methodRound < methodRounds.length - 1) {
-        state.methodRound += 1;
-        renderMethodRound();
-      } else {
-        els.methodScenario.textContent = `Harjutus tehtud: ${state.methodScore}/${methodRounds.length} õiget valikut.`;
-        els.methodFeedback.className = "method-feedback good";
-        els.methodFeedback.textContent = "Vali meetod ülesande, andmemahu ja korduvuse järgi.";
-        setGuide("Meetodi valik on tehtud. Järgmisena testi API mõistmist", els.conceptKicker, "Näita kolmandat testi");
-      }
-      syncHeight();
-    }, 1700);
+    els.methodFeedback.textContent = `${correct ? "Õige." : "Sobivaim vastus on esile tõstetud."} ${round.why}`;
+    els.methodFeedback.hidden = false;
+    const next = $("#methodNext");
+    next.textContent = state.methodRound + 1 < methodRounds.length ? "Järgmine küsimus" : "Lõpeta test";
+    next.hidden = false;
+    next.focus({ preventScroll: true });
+    syncHeight();
   }
+
+  $("#methodNext").addEventListener("click", () => {
+    $("#methodNext").hidden = true;
+    if (state.methodRound < methodRounds.length - 1) {
+      state.methodRound += 1;
+      renderMethodRound();
+      els.methodOptions.querySelector("button").focus();
+    } else {
+      els.methodScenario.textContent = `Harjutus tehtud: ${state.methodScore}/${methodRounds.length} õiget valikut.`;
+      els.methodFeedback.className = "method-feedback good";
+      els.methodFeedback.textContent = "Vali meetod ülesande, andmemahu ja korduvuse järgi.";
+      highlightNext(els.conceptKicker);
+    }
+    syncHeight();
+  });
 
   function renderConceptRound() {
     const round = conceptRounds[state.conceptRound];
@@ -745,14 +759,15 @@
     els.conceptBar.style.width = `${((state.conceptRound + 1) / conceptRounds.length) * 100}%`;
     els.conceptScore.textContent = `${state.conceptScore} ${state.conceptScore === 1 ? "õige" : "õiget"}`;
     els.conceptFeedback.className = "concept-feedback test-feedback";
-    els.conceptFeedback.textContent = "Vali üks vastus.";
+    els.conceptFeedback.hidden = true;
+    $("#conceptNext").hidden = true;
     state.conceptLocked = false;
     $$("button", els.conceptOptions).forEach((button, index) => {
       button.disabled = false;
       button.classList.remove("correct", "wrong");
       button.querySelector("span").textContent = round.options[index];
     });
-    setGuide(`API mõistmine ${state.conceptRound + 1}/${conceptRounds.length}. Vali parim vastus`, els.conceptKicker, "Näita küsimust");
+    highlightNext(els.conceptKicker);
   }
 
   function chooseConcept(event) {
@@ -772,20 +787,29 @@
     if (!correct) button.classList.add("wrong");
     els.conceptScore.textContent = `${state.conceptScore} ${state.conceptScore === 1 ? "õige" : "õiget"}`;
     els.conceptFeedback.className = `concept-feedback test-feedback ${correct ? "good" : "bad"}`;
-    els.conceptFeedback.textContent = `${correct ? "Õige." : "Vaata õiget vastust."} ${round.why}`;
-    window.setTimeout(() => {
-      if (state.conceptRound < conceptRounds.length - 1) {
-        state.conceptRound += 1;
-        renderConceptRound();
-      } else {
-        els.conceptPrompt.textContent = `Kolm testi tehtud. Skoor: ${state.conceptScore}/${conceptRounds.length}.`;
-        els.conceptFeedback.className = "concept-feedback test-feedback good";
-        els.conceptFeedback.textContent = "Oskad eristada metaandmeid, päringu keha, olekukoodi ja sisulist kontrolli.";
-        setGuide("Kõik kolm testi on tehtud. Võid alustada algusest", els.resetButton, "Alusta algusest");
-      }
-      syncHeight();
-    }, 1800);
+    els.conceptFeedback.textContent = `${correct ? "Õige." : "Sobiv vastus on esile tõstetud."} ${round.why}`;
+    els.conceptFeedback.hidden = false;
+    const next = $("#conceptNext");
+    next.textContent = state.conceptRound + 1 < conceptRounds.length ? "Järgmine küsimus" : "Lõpeta test";
+    next.hidden = false;
+    next.focus({ preventScroll: true });
+    syncHeight();
   }
+
+  $("#conceptNext").addEventListener("click", () => {
+    $("#conceptNext").hidden = true;
+    if (state.conceptRound < conceptRounds.length - 1) {
+      state.conceptRound += 1;
+      renderConceptRound();
+      els.conceptOptions.querySelector("button").focus();
+    } else {
+      els.conceptPrompt.textContent = `Test lõpetatud. Õigeid vastuseid: ${state.conceptScore}/${conceptRounds.length}.`;
+      els.conceptFeedback.className = "concept-feedback test-feedback good";
+      els.conceptFeedback.textContent = "Selles testis kontrolliti metaandmete, päringukeha ja olekukoodi tähendust.";
+      highlightNext(els.resetButton);
+    }
+    syncHeight();
+  });
 
   function resetLab() {
     state = initialState();
@@ -816,7 +840,6 @@
     setStatus("—", "neutral");
     setResponseContext("API VASTUS", "Päringu vastus kuvatakse siin JSON-vormingus.");
     showResponse({ status: "Päringut pole veel saadetud" });
-    setStory(1, "<b>Esimene vastus kirjeldab tabelit.</b> GET-päring näitab, milliseid andmeid saab järgmises päringus valida.");
     els.flowStatus.textContent = "Päringut pole veel saadetud";
     updateRequestPreview();
     renderDecoderRound();
@@ -824,7 +847,7 @@
     renderConceptRound();
     setPracticeLocked(true);
     setProgress(1);
-    hideGuide(els.getMetadata);
+    highlightNext(els.getMetadata);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -857,13 +880,13 @@
   els.flowDialogClose.addEventListener("click", () => {
     const viewingPostResponse = state.successfulPost && dialogTarget === els.responseContext;
     els.flowDialog.close();
-    window.setTimeout(() => dialogTarget?.scrollIntoView({ behavior: "smooth", block: "center" }), 120);
-    if (viewingPostResponse) window.setTimeout(advanceToValidation, 3200);
+    dialogTarget?.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (viewingPostResponse) advanceToValidation();
   });
   els.resetButton.addEventListener("click", resetLab);
   els.selectionFields.addEventListener("change", () => {
     updateRequestPreview();
-    if (state.metadata && !state.successfulPost) setGuide("Saada valitud andmete POST-päring", els.sendRequest, "Näita nuppu");
+    if (state.metadata && !state.successfulPost) highlightNext(els.sendRequest);
   });
   els.validationFields.addEventListener("change", updateChecks);
   els.decoderOptions.addEventListener("click", chooseDecoder);
@@ -883,6 +906,6 @@
   renderConceptRound();
   setPracticeLocked(true);
   setProgress(1);
-  hideGuide(els.getMetadata);
+  highlightNext(els.getMetadata);
   window.setTimeout(syncHeight, 100);
 })();

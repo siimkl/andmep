@@ -609,3 +609,77 @@ body { padding-bottom: 0; }
   .lab-grid.result-pending .control-card,
   .lab-grid.impact-pending .control-card { max-width: none; }
 }
+
+/* Praktikumide juhised ja tagasiside. */
+.shell .step.active::before,
+.shell .step.active::after,
+.shell .next-target::before,
+.shell .next-target::after {
+  content: none;
+}
+.shell .next-action-guide.contextual.next-target {
+  margin-top: 18px;
+  border-color: #b8ccd9;
+  background: transparent;
+  box-shadow: none;
+}
+.briefing-card[aria-labelledby="task-title"] > div:only-child {
+  grid-column: 1 / -1;
+}
+.briefing-card #task-title, .planner-feedback h4 {
+  margin: 0 0 .55rem;
+  color: #102f55;
+  font-size: 1.25rem;
+}
+.quiz-next {
+  margin-top: 14px;
+  min-height: 44px;
+  padding: .5rem .8rem;
+  border: 1px solid #2f60a0;
+  border-radius: 8px;
+  color: #173f73;
+  background: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.practice-example {
+  min-width: 0;
+  margin: 12px 0;
+  padding: .75rem;
+  border: 1px solid #b8ccd9;
+  border-radius: 8px;
+}
+.practice-example summary {
+  color: #173f73;
+  font-weight: 700;
+  cursor: pointer;
+}
+.practice-example pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.planner-feedback {
+  margin: 16px 0;
+  padding: 14px;
+  border: 1px solid #b8ccd9;
+  border-radius: 10px;
+  background: #f5f9fb;
+}
+.planner-feedback dl, .planner-feedback dd {
+  margin: 0;
+}
+.planner-feedback dl > div {
+  padding: .65rem 0;
+  border-top: 1px solid #d2dfe7;
+}
+.planner-feedback dt {
+  color: #102f55;
+  font-weight: 700;
+}
+.planner-feedback dd {
+  color: #38546b;
+  line-height: 1.5;
+}
+.shell :is(.quiz-next, .stress-result, .planner-feedback, #decoderHint, #methodFeedback, #conceptFeedback)[hidden] {
+  display: none;
+}

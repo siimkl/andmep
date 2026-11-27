@@ -120,17 +120,34 @@ with tempfile.TemporaryDirectory(prefix="andmep-api1-chrome-") as profile:
           comparison: resultComparison.textContent.replace(/\\s+/g, ' ').trim(),
           note: resultSummaryNote.textContent.replace(/\\s+/g, ' ').trim(),
           responseValues: [...document.querySelectorAll('.response-value')].map(node => Number(node.textContent)),
+          rawValues: JSON.parse(responseOutput.textContent).value,
           overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth
         })"""))
         assert result["periods"] == ["2024 II kv", "2025 II kv", "2026 II kv"], result
         assert result["values"] == ["2 007 €", "2 126 €", "2 243 €"], result
-        assert result["responseValues"] == [2007, 2126, 2243], result
+        assert result["rawValues"] == result["responseValues"] == [2007, 2126, 2243], result
         assert "119 € (5,9%)" in result["comparison"], result
         assert "117 € (5,5%)" in result["comparison"], result
         assert "236 € (11,8%)" in result["comparison"], result
         assert "Statistikaameti tabeli PA111 kontrollväärtused" in result["note"], result
         assert not result["overflow"], result
         screenshot("api1-feedback-result.png")
+
+        evaluate("[...validationFields.querySelectorAll('input')].forEach(input => input.click())")
+        evaluate("decoderOptions.querySelector('[data-code=\"404\"]').click()")
+        assert evaluate("!decoderHint.hidden && !decoderNext.hidden && decoderQuestionNumber.textContent === '1 / 4'")
+        time.sleep(2)
+        assert evaluate("!decoderHint.hidden && decoderQuestionNumber.textContent === '1 / 4'")
+        evaluate("decoderNext.click()")
+        assert evaluate("decoderHint.hidden && decoderNext.hidden && decoderQuestionNumber.textContent === '2 / 4'")
+        for selector, feedback, next_button in [
+            ("#methodOptions [data-method=manual]", "methodFeedback", "methodNext"),
+            ("#conceptOptions [data-answer='1']", "conceptFeedback", "conceptNext"),
+        ]:
+            evaluate(f"document.querySelector({json.dumps(selector)}).click()")
+            assert evaluate(f"!{feedback}.hidden && !{next_button}.hidden")
+            evaluate(f"{next_button}.click()")
+            assert evaluate(f"{feedback}.hidden && {next_button}.hidden")
 
         command("Emulation.setDeviceMetricsOverride", {"width": 390, "height": 844, "deviceScaleFactor": 1, "mobile": True})
         command("Page.navigate", {"url": URL})
