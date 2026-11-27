@@ -6,21 +6,8 @@
   const wait = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
   const TOTAL_STEPS = 4;
-  const requestSteps = new Set([1, 3, 4]);
-
-  const stepContent = {
-    1: { title: "Vaata, mida saab küsida", story: "<b>Alusta tabeli kirjeldusest.</b> GET-päring näitab, milliseid andmeid saab küsida." },
-    2: { title: "Vali soovitud andmed", story: "<b>Vali metaandmete põhjal näitaja, tegevusala ja vaatlusperiood.</b> Iga muudatus uuendab all olevat POST-päringut automaatselt, nii et näed kohe päringu keha muutumist." },
-    3: { title: "Küsi valitud andmed", story: "<b>POST-päring saadab sinu valiku Statistikaameti API-le JSON-vormingus.</b> Vastus sisaldab just valitud näitaja, tegevusala ja perioodide väärtusi." },
-    4: { title: "Saada arvutatud tulemus Gemini API-le", story: "" }
-  };
-
-  const outputs = {
-    1: `GET /api/v1/et/stat/PA111\nAccept: application/json\n\nHTTP/1.1 200 OK\n\nMETAANDMED\n• Näitaja — 12 võimalikku valikut\n• Tegevusala — 20 võimalikku valikut\n• Vaatlusperiood — 22 võimalikku valikut\n\nPalgaväärtusi vastuses veel ei ole.`,
-    2: `> valik\n$Näitaja\n[1] "GR_W_AVG"\n\n$Tegevusala\n[1] "TOTAL"\n\n$Vaatlusperiood\n[1] "2024Q2" "2025Q2" "2026Q2"\n\nValik on R-is valmis: 1 × 1 × 3 = 3 väärtust.`,
-    3: `> vastus <- pxweb_get(url, query = valik)\n\nHTTP POST → PA111\nStatus: 200 OK\nResponse: PXWEB_DATASET\nDimensions: 1 × 1 × 3\nValues: 2007, 2126, 2243\n\nVastus salvestati R-i objekti "vastus".`,
-    4: `R-I ARVUTUS\n2243 − 2007 = +236 eurot\n(2243 / 2007 − 1) × 100 = +11,8%\n\nPOST /v1beta/interactions\nx-goog-api-key: [REDACTED]\nApi-Revision: 2026-05-20\nContent-Type: application/json\n\n{\n  "model": "gemini-3.6-flash",\n  "input": "2024 II kv: 2007 €; 2026 II kv: 2243 €; muutus +236 € (+11,8%). Selgita kahe lausega. Ära oleta põhjuseid.",\n  "store": false\n}\n\nHTTP/1.1 200 OK\nMudeli vastus saabus JSON-ina.`
-  };
+  const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/interactions";
+  const GEMINI_MODEL = "gemini-3.6-flash";
 
   const metadataSample = `{
   "title": "PA111: Keskmine brutokuupalk",
@@ -29,27 +16,6 @@
     { "code": "Tegevusala", "values": ["TOTAL", "..."] },
     { "code": "Vaatlusperiood", "values": ["2024Q2", "2025Q2", "2026Q2", "..."] }
   ]
-}`;
-
-  const statisticsSample = `{
-  "class": "dataset",
-  "label": "PA111: Keskmine brutokuupalk",
-  "size": [1, 1, 3],
-  "period": ["2024Q2", "2025Q2", "2026Q2"],
-  "value": [2007, 2126, 2243],
-  "unit": "eurot"
-}`;
-
-  const aiSample = `{
-  "id": "interaction_demo",
-  "status": "completed",
-  "steps": [{
-    "type": "model_output",
-    "content": [{
-      "type": "text",
-      "text": "Keskmine brutokuupalk suurenes 2024. aasta II kvartalist 2026. aasta II kvartalini 236 euro ehk 11,8%. Need arvud kirjeldavad muutust, kuid ei näita selle põhjust."
-    }]
-  }]
 }`;
 
   const metadataOptions = {
@@ -102,21 +68,22 @@
   const officialWages = Object.freeze({ "2024Q2": 2007, "2025Q2": 2126, "2026Q2": 2243 });
 
   const runLabels = [
-    "Küsi metaandmed",
-    "Kinnita valik",
-    "Saada POST-päring",
-    "Saada andmed mudelile"
+    "Ava tabeli kirjeldus (GET)",
+    "Kinnita andmevalik",
+    "Saada Statistikaameti päring (POST)",
+    "Käivita Gemini näidispäring"
   ];
   const completedLabels = [
-    "Metaandmed saadud",
-    "Valik kinnitatud",
-    "POST-päring saadetud",
-    "AI vastus saadud"
+    "Tabeli kirjeldus on avatud",
+    "Andmevalik on kinnitatud",
+    "Statistikaameti vastus on avatud",
+    "Mudeli näidisvastus on avatud"
   ];
 
   let currentStep = 1;
   let completed = 0;
   let running = false;
+  let selectedData = null;
   const els = {
     progressValue: $("#progressValue"),
     progressText: $("#progressText"),
@@ -125,9 +92,6 @@
     labGrid: $(".lab-grid"),
     stageTitle: $("#stageTitle"),
     stageCard: $("#stageCard"),
-    storyStrip: $(".story-strip"),
-    storyIndex: $("#storyIndex"),
-    storyText: $("#storyText"),
     statusChip: $("#statusChip"),
     statusText: $("#statusText"),
     responseContext: $("#responseContext"),
@@ -139,19 +103,21 @@
     currentStepLabel: $("#currentStepLabel"),
     prevLesson: $("#prevLesson"),
     nextLesson: $("#nextLesson"),
-    lessonDots: $("#lessonDots"),
     flowMap: $("#flowMap"),
     flowPackage: $("#flowPackage"),
     flowApi: $("#flowApi"),
     flowMethodLabel: $("#flowMethodLabel"),
     flowApiRole: $("#flowApiRole"),
     flowApiName: $("#flowApiName"),
-    jsonEmpty: $("#jsonEmpty"),
-    jsonOutput: $("#jsonOutput"),
     postResponseOutput: $("#postResponseOutput"),
-    postChartTitle: $("#postChartTitle"),
-    postBarChart: $("#postBarChart"),
-    postChartInsight: $("#postChartInsight"),
+    dataSummary: $("#dataSummary"),
+    dataSourceNote: $("#dataSourceNote"),
+    dataTableCaption: $("#dataTableCaption"),
+    dataRows: $("#dataRows"),
+    dataComparison: $("#dataComparison"),
+    modelInputPreview: $("#modelInputPreview"),
+    modelResult: $("#modelResult"),
+    modelAnswer: $("#modelAnswer"),
     selectionFields: $("#selectionFields"),
     indicatorSelect: $("#indicatorSelect"),
     activitySelect: $("#activitySelect"),
@@ -164,7 +130,6 @@
     sequenceExercise: $("#sequenceExercise"),
     practiceSuite: $("#practiceSuite"),
     flowDialog: $("#flowDialog"),
-    flowDialogKicker: $("#flowDialogKicker"),
     dialogFlowStage: $("#dialogFlowStage"),
     dialogFlowStatus: $("#dialogFlowStatus"),
     flowDialogResult: $("#flowDialogResult"),
@@ -173,8 +138,7 @@
     dialogServiceIcon: $("#dialogServiceIcon"),
     dialogServiceRole: $("#dialogServiceRole"),
     dialogServiceName: $("#dialogServiceName"),
-    dialogServiceAction: $("#dialogServiceAction"),
-    toast: $("#toast")
+    dialogServiceAction: $("#dialogServiceAction")
   };
 
   function syncHeight() {
@@ -183,12 +147,6 @@
     const height = Math.ceil(document.documentElement.scrollHeight);
     window.parent.postMessage({ type: "simfluence:resize", height }, "*");
     window.parent.postMessage({ type: "resize", height }, "*");
-  }
-
-  function showToast(message) {
-    els.toast.textContent = message;
-    els.toast.classList.add("show");
-    window.setTimeout(() => els.toast.classList.remove("show"), 1800);
   }
 
   function setResultPanelVisible(visible) {
@@ -202,24 +160,6 @@
     const lesson = $(`[data-lesson="${step}"]`);
     const target = desktop && lesson ? lesson : els.stageCard;
     target.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  function alignPostResponseWithAiLesson() {
-    const lesson = $('[data-lesson="4"]');
-    if (!lesson) return;
-    els.stageCard.scrollTop = 0;
-    if (!window.matchMedia("(min-width: 1001px)").matches) {
-      lesson.scrollIntoView({ behavior: "smooth", block: "start" });
-      return;
-    }
-    const lab = $(".lab-grid");
-    const stickyTop = 12;
-    const lessonTop = lesson.getBoundingClientRect().top + window.scrollY;
-    const latestStickyScroll = lab.getBoundingClientRect().bottom + window.scrollY - els.stageCard.offsetHeight - stickyTop;
-    window.scrollTo({
-      top: Math.max(0, Math.min(lessonTop - stickyTop, latestStickyScroll)),
-      behavior: "smooth"
-    });
   }
 
   function setResponseContext(label, message, kind = "neutral") {
@@ -301,14 +241,12 @@
     els.valueCount.textContent = `= ${count} ${count === 1 ? "väärtus" : "väärtust"}`;
     $("#code2").textContent = fullPostRequest();
     els.selectionFeedback.className = `selection-feedback ${count ? "" : "error"}`.trim();
-    els.selectionFeedback.textContent = count
-      ? "Valitud POST-päring uuenes automaatselt."
-      : "Vali vähemalt üks vaatlusperiood.";
+    els.selectionFeedback.textContent = count ? "" : "Vali vähemalt üks vaatlusperiood.";
     syncHeight();
   }
 
   function indicatorUnit() {
-    if (els.indicatorSelect.value === "NR_EMPL") return "tuh";
+    if (els.indicatorSelect.value === "NR_EMPL") return "töötajat";
     if (els.indicatorSelect.value === "GR_W_AVG_SM") return "%";
     return "€";
   }
@@ -322,7 +260,7 @@
     const year = Number(period.slice(0, 4));
     const quarter = Number(period.slice(-1));
     const timeIndex = (year - 2024) * 4 + quarter - 2;
-    if (indicator === "NR_EMPL") return Number((100 + timeIndex * 0.7 + activityIndex * 1.2).toFixed(1));
+    if (indicator === "NR_EMPL") return 100000 + timeIndex * 700 + activityIndex * 1200;
     if (indicator === "GR_W_AVG_SM") return Number((5.2 + timeIndex * 0.08 - activityIndex * 0.05).toFixed(1));
     const wageBase = {
       GR_W_AVG: 2007, GR_W_D1: 1150, GR_W_D2: 1320, GR_W_D3: 1490, GR_W_D4: 1660,
@@ -337,9 +275,11 @@
     return fraction ? `${grouped},${fraction}` : grouped;
   }
 
-  function formatPeriod(period) {
-    const quarters = { Q1: "I kv", Q2: "II kv", Q3: "III kv", Q4: "IV kv" };
-    return `${period.slice(0, 4)} ${quarters[period.slice(4)]}`;
+  function formatPeriod(period, inSentence = false) {
+    const quarters = { Q1: "I", Q2: "II", Q3: "III", Q4: "IV" };
+    const year = period.slice(0, 4);
+    const quarter = quarters[period.slice(4)];
+    return inSentence ? `${year}. aasta ${quarter} kvartalis` : `${year} ${quarter} kv`;
   }
 
   function escapeHtml(value) {
@@ -356,16 +296,13 @@
       && periods.every((period) => Object.hasOwn(officialWages, period));
   }
 
-  function linkedPostResponse(data, periods, values) {
-    const indicator = els.indicatorSelect.value;
-    const activity = els.activitySelect.value;
-    const unit = indicatorUnit();
+  function linkedPostResponse(data, { indicator, activity, unit, periods, values }) {
     let insideValues = false;
     let valueIndex = 0;
 
     return JSON.stringify(data, null, 2).split("\n").map((line) => {
       const trimmed = line.trim();
-      if (trimmed === '"values": [') {
+      if (trimmed === '"value": [') {
         insideValues = true;
         return escapeHtml(line);
       }
@@ -377,7 +314,7 @@
         const valueMatch = line.match(/^(\s*)(-?\d+(?:\.\d+)?)(,?)$/);
         if (valueMatch) {
           const index = valueIndex++;
-          const hint = `API tagastas: ${formatValue(values[index])} ${unit} · ${indicator} · ${activity} · ${periods[index]}`;
+          const hint = `${formatValue(values[index])} ${unit} · ${indicator} · ${activity} · ${periods[index]}`;
           return `${escapeHtml(valueMatch[1])}<span class="response-value" tabindex="0" data-result-index="${index}" title="${escapeHtml(hint)}" aria-label="${escapeHtml(hint)}">${escapeHtml(valueMatch[2])}</span>${valueMatch[3]}`;
         }
       }
@@ -403,55 +340,146 @@
       .forEach((item) => item.classList.toggle("is-linked", active));
   }
 
-  function renderSelectedData() {
+  function captureSelectedData() {
     const periods = selectedPeriods();
     const values = periods.map(simulatedValue);
     const unit = indicatorUnit();
-    const official = usesOfficialValues(periods);
+    const first = values[0];
+    const last = values.at(-1);
+    const hasComparison = periods.length > 1;
+    return {
+      periods, values, unit,
+      indicator: els.indicatorSelect.value,
+      indicatorName: els.indicatorSelect.selectedOptions[0].textContent.split(" · ")[0],
+      activity: els.activitySelect.value,
+      activityName: els.activitySelect.selectedOptions[0].textContent.split(" · ")[0],
+      official: usesOfficialValues(periods),
+      changeUnit: unit === "%" ? "protsendipunkti" : unit,
+      change: hasComparison ? Number((last - first).toFixed(1)) : null,
+      relativeChange: hasComparison && unit !== "%" && first !== 0
+        ? Number(((last / first - 1) * 100).toFixed(1))
+        : null
+    };
+  }
+
+  function signed(value) {
+    return `${value > 0 ? "+" : value < 0 ? "−" : ""}${formatValue(Math.abs(value))}`;
+  }
+
+  function formattedChange(data) {
+    const relative = data.relativeChange === null ? "" : ` (${signed(data.relativeChange)}%)`;
+    return `${signed(data.change)} ${data.changeUnit}${relative}`;
+  }
+
+  function renderSelectedData(data) {
+    const { periods, values, unit, indicator, activity, official } = data;
     const response = {
+      version: "2.0",
       class: "dataset",
-      label: official ? "PA111 vastus" : "Näitlik vastus",
+      label: "PA111 näidisvastus",
       id: ["Näitaja", "Tegevusala", "Vaatlusperiood"],
       size: [1, 1, periods.length],
       dimension: {
-        Näitaja: { category: { index: [els.indicatorSelect.value] } },
-        Tegevusala: { category: { index: [els.activitySelect.value] } },
+        Näitaja: { category: { index: [indicator] } },
+        Tegevusala: { category: { index: [activity] } },
         Vaatlusperiood: { category: { index: periods } }
       },
-      values,
-      note: official
-        ? "PA111 ametliku tabeli kontrollväärtused"
-        : "Õppeandmed — mitte ametlik statistika"
+      value: values
     };
-    els.postResponseOutput.innerHTML = `<code>${linkedPostResponse(response, periods, values)}</code>`;
-
-    const max = Math.max(...values);
-    const min = Math.min(...values);
-    els.postChartTitle.textContent = els.indicatorSelect.selectedOptions[0].textContent.split(" · ")[0];
-    els.postBarChart.innerHTML = periods.map((period, index) => {
-      const height = 45 + (Math.abs(values[index]) / Math.max(...values.map(Math.abs), 1)) * 50;
-      return `<div class="chart-column"><span class="chart-value">${escapeHtml(formatValue(values[index]))} ${escapeHtml(unit)}</span><i class="chart-bar" style="--bar-height:${height}%"></i><span class="chart-label">${escapeHtml(formatPeriod(period))}</span></div>`;
-    }).join("");
-    els.postBarChart.setAttribute("aria-label", periods.map((period, index) => `${formatPeriod(period)} ${formatValue(values[index])} ${unit}`).join(", "));
-    const change = max === min
-      ? "Väärtused on võrdsed"
-      : `Vastuse väärtuste vahe: ${formatValue(Number((max - min).toFixed(1)))} ${unit}`;
-    els.postChartInsight.innerHTML = `<span>↗</span><b>${escapeHtml(change)}.</b> Muutus on nähtav. Enne järeldust kontrolli näitaja tähendust.`;
+    els.postResponseOutput.innerHTML = `<code>${linkedPostResponse(response, data)}</code>`;
+    els.dataSourceNote.textContent = official
+      ? "Väärtused pärinevad Statistikaameti tabelist PA111."
+      : "Vastus sisaldab õppimiseks loodud näidisväärtusi.";
+    els.dataTableCaption.textContent = `${data.indicatorName}. ${data.activityName}.`;
+    const rows = periods.map((period, index) => {
+      const row = document.createElement("tr");
+      const heading = document.createElement("th");
+      heading.scope = "row";
+      heading.textContent = formatPeriod(period);
+      row.append(heading);
+      row.insertCell().textContent = `${formatValue(values[index])} ${unit}`;
+      return row;
+    });
+    els.dataRows.replaceChildren(...rows);
+    els.dataComparison.textContent = data.change === null
+      ? "Muutuse arvutamiseks on vaja vähemalt kaht perioodi."
+      : `Muutus esimesest valitud perioodist viimaseni on ${formattedChange(data)}.`;
+    els.dataSummary.hidden = false;
   }
 
-  function selectionConsoleOutput() {
-    const periods = selectedPeriods();
-    return `VALIK ON VALMIS\n\nNäitaja        → ${els.indicatorSelect.value}\nTegevusala     → ${els.activitySelect.value}\nVaatlusperiood → ${periods.join(", ")}\n\nOodatav vastuse maht:\n1 näitaja × 1 tegevusala × ${periods.length} perioodi = ${periods.length} väärtust\n\nPOST-päringu keha uuenes automaatselt.`;
+  function renderModelInput(data) {
+    const task = data.change === null
+      ? "Kirjelda valitud perioodi väärtust ja selgita, mida oleks vaja ajas muutumise hindamiseks."
+      : "Sõnasta kahe lausega ainult etteantud arvudel põhinev järeldus esimese ja viimase perioodi kohta.";
+    const source = data.official ? "Statistikaameti tabel PA111" : "Harjutuse näidisandmed";
+    const input = {
+      ulesanne: task,
+      allikas: source,
+      naitaja: data.indicatorName,
+      tegevusala: data.activityName,
+      perioodid: data.periods,
+      vaartused: data.values,
+      uhik: data.unit,
+      muutus: data.change,
+      muutuse_uhik: data.changeUnit,
+      suhteline_muutus_protsentides: data.relativeChange
+    };
+    els.modelInputPreview.textContent = JSON.stringify(input, null, 2);
+    $("#code4").textContent = [
+      `perioodid <- c(${data.periods.map((period) => JSON.stringify(period)).join(", ")})`,
+      `vaartused <- c(${data.values.join(", ")})`,
+      `uhik <- ${JSON.stringify(data.unit)}`,
+      "esimene <- vaartused[1]",
+      "viimane <- tail(vaartused, 1)",
+      "vordlus <- length(vaartused) >= 2",
+      "muutus <- if (vordlus) round(viimane - esimene, 1) else NA_real_",
+      "suhteline <- if (vordlus && uhik != \"%\" && esimene != 0) {",
+      "  round((viimane / esimene - 1) * 100, 1)",
+      "} else NA_real_",
+      "",
+      "sisend <- jsonlite::toJSON(list(",
+      `  ulesanne = ${JSON.stringify(task)},`,
+      `  allikas = ${JSON.stringify(source)},`,
+      `  naitaja = ${JSON.stringify(data.indicatorName)},`,
+      `  tegevusala = ${JSON.stringify(data.activityName)},`,
+      "  perioodid = I(perioodid), vaartused = I(vaartused), uhik = uhik,",
+      `  muutus = muutus, muutuse_uhik = ${JSON.stringify(data.changeUnit)},`,
+      "  suhteline_muutus_protsentides = suhteline",
+      "), auto_unbox = TRUE, na = \"null\")",
+      "",
+      "voti <- Sys.getenv(\"GEMINI_API_KEY\")",
+      "stopifnot(nzchar(voti))",
+      `vastus <- httr2::request(${JSON.stringify(GEMINI_ENDPOINT)}) |>`,
+      "  httr2::req_headers_redacted(\"x-goog-api-key\" = voti) |>",
+      `  httr2::req_body_json(list(model = ${JSON.stringify(GEMINI_MODEL)},`,
+      "    input = as.character(sisend), store = FALSE)) |>",
+      "  httr2::req_perform() |>",
+      "  httr2::resp_body_json(simplifyVector = FALSE)"
+    ].join("\n");
   }
 
-  function postConsoleOutput() {
-    const periods = selectedPeriods();
-    const values = periods.map(simulatedValue);
-    return `POST /api/v1/et/stat/PA111\nContent-Type: application/json\nAccept: application/json\n\nHTTP/1.1 200 OK\nResponse: JSON-STAT2\nDimensions: 1 × 1 × ${periods.length}\nCodes: ${els.indicatorSelect.value} · ${els.activitySelect.value}\nPeriods: ${periods.join(", ")}\nValues: ${values.join(", ")}\n\nVastus salvestati R-i objekti "vastus".`;
+  function modelResponse(data) {
+    const indicator = data.indicatorName.split(", ")[0];
+    const activity = data.activity === "TOTAL" ? "kõik tegevusalad" : data.activityName;
+    const subject = `${indicator} (${activity})`;
+    const first = formatPeriod(data.periods[0], true);
+    const firstValue = formatValue(data.values[0]);
+    const last = formatPeriod(data.periods.at(-1), true);
+    const lastValue = formatValue(data.values.at(-1));
+    const text = data.change === null
+      ? `${subject} oli ${first} ${firstValue} ${data.unit}. Muutuse hindamiseks on vaja vähemalt kaht perioodi.`
+      : `${subject} oli ${first} ${firstValue} ${data.unit} ja ${last} ${lastValue} ${data.unit}. Muutus oli ${formattedChange(data)}.`;
+    els.modelAnswer.textContent = text;
+    els.modelResult.hidden = false;
+    return {
+      id: "interaction_demo",
+      status: "completed",
+      steps: [{ type: "model_output", content: [{ type: "text", text }] }]
+    };
   }
 
   function updateProgress() {
-    const labels = ["Küsi metaandmed", "Vali soovitud andmed", "Saada POST-päring", "Saada Gemini POST", "Töövoog on valmis"];
+    const labels = ["1. Tabeli kirjeldus", "2. Andmevalik", "3. Andmepäring", "4. Mudeli päring ja vastus", "Põhiülesanne lõpetatud"];
     const percent = Math.round((completed / TOTAL_STEPS) * 100);
     els.progressValue.textContent = `${percent}%`;
     els.progressText.textContent = labels[completed];
@@ -462,14 +490,6 @@
       step.classList.toggle("done", number <= completed);
       step.disabled = number > completed + 1;
     });
-  }
-
-  function renderDots() {
-    els.lessonDots.innerHTML = Array.from({ length: TOTAL_STEPS }, (_, index) => {
-      const step = index + 1;
-      const className = step === currentStep ? "active" : step <= completed ? "done" : "";
-      return `<i class="${className}"></i>`;
-    }).join("");
   }
 
   function showStep(step, scroll = false) {
@@ -486,25 +506,20 @@
       els.selectionAction.dataset.run = "2";
       els.selectionAction.classList.remove("orange");
       els.selectionAction.disabled = completed >= 2;
-      els.selectionAction.querySelector("span").textContent = completed >= 2 ? "Valik kinnitatud" : "Kinnita valik";
+      els.selectionAction.querySelector("span").textContent = completed >= 2 ? completedLabels[1] : runLabels[1];
     } else if (step === 3) {
       els.selectionAction.dataset.run = "3";
       els.selectionAction.classList.add("orange");
       els.selectionAction.disabled = completed >= 3;
-      els.selectionAction.querySelector("span").textContent = completed >= 3 ? "POST-päring saadetud" : "Saada POST-päring";
-      if (completed < 3) {
-        els.selectionFeedback.className = "selection-feedback success";
-        els.selectionFeedback.textContent = "Valik kinnitatud. Saada nüüd POST-päring Statistikaametile.";
-      }
+      els.selectionAction.querySelector("span").textContent = completed >= 3 ? completedLabels[2] : runLabels[2];
     }
-    $$(".step").forEach((item) => item.classList.toggle("active", Number(item.dataset.step) === step));
+    $$(".step").forEach((item) => {
+      const active = Number(item.dataset.step) === step;
+      item.classList.toggle("active", active);
+      if (active) item.setAttribute("aria-current", "step");
+      else item.removeAttribute("aria-current");
+    });
     els.currentStepLabel.textContent = `SAMM ${step} / ${TOTAL_STEPS}`;
-    const preserveResponseStage = step === 3 && completed === 2;
-    els.storyStrip.hidden = step === 4;
-    if (!preserveResponseStage) {
-      els.storyIndex.textContent = String(step).padStart(2, "0");
-      els.storyText.innerHTML = stepContent[step].story;
-    }
     els.prevLesson.disabled = step === 1;
     els.nextLesson.disabled = step >= completed + 1 || step === TOTAL_STEPS;
     const aiStep = step === 4;
@@ -513,18 +528,12 @@
     els.flowApiName.textContent = aiStep ? "Gemini API" : "PA111 API";
     els.flowPackage.classList.toggle("active", completed >= 1);
     els.flowApi.classList.toggle("active", completed >= 2);
-    renderDots();
     if (scroll) alignResponseWithLesson(step);
     syncHeight();
   }
 
-  function activateTab(panelId) {
+  function showResponsePanel(panelId) {
     $$(".workspace-panel").forEach((panel) => { panel.hidden = panel.id !== panelId; });
-    $$(".tab").forEach((tab) => {
-      const active = tab.dataset.panel === panelId;
-      tab.classList.toggle("active", active);
-      tab.setAttribute("aria-selected", String(active));
-    });
     syncHeight();
   }
 
@@ -535,10 +544,10 @@
       icon: "PA",
       serviceRole: "ANDMEALLIKAS",
       service: "Tabel PA111",
-      serviceAction: "Koostab metaandmed",
-      processing: "Tabel PA111 koostab metaandmed",
-      result: "<b>200 OK.</b> Statistikaameti API saatis tabeli kirjelduse ja valikukoodid R-i tagasi.",
-      close: "Vaata saadud metaandmeid"
+      serviceAction: "Tabeli kirjeldus ja valikud",
+      processing: "API koostab tabeli kirjelduse",
+      result: "GET-vastus sisaldab tabeli kirjeldust ja valikukoode.",
+      close: "Vaata tabeli kirjeldust"
     },
     3: {
       method: "POST",
@@ -546,28 +555,27 @@
       icon: "PA",
       serviceRole: "ANDMEALLIKAS",
       service: "Tabel PA111",
-      serviceAction: "Leiab valitud andmed",
-      processing: "Tabel PA111 leiab valitud väärtused",
-      result: "<b>200 OK.</b> Statistikaameti API saatis kolme II kvartali palgaandmed R-i tagasi.",
-      close: "Vaata saadud palgaandmeid"
+      serviceAction: "Valitud andmete allikas",
+      processing: "API koostab vastuse tabeli PA111 põhjal",
+      result: "POST-vastus sisaldab valitud näitaja ja perioodide väärtusi.",
+      close: "Vaata andmeid ja arvutust"
     },
     4: {
       method: "POST",
       api: "Gemini API",
       icon: "AI",
-      serviceRole: "TEENUS",
+      serviceRole: "VASTUSE KOOSTAJA",
       service: "Keelemudel",
       serviceAction: "Koostab selgituse",
       processing: "Keelemudel koostab vastuse",
-      result: "<b>200 OK.</b> Gemini API saatis mudeli JSON-vastuse R-i tagasi.",
-      close: "Vaata saadud AI vastust"
+      result: "Gemini näidisvastus sisaldab andmetel põhinevat selgitust.",
+      close: "Võrdle selgitust lähteandmetega"
     }
   };
 
   function openFlowDialog(config) {
-    els.flowDialogKicker.textContent = `SINU ${config.method}-PÄRING LIIGUB`;
-    els.dialogFlowStatus.textContent = "Valmistab päringut ette";
-    els.flowDialogResult.innerHTML = `<b>${config.method}-päring on teel.</b> Vastus pole veel saabunud.`;
+    els.dialogFlowStatus.textContent = `${config.method}-päring on teel`;
+    els.flowDialogResult.textContent = "";
     els.flowDialogResult.className = "";
     els.dialogApiName.textContent = config.api;
     els.dialogServiceIcon.textContent = config.icon;
@@ -575,15 +583,15 @@
     els.dialogServiceName.textContent = config.service;
     els.dialogServiceAction.textContent = config.serviceAction;
     els.flowDialogClose.disabled = true;
-    els.flowDialogClose.querySelector("span").textContent = "Oota vastust…";
+    els.flowDialogClose.querySelector("span").textContent = "Päring on töötlemisel";
     els.dialogFlowStage.classList.remove("sending", "returning");
     $$(".dialog-node", els.dialogFlowStage).forEach((node) => node.classList.remove("flow-active"));
     if (!els.flowDialog.open) els.flowDialog.showModal();
   }
 
   function completeFlowDialog(config) {
-    els.dialogFlowStatus.textContent = "200 OK · Vastus on käes";
-    els.flowDialogResult.innerHTML = config.result;
+    els.dialogFlowStatus.textContent = "200 OK";
+    els.flowDialogResult.textContent = config.result;
     els.flowDialogResult.className = "success";
     els.flowDialogClose.querySelector("span").textContent = config.close;
     els.flowDialogClose.disabled = false;
@@ -598,7 +606,7 @@
     void stage.offsetWidth;
 
     activate(0);
-    els.dialogFlowStatus.textContent = "Klient saadab päringu";
+    els.dialogFlowStatus.textContent = "R saadab päringu";
     stage.classList.add("sending");
     await wait(800);
 
@@ -619,128 +627,94 @@
     activate(1);
     await wait(450);
     activate(0);
-    els.dialogFlowStatus.textContent = "Klient saab vastuse";
+    els.dialogFlowStatus.textContent = "R saab vastuse";
     await wait(450);
 
     stage.classList.remove("returning");
     nodes.forEach((node) => node.classList.remove("flow-active"));
   }
 
-  async function animateFlow(step) {
-    const config = dialogConfigs[step];
+  async function animateFlow(config) {
     els.flowPackage.classList.add("active");
-    if (config) {
-      els.flowDialog.dataset.step = String(step);
-      openFlowDialog(config);
-      els.flowMap.classList.add("sending");
-      await animateDialogFlow(config);
-      els.flowMap.classList.remove("sending");
-      els.flowApi.classList.add("active");
-    } else {
-      await wait(520);
-    }
+    openFlowDialog(config);
+    els.flowMap.classList.add("sending");
+    await animateDialogFlow(config);
+    els.flowMap.classList.remove("sending");
+    els.flowApi.classList.add("active");
+  }
+
+  function setPracticeLocked(locked) {
+    [els.sequenceExercise, els.practiceSuite].forEach((section) => {
+      section.classList.toggle("locked", locked);
+      section.inert = locked;
+      if (locked) section.setAttribute("aria-disabled", "true");
+      else section.removeAttribute("aria-disabled");
+    });
   }
 
   async function runStep(step) {
-    if (running || step !== currentStep || step > completed + 1) return;
+    if (running || step !== currentStep || step !== completed + 1) return;
     if ((step === 2 || step === 3) && selectedPeriods().length === 0) {
       els.selectionFeedback.className = "selection-feedback error";
-      els.selectionFeedback.textContent = "Vali enne jätkamist vähemalt üks vaatlusperiood.";
-      showToast("Vali vähemalt üks vaatlusperiood");
+      els.selectionFeedback.textContent = "Vali vähemalt üks vaatlusperiood.";
+      return;
+    }
+    const button = $(`[data-run="${step}"]`);
+    if (step === 2) {
+      completed = step;
+      updateProgress();
+      showStep(3);
       return;
     }
     running = true;
-    const button = $(`[data-run="${step}"]`);
-    if (step === 2) {
-      button.disabled = true;
-      els.selectionFeedback.className = "selection-feedback";
-      els.selectionFeedback.textContent = "Valik kinnitatakse…";
-      await wait(260);
-      completed = Math.max(completed, step);
-      button.querySelector("span").textContent = completedLabels[step - 1];
-      updateProgress();
-      running = false;
-      els.nextLesson.disabled = false;
-      renderDots();
-      await wait(180);
-      showStep(3);
-      syncHeight();
-      return;
-    }
     if (step === 4) els.modelGuide.hidden = true;
     if (step === 1) {
       setResultPanelVisible(true);
       els.stageCard.classList.remove("awaiting-response");
       els.stageCard.removeAttribute("aria-disabled");
     }
+    if (step === 3) {
+      selectedData = captureSelectedData();
+      els.selectionFields.disabled = true;
+      els.selectionFeedback.textContent = "Uue andmevaliku saab teha praktikumi uuesti alustades.";
+    }
     button.disabled = true;
-    els.terminalTitle.textContent = ({
-      1: "metaandmed.json",
-      2: "valik.json",
-      3: "andmed.json",
-      4: "gemini-vastus.json"
-    })[step];
+    const config = dialogConfigs[step];
     els.statusChip.className = "status-chip running";
-    els.statusText.textContent = requestSteps.has(step) ? `${dialogConfigs[step].method} LIIGUB` : "SAMM TÖÖTAB";
-    els.consoleBadge.textContent = "töötleb…";
-    els.consoleBadge.className = "running";
-    activateTab("consolePanel");
-    els.consoleOutput.textContent = `Samm ${step}: ${stepContent[step].title.toLowerCase()}…`;
-    await animateFlow(step);
-    els.consoleOutput.textContent = step === 1
-      ? metadataSample
-      : step === 2
-        ? selectionConsoleOutput()
-        : step === 3
-          ? postConsoleOutput()
-          : step === 4
-            ? aiSample
-            : outputs[step];
-    els.consoleBadge.textContent = requestSteps.has(step) ? "200 OK" : "valmis";
-    els.consoleBadge.className = requestSteps.has(step) ? "success" : "neutral";
+    els.statusText.textContent = "Päring on töötlemisel";
+    await animateFlow(config);
     els.statusChip.className = "status-chip success";
-    els.statusText.textContent = step === 3 || step === 4 ? "Vastus käes" : "ÕNNESTUS";
-
-    const responseContexts = {
-      1: ["GET-PÄRINGU VASTUS", "Teenus tagastas tabeli muutujad, valikute nimetused ja koodid.", "metadata"],
-      2: ["VALIK ON VALMIS", "Metaandmete põhjal koostatud valik määrab järgmise POST-päringu keha.", "metadata"],
-      3: ["POST-PÄRINGU VASTUS", "Värvilised arvud on API tagastatud väärtused. Liigu arvule, et näha, milliste päringukoodidega see seotud on.", "data"],
-      4: ["GEMINI API VASTUS", "Keelemudel tagastas R-is arvutatud tulemuse põhjal lühikese tõlgenduse.", "data"]
-    };
-    setResponseContext(...responseContexts[step]);
+    els.statusText.textContent = "Vastus saabus";
+    els.consoleBadge.textContent = "200 OK";
+    els.consoleBadge.className = "success";
 
     if (step === 1) {
-      completeFlowDialog(dialogConfigs[step]);
+      els.terminalTitle.textContent = "metaandmed.json";
+      els.consoleOutput.textContent = metadataSample;
+      setResponseContext("GET-VASTUSE VÄLJAVÕTE", "Väli values loetleb tabeli valikukoodid, mida kasutatakse POST-päringus.", "metadata");
+      showResponsePanel("consolePanel");
     }
     if (step === 3) {
-      renderSelectedData();
-      els.jsonEmpty.hidden = true;
-      els.jsonOutput.hidden = false;
-      activateTab("jsonPanel");
+      renderSelectedData(selectedData);
+      renderModelInput(selectedData);
+      setResponseContext("STATISTIKAAMETI POST-VASTUS", "Välja value arvud on perioodikoodidega samas järjekorras.", "data");
+      showResponsePanel("jsonPanel");
       els.modelGuide.hidden = false;
-      els.stageCard.scrollIntoView({ behavior: "smooth", block: "start" });
-      completeFlowDialog(dialogConfigs[step]);
     }
     if (step === 4) {
-      completeFlowDialog(dialogConfigs[step]);
-      els.sequenceExercise.classList.remove("locked");
-      els.sequenceExercise.removeAttribute("aria-disabled");
-      els.practiceSuite.classList.remove("locked");
-      els.practiceSuite.removeAttribute("aria-disabled");
+      els.terminalTitle.textContent = "gemini-vastus.json";
+      els.consoleOutput.textContent = JSON.stringify(modelResponse(selectedData), null, 2);
+      setResponseContext("GEMINI POST-VASTUS", "Väljal steps on mudeli vastus. Tekst on väljal content.", "data");
+      showResponsePanel("consolePanel");
+      setPracticeLocked(false);
     }
 
-    completed = Math.max(completed, step);
+    completed = step;
     button.querySelector("span").textContent = completedLabels[step - 1];
-    if (step === TOTAL_STEPS) $(`[data-lesson="${step}"]`).classList.add("completed");
     updateProgress();
     running = false;
-    els.nextLesson.disabled = step === TOTAL_STEPS;
-    renderDots();
-
-    if (step < TOTAL_STEPS) {
-      await wait(420);
-      showStep(step + 1);
-    }
+    showStep(Math.min(step + 1, TOTAL_STEPS));
+    completeFlowDialog(config);
     syncHeight();
   }
 
@@ -782,10 +756,10 @@
     feedback.hidden = positionsCorrect !== 5;
     feedback.className = `sequence-feedback ${solved ? "complete" : "choices"}`;
     feedback.querySelector("span").textContent = solved ? "✓" : "2";
-    feedback.querySelector("b").textContent = solved ? "Loogiline töövoog on valmis" : "Järjestus on paigas";
+    feedback.querySelector("b").textContent = solved ? "Töövoog on valmis" : "Järjestus on õige";
     feedback.querySelector("p").textContent = solved
-      ? "Käivitaja, andmed, R-töötlus, AI API ja kasutajale kuvatav tulemus moodustavad tervikliku protsessi."
-      : "Nüüd vali igas plokis tegevus, mis vastab selle sammu ülesandele.";
+      ? "Kasutajale kuvatakse tõlgendus koos lähteandmetega, et ta saaks väiteid kontrollida."
+      : "Lõpetamiseks tuleb valida iga sammu juurde sobiv tegevus.";
     syncHeight();
   }
 
@@ -1086,7 +1060,7 @@
     $("#plannerState").textContent = `${completedFields} / ${plannerFields.length} valikut`;
     $("#previewTrigger").textContent = [plannerLabel("useCaseInput", "Kasutusjuht valimata"), plannerLabel("triggerInput", "käivitus valimata"), plannerLabel("environmentInput", "keskkond valimata")].join(" · ");
     $("#previewSource").textContent = [plannerLabel("sourceInput", "Allikas valimata"), plannerLabel("sensitivityInput", "tundlikkus valimata")].join(" · ");
-    $("#previewAi").textContent = [plannerLabel("modelInput", "Mudel valimata"), plannerLabel("aiRoleInput", "roll valimata")].join(" · ");
+    $("#previewAi").textContent = [plannerLabel("modelInput", "Mudel valimata"), plannerLabel("aiRoleInput", "ülesanne määramata")].join(" · ");
     $("#previewOutput").textContent = [plannerLabel("formatInput", "Vorming valimata"), plannerLabel("visualInput", "vaade valimata")].join(" · ");
     $("#previewControl").textContent = [plannerLabel("controlInput", "Kontroll valimata"), plannerLabel("fallbackInput", "varuplaan valimata")].join(" · ");
 
@@ -1106,6 +1080,7 @@
     currentStep = 1;
     completed = 0;
     running = false;
+    selectedData = null;
     if (els.flowDialog.open) els.flowDialog.close();
     setResultPanelVisible(false);
     els.selectionAction.dataset.run = "2";
@@ -1118,21 +1093,20 @@
     els.terminalTitle.textContent = "vastus.json";
     els.consoleBadge.textContent = "—";
     els.consoleBadge.className = "neutral";
-    setResponseContext("API VASTUS", "Pärast päringu saatmist näed siin teenuselt saadud vastust.");
+    setResponseContext("API VASTUS", "Vastus kuvatakse JSON-vormingus.");
     els.statusChip.className = "status-chip neutral";
     els.statusText.textContent = "Päringut pole veel saadetud";
     els.stageCard.classList.add("awaiting-response");
     els.stageCard.setAttribute("aria-disabled", "true");
-    els.jsonEmpty.hidden = false;
-    els.jsonOutput.hidden = true;
+    els.dataSummary.hidden = true;
+    els.modelResult.hidden = true;
+    els.selectionFields.disabled = false;
+    $(".r-example").open = false;
     els.flowPackage.classList.remove("active");
     els.flowApi.classList.remove("active");
     els.flowMap.classList.remove("sending", "returning");
     els.modelGuide.hidden = true;
-    els.sequenceExercise.classList.add("locked");
-    els.sequenceExercise.setAttribute("aria-disabled", "true");
-    els.practiceSuite.classList.add("locked");
-    els.practiceSuite.setAttribute("aria-disabled", "true");
+    setPracticeLocked(true);
     els.indicatorSelect.selectedIndex = 0;
     els.activitySelect.selectedIndex = 0;
     $$('input[type="checkbox"]', els.periodOptions).forEach((input) => {
@@ -1141,7 +1115,7 @@
     updateRequestPreview();
     resetSequenceExercise();
     resetPlanner();
-    activateTab("consolePanel");
+    showResponsePanel("consolePanel");
     updateProgress();
     showStep(1);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1158,7 +1132,6 @@
     if (value) toggleResultLinks(value.dataset.resultIndex, false);
   }));
   $$(".step").forEach((button) => button.addEventListener("click", () => showStep(Number(button.dataset.step), true)));
-  $$(".tab").forEach((tab) => tab.addEventListener("click", () => activateTab(tab.dataset.panel)));
   els.prevLesson.addEventListener("click", () => showStep(currentStep - 1, true));
   els.nextLesson.addEventListener("click", () => showStep(currentStep + 1, true));
   $("#resetButton").addEventListener("click", reset);
@@ -1217,20 +1190,16 @@
   });
   $("#clearWorkflow").addEventListener("click", resetPlanner);
   els.modelGuide.addEventListener("click", () => {
-    const target = $('[data-run="4"]');
-    target.scrollIntoView({ behavior: "smooth", block: "center" });
-    window.setTimeout(() => target.focus({ preventScroll: true }), 450);
+    const target = $("#model-request-title");
+    target.focus({ preventScroll: true });
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
   });
-  els.flowDialogClose.addEventListener("click", () => {
-    const dialogStep = Number(els.flowDialog.dataset.step || 0);
-    els.flowDialog.close();
-    if (dialogStep === 4) {
-      window.setTimeout(alignPostResponseWithAiLesson, 120);
-    } else if (dialogStep === 3 && !els.modelGuide.hidden) {
-      window.setTimeout(alignPostResponseWithAiLesson, 120);
-    } else if (dialogStep === 1) {
-      window.setTimeout(() => alignResponseWithLesson(2), 120);
-    }
+  els.flowDialogClose.addEventListener("click", () => els.flowDialog.close());
+  els.flowDialog.addEventListener("close", () => {
+    if (completed === 0 || running || els.flowDialog.open) return;
+    els.stageCard.scrollTop = 0;
+    els.stageTitle.focus({ preventScroll: true });
+    els.stageCard.scrollIntoView({ behavior: "smooth", block: "start" });
   });
   els.flowDialog.addEventListener("cancel", (event) => {
     if (els.flowDialogClose.disabled) event.preventDefault();

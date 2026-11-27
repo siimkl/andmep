@@ -155,6 +155,79 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
             assert evaluate("!document.querySelector('.practice-suite').inert && practiceCompleted.textContent === '1 / 5'")
             return result["example"]
 
+        def run_api3_request(step):
+            evaluate(f"""new Promise(resolve => {{
+              const observer = new MutationObserver(() => {{
+                if (flowDialogClose.disabled) return;
+                observer.disconnect();
+                resolve(true);
+              }});
+              observer.observe(flowDialogClose, {{attributes: true, attributeFilter: ['disabled']}});
+              document.querySelector('[data-run="{step}"]').click();
+            }})""")
+            evaluate("flowDialogClose.click()")
+
+        def assert_api3_flow():
+            evaluate("flowDialogClose.click(); selectionAction.click()")
+            wait_for_counter("SAMM 3 / 4")
+            run_api3_request(3)
+            wait_for_counter("SAMM 4 / 4")
+            result = evaluate(r"""({
+              rows: [...dataRows.rows].map(row => [...row.cells].map(c => c.textContent.replace(/\s+/g, ' '))),
+              values: JSON.parse(postResponseOutput.textContent).value,
+              input: JSON.parse(modelInputPreview.textContent),
+              rCode: code4.textContent,
+              change: dataComparison.textContent,
+              chartRemoved: !document.querySelector('.result-viz, .bar-chart'),
+              choicesLocked: selectionFields.disabled
+            })""")
+            assert result["rows"] == [["2024 II kv", "2 007 €"], ["2025 II kv", "2 126 €"], ["2026 II kv", "2 243 €"]], result
+            assert result["input"]["vaartused"] == result["values"] == [2007, 2126, 2243], result
+            assert result["input"]["muutus"] == 236 and result["input"]["suhteline_muutus_protsentides"] == 11.8, result
+            assert "+236 € (+11,8%)" in result["change"] and result["chartRemoved"] and result["choicesLocked"], result
+
+            run_api3_request(4)
+            assert evaluate("""!modelResult.hidden && !dataSummary.hidden
+              && modelAnswer.textContent.includes('+236 € (+11,8%)')
+              && JSON.parse(consoleOutput.textContent).steps[0].content[0].text === modelAnswer.textContent
+              && progressValue.textContent === '100%' && !sequenceExercise.inert && !practiceSuite.inert""")
+            evaluate("stageCard.scrollIntoView({block:'start', behavior:'instant'})")
+            screenshot("api3-comparison-desktop.png")
+            command("Emulation.setDeviceMetricsOverride", {"width": 390, "height": 844, "deviceScaleFactor": 1, "mobile": True})
+            evaluate("modelResult.scrollIntoView({block:'start', behavior:'instant'})")
+            assert evaluate("""document.documentElement.scrollWidth === document.documentElement.clientWidth
+              && dataSummary.getBoundingClientRect().right <= innerWidth""")
+            screenshot("api3-comparison-mobile.png")
+            command("Emulation.setDeviceMetricsOverride", {"width": 1440, "height": 1000, "deviceScaleFactor": 1, "mobile": False})
+
+            evaluate("""(() => {
+              const up = key => document.querySelector(`[data-flow-key="${key}"] [data-sequence-move=up]`).click();
+              ['trigger', 'trigger', 'transform', 'transform', 'ai'].forEach(up);
+              sequenceStack.querySelectorAll('select').forEach(select => {
+                select.value = select.dataset.answer;
+                select.dispatchEvent(new Event('change', {bubbles:true}));
+              });
+            })()""")
+            assert evaluate("sequenceFeedback.classList.contains('complete')")
+            evaluate("resetButton.click()")
+            assert evaluate("!selectionFields.disabled && progressValue.textContent === '0%' && dataSummary.hidden && modelResult.hidden")
+            run_api3_request(1)
+            evaluate("""indicatorSelect.value = 'GR_W_AVG_SM'; activitySelect.value = 'P';
+              selectionFields.querySelector('input[value="2025Q2"]').click();
+              selectionAction.click()""")
+            run_api3_request(3)
+            run_api3_request(4)
+            alternate = evaluate("""({
+              input: JSON.parse(modelInputPreview.textContent),
+              answer: modelAnswer.textContent,
+              values: JSON.parse(postResponseOutput.textContent).value
+            })""")
+            assert alternate["input"]["tegevusala"] == "Haridus" and alternate["input"]["perioodid"] == ["2024Q2", "2026Q2"], alternate
+            assert alternate["input"]["vaartused"] == alternate["values"] == [4.4, 5], alternate
+            assert alternate["input"]["suhteline_muutus_protsentides"] is None and "(Haridus)" in alternate["answer"], alternate
+            assert "+0,6 protsendipunkti" in alternate["answer"], alternate
+            return {"rCode": result["rCode"], "input": result["input"]}
+
         def assert_shared_footer(columns):
             footer = evaluate("""(() => {
               const text = nodes => [...nodes].map(node => node.textContent.trim());
@@ -320,6 +393,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 revealed = json.loads(evaluate("JSON.stringify({hidden:stageCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('result-pending')})"))
                 assert revealed == {"hidden": False, "pending": False}, {route: revealed}
                 wait_for_counter("SAMM 2 / 4")
+                state["modelExample"] = assert_api3_flow()
             elif route == "ai-andmetoo":
                 intro = evaluate("document.querySelector('.labeling-instruction-intro').textContent.replace(/\\s+/g,' ').trim()")
                 assert intro == "MIS ON MÄRGENDUSJUHIS? Märgendusjuhis on ühine reeglistik, mis selgitab, mida iga märgend tähendab ja millise nähtava info põhjal seda kasutada. Selge juhis aitab eri märgendajatel samasuguste registriandmetega tööotsijaid ühtemoodi hinnata ning loob mudelile järjepidevad treeningandmed.", intro
