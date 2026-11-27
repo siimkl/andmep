@@ -155,7 +155,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
             assert evaluate("!document.querySelector('.practice-suite').inert && practiceCompleted.textContent === '1 / 5'")
             return result["example"]
 
-        def run_api3_request(step):
+        def run_dialog_step(step):
             evaluate(f"""new Promise(resolve => {{
               const observer = new MutationObserver(() => {{
                 if (flowDialogClose.disabled) return;
@@ -170,7 +170,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
         def assert_api3_flow():
             evaluate("flowDialogClose.click(); selectionAction.click()")
             wait_for_counter("SAMM 3 / 4")
-            run_api3_request(3)
+            run_dialog_step(3)
             wait_for_counter("SAMM 4 / 4")
             result = evaluate(r"""({
               rows: [...dataRows.rows].map(row => [...row.cells].map(c => c.textContent.replace(/\s+/g, ' '))),
@@ -186,7 +186,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
             assert result["input"]["muutus"] == 236 and result["input"]["suhteline_muutus_protsentides"] == 11.8, result
             assert "+236 € (+11,8%)" in result["change"] and result["chartRemoved"] and result["choicesLocked"], result
 
-            run_api3_request(4)
+            run_dialog_step(4)
             assert evaluate("""!modelResult.hidden && !dataSummary.hidden
               && modelAnswer.textContent.includes('+236 € (+11,8%)')
               && JSON.parse(consoleOutput.textContent).steps[0].content[0].text === modelAnswer.textContent
@@ -211,12 +211,12 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
             assert evaluate("sequenceFeedback.classList.contains('complete')")
             evaluate("resetButton.click()")
             assert evaluate("!selectionFields.disabled && progressValue.textContent === '0%' && dataSummary.hidden && modelResult.hidden")
-            run_api3_request(1)
+            run_dialog_step(1)
             evaluate("""indicatorSelect.value = 'GR_W_AVG_SM'; activitySelect.value = 'P';
               selectionFields.querySelector('input[value="2025Q2"]').click();
               selectionAction.click()""")
-            run_api3_request(3)
-            run_api3_request(4)
+            run_dialog_step(3)
+            run_dialog_step(4)
             alternate = evaluate("""({
               input: JSON.parse(modelInputPreview.textContent),
               answer: modelAnswer.textContent,
@@ -719,18 +719,34 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
         command("Page.navigate", {"url": URL + "kraapimine/"})
         wait_for_path("/kraapimine/")
         evaluate("[...document.querySelectorAll('#permissionChecklist input')].forEach(input=>input.click()); document.querySelector('[data-run=\"1\"]').click()")
-        time.sleep(0.7)
+        wait_for_counter("SAMM 2 / 5")
         evaluate("recordSelector.value='.quote'; textSelector.value='.text'; authorSelector.value='.author'; tagSelector.value='.tags .tag'; selectorFields.dispatchEvent(new Event('change',{bubbles:true})); document.querySelector('[data-run=\"2\"]').click()")
-        time.sleep(0.7)
+        wait_for_counter("SAMM 3 / 5")
         before_scrape = json.loads(evaluate("JSON.stringify({step:document.querySelector('.lesson-panel:not([hidden])').dataset.lesson,hidden:stageCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('result-pending')})"))
         assert before_scrape == {"step": "3", "hidden": True, "pending": True}, before_scrape
         assert evaluate("currentStepLabel.textContent") == "SAMM 3 / 5"
-        evaluate("document.querySelector('[data-run=\"3\"]').click()")
-        time.sleep(2.4)
-        evaluate("flowDialogClose.click()")
+        run_dialog_step(3)
+        wait_for_counter("SAMM 4 / 5")
         after_scrape = json.loads(evaluate("JSON.stringify({hidden:stageCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('result-pending'),rows:rowCount.textContent})"))
         assert after_scrape == {"hidden": False, "pending": False, "rows": "10"}, after_scrape
+        assert evaluate("resultRows.rows[0].cells.length === 2")
+        run_dialog_step(4)
+        wait_for_counter("SAMM 5 / 5")
+        assert evaluate("""rowCount.textContent === '20' && pageCount.textContent === '2'
+          && resultRows.rows[0].cells.length === 4
+          && resultRows.querySelector('a[href="https://quotes.toscrape.com/page/2/"]') !== null""")
+        evaluate("document.querySelector('[data-run=\"5\"]').click()")
+        assert evaluate("""progressValue.textContent === '100%' && missingCount.textContent === '0'
+          && duplicateCount.textContent === '0' && !qualityResults.hidden && !practiceSuite.inert
+          && rExportExample.textContent.includes('write.csv(andmed, "tsitaadid.csv"')""")
+        evaluate("scenarioInput.value='file'; methodInput.value='file'; methodInput.dispatchEvent(new Event('change',{bubbles:true}))")
+        assert evaluate("!decisionPreview.hidden && decisionPreview.classList.contains('good')")
+        evaluate("stageCard.scrollIntoView({block:'start', behavior:'instant'})")
         screenshot("kraapimine-result.png")
+        command("Emulation.setDeviceMetricsOverride", {"width": 390, "height": 844, "deviceScaleFactor": 1, "mobile": True})
+        evaluate("stageCard.scrollIntoView({block:'start', behavior:'instant'})")
+        assert evaluate("document.documentElement.scrollWidth === document.documentElement.clientWidth")
+        screenshot("kraapimine-result-mobile.png")
 
         command("Emulation.setDeviceMetricsOverride", {"width": 390, "height": 844, "deviceScaleFactor": 1, "mobile": True})
         command("Page.navigate", {"url": URL})

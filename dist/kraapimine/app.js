@@ -3,31 +3,30 @@
 
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
-  const wait = (ms) => new Promise((resolve) => window.setTimeout(resolve, ms));
   const TOTAL_STEPS = 5;
 
   const stepTitles = [
-    "Hinda andmeallikat",
-    "Leia CSS-selektorid",
-    "Kraabi esimene leht",
-    "Kogu kaks lehte",
-    "Kontrolli kvaliteeti"
+    "Andmeallika hindamine",
+    "HTML ja selektorid",
+    "Esimese lehe andmed",
+    "Kahe lehe ühendamine",
+    "Tulemuse kontroll"
   ];
 
   const completedLabels = [
-    "Kraapimisotsus kinnitatud",
+    "Allika hinnang on kinnitatud",
     "Selektorid kinnitatud",
-    "Esimene leht kraabitud",
-    "Kaks lehte kogutud",
-    "Kvaliteet kontrollitud"
+    "Esimese lehe näidis on avatud",
+    "Kahe lehe näidis on avatud",
+    "Näidisandmed on kontrollitud"
   ];
 
   const initialLabels = [
-    "Kinnita kraapimisotsus",
+    "Kinnita allika hinnang",
     "Kinnita selektorid",
-    "Kraabi esimene leht",
-    "Kogu mõlemad lehed",
-    "Käivita kvaliteedikontroll"
+    "Kuva esimese lehe näidis",
+    "Kuva kahe lehe näidis",
+    "Kontrolli näidisandmeid"
   ];
 
   const sampleRows = [
@@ -54,35 +53,34 @@
   ];
 
   const dialogConfigs = {
-    3: { kicker: "R KÜSIB ESIMESE LEHE HTML-I", endpoint: "/page/1/", action: "Eraldab 10 tsitaadiplokki", result: "10 kirjet jõudis R-i andmetabelisse." },
-    4: { kicker: "R KÜSIB KAHE LEHE HTML-I", endpoint: "/page/1/ ja /page/2/", action: "Ühendab kaks andmetabelit", result: "20 kirjet on koos metaandmetega tabelis." }
+    3: { endpoint: "/page/1/", action: "Leiab tsitaadi ja autori", close: "Vaata esimese lehe näidist" },
+    4: { endpoint: "/page/1/ ja /page/2/", action: "Ühendab kahe lehe read", close: "Vaata kahe lehe näidist" }
   };
 
   const decisionAnswers = {
-    few: { method: "manual", title: "Käsitsi on siin mõistlik", text: "Kolme ühekordse väärtuse jaoks võib käsitsi kopeerimine olla läbipaistvam kui uue töövoo ehitamine." },
-    file: { method: "file", title: "Eelista ametlikku faili", text: "CSV säilitab andmestruktuuri ning väldib veebilehe HTML-ist sõltumist." },
-    api: { method: "api", title: "Eelista dokumenteeritud API-t", text: "API annab selge otspunkti, parameetrid ja masinloetava vastuse." },
-    static: { method: "rvest", title: "R + rvest sobib", text: "Staatilise HTML-i 20 kirjet saab korratava skriptiga koguda ja kontrollida." },
-    restricted: { method: "stop", title: "Peatu ja küsi volitust", text: "Ligipääs siseveebi ei anna automaatselt õigust sisu välja võtta, säilitada või edasi saata." }
+    few: { method: "manual", title: "Sobib käsitsi kopeerimine", text: "Kolme väärtuse ühekordseks kogumiseks piisab enamasti veebilehelt kopeerimisest." },
+    file: { method: "file", title: "Sobib ametlik CSV-fail", text: "Valmis failist saab andmed tabelina otse sisse lugeda." },
+    api: { method: "api", title: "Sobib dokumenteeritud API", text: "Dokumentatsioon kirjeldab, milliselt aadressilt ja milliste parameetritega andmeid küsida." },
+    static: { method: "rvest", title: "Sobib veebikraapimine R-is", text: "Korduvaid HTML-kirjeid saab koguda skriptiga. Enne kraapimist tuleb veenduda, et veebilehte tohib selleks kasutada." },
+    restricted: { method: "stop", title: "Esmalt on vaja volitust", text: "Siseveebi andmete kogumise, säilitamise ja edastamise tingimused tuleb volituse andjaga kokku leppida." }
   };
 
   const els = {
     progressValue: $("#progressValue"), progressText: $("#progressText"), progressBar: $("#progressBar"),
     completedCount: $("#completedCount"), currentStepLabel: $("#currentStepLabel"), labGrid: $(".lab-grid"), stageCard: $("#stageCard"),
     statusChip: $("#statusChip"), statusText: $("#statusText"), responseContext: $("#responseContext"),
-    responseContextLabel: $("#responseContextLabel"), responseContextText: $("#responseContextText"),
     dataPanel: $("#dataPanel"), resultRows: $("#resultRows"), rowCount: $("#rowCount"), pageCount: $("#pageCount"),
     missingCount: $("#missingCount"), duplicateCount: $("#duplicateCount"), tableState: $("#tableState"),
     qualityResults: $("#qualityResults"),
     permissionChecklist: $("#permissionChecklist"), permissionFeedback: $("#permissionFeedback"),
     selectorFields: $("#selectorFields"), selectorFeedback: $("#selectorFeedback"),
-    prevLesson: $("#prevLesson"), nextLesson: $("#nextLesson"), lessonDots: $("#lessonDots"),
+    prevLesson: $("#prevLesson"), nextLesson: $("#nextLesson"),
     practiceSuite: $("#practiceSuite"), scenarioInput: $("#scenarioInput"), methodInput: $("#methodInput"),
     decisionPreview: $("#decisionPreview"), inspectorHelpOpen: $("#inspectorHelpOpen"),
     inspectorHelpDialog: $("#inspectorHelpDialog"), inspectorHelpClose: $("#inspectorHelpClose"),
-    flowDialog: $("#flowDialog"), flowDialogKicker: $("#flowDialogKicker"),
+    flowDialog: $("#flowDialog"),
     dialogFlowStage: $("#dialogFlowStage"), dialogFlowStatus: $("#dialogFlowStatus"), dialogApiName: $("#dialogApiName"),
-    dialogServiceAction: $("#dialogServiceAction"), flowDialogResult: $("#flowDialogResult"), flowDialogClose: $("#flowDialogClose")
+    dialogServiceAction: $("#dialogServiceAction"), flowDialogClose: $("#flowDialogClose")
   };
 
   let currentStep = 1;
@@ -108,7 +106,9 @@
     els.progressValue.textContent = `${percent}%`;
     els.progressBar.style.width = `${percent}%`;
     els.completedCount.textContent = String(completed);
-    els.progressText.textContent = completed === TOTAL_STEPS ? "Praktikum on valmis" : stepTitles[Math.min(completed, TOTAL_STEPS - 1)];
+    els.progressText.textContent = completed === TOTAL_STEPS
+      ? "Põhiülesanne lõpetatud"
+      : `${completed + 1}. ${stepTitles[completed]}`;
     $$(".step").forEach((button) => {
       const step = Number(button.dataset.step);
       button.classList.toggle("done", step <= completed);
@@ -116,39 +116,39 @@
     });
   }
 
-  function renderDots() {
-    els.lessonDots.innerHTML = Array.from({ length: TOTAL_STEPS }, (_, index) => `<i class="${index + 1 === currentStep ? "active" : index + 1 <= completed ? "done" : ""}"></i>`).join("");
-  }
-
   function showStep(step, manual = false) {
-    if (step < 1 || step > TOTAL_STEPS || step > completed + 1) return;
+    if (running || step < 1 || step > TOTAL_STEPS || step > completed + 1) return;
     currentStep = step;
     $$(".lesson-panel").forEach((panel) => {
       const active = Number(panel.dataset.lesson) === step;
       panel.hidden = !active;
       panel.classList.toggle("active", active);
     });
-    $$(".step").forEach((button) => button.classList.toggle("active", Number(button.dataset.step) === step));
+    $$(".step").forEach((button) => {
+      const active = Number(button.dataset.step) === step;
+      button.classList.toggle("active", active);
+      if (active) button.setAttribute("aria-current", "step");
+      else button.removeAttribute("aria-current");
+    });
     els.currentStepLabel.textContent = `SAMM ${step} / ${TOTAL_STEPS}`;
     els.prevLesson.disabled = step === 1;
     els.nextLesson.disabled = step === TOTAL_STEPS || step >= completed + 1;
     setResultPanelVisible(step >= 3 && completed >= 3);
-    renderDots();
     if (manual) $(".control-card").scrollIntoView({ behavior: "smooth", block: "start" });
     syncHeight();
   }
 
-  function setStatus(text, success = true) {
+  function setStatus(text) {
     els.stageCard.classList.remove("awaiting-response");
     els.stageCard.removeAttribute("aria-disabled");
-    els.statusChip.className = `status-chip ${success ? "success" : "neutral"}`;
+    els.statusChip.className = "status-chip success";
     els.statusText.textContent = text;
   }
 
-  function setContext(label, value, tone = "success") {
-    els.responseContext.className = `response-context ${tone}`;
-    els.responseContextLabel.textContent = label;
-    els.responseContextText.textContent = value;
+  function setContext(text) {
+    els.responseContext.textContent = text;
+    els.responseContext.hidden = !text;
+    els.responseContext.className = "response-context success";
   }
 
   function escapeHtml(value) {
@@ -156,65 +156,69 @@
   }
 
   function renderRows(count) {
-    const previewRows = count === 10
-      ? sampleRows.slice(0, 5)
-      : [...sampleRows.slice(0, 4), ...sampleRows.slice(10, 14)];
-    els.resultRows.innerHTML = previewRows.map((row) => `<tr><td>${escapeHtml(row.quote)}</td><td>${escapeHtml(row.author)}</td><td>${escapeHtml(row.tags)}</td><td>${row.page}</td></tr>`).join("");
-    els.rowCount.textContent = String(count);
-    els.pageCount.textContent = count === 10 ? "1" : "2";
-    els.tableState.textContent = `${count} rida · näidatud ${previewRows.length}`;
+    const rows = sampleRows.slice(0, count);
+    const fullFields = count === 20;
+    const previewRows = fullFields ? [1, 2].flatMap((page) => rows.filter((row) => row.page === page).slice(0, 4)) : rows.slice(0, 5);
+    $$(".source-column", els.dataPanel).forEach((column) => { column.hidden = !fullFields; });
+    els.resultRows.innerHTML = previewRows.map((row) => {
+      const sourceCells = fullFields
+        ? `<td role="cell"><span class="row-label" aria-hidden="true">Märksõnad </span>${escapeHtml(row.tags)}</td>
+           <td role="cell"><span class="row-label" aria-hidden="true">Leht </span><a href="https://quotes.toscrape.com/page/${row.page}/" target="_blank" rel="noopener noreferrer" aria-label="Harjutusveebi lehekülg ${row.page} (avaneb uuel vahelehel)">${row.page}</a></td>`
+        : "";
+      return `<tr role="row"><td role="cell">${escapeHtml(row.quote)}</td><td role="cell">${escapeHtml(row.author)}</td>${sourceCells}</tr>`;
+    }).join("");
+    els.rowCount.textContent = String(rows.length);
+    els.pageCount.textContent = String(new Set(rows.map((row) => row.page)).size);
+    els.tableState.textContent = `Näidatud ${previewRows.length} / ${rows.length} kirjet`;
     els.dataPanel.hidden = false;
   }
 
   function renderQuality() {
-    els.missingCount.textContent = "0";
-    els.duplicateCount.textContent = "0";
+    const missing = sampleRows.filter((row) => !row.quote?.trim() || !row.author?.trim()).length;
+    const duplicate = sampleRows.length - new Set(sampleRows.map((row) => row.quote)).size;
+    const firstPage = sampleRows.filter((row) => row.page === 1).length;
+    const secondPage = sampleRows.filter((row) => row.page === 2).length;
+    els.missingCount.textContent = String(missing);
+    els.duplicateCount.textContent = String(duplicate);
+    els.qualityResults.textContent = `Esimese lehe näidises on ${firstPage} kirjet ja teise lehe näidises ${secondPage} kirjet.`;
     els.qualityResults.hidden = false;
-    els.qualityResults.innerHTML = `
-      <div><span>✓</span><b>20 kirjet</b><small>oodatud arv käes</small></div>
-      <div><span>✓</span><b>10 + 10</b><small>mõlemad lehed kaetud</small></div>
-      <div><span>✓</span><b>0 tühja</b><small>tekst ja autor olemas</small></div>
-      <div><span>✓</span><b>0 kordust</b><small>tsitaadid unikaalsed</small></div>
-      <div><span>✓</span><b>Allikas alles</b><small>URL, leht ja kuupäev lisatud</small></div>`;
   }
 
   function applyStepResult(step) {
     if (step === 3) {
       setResultPanelVisible(true);
-      setStatus("10 kirjet käes");
-      setContext("ESIMENE LEHT", "HTTP-vastus sisaldas staatilist HTML-i ja .quote-selektor leidis 10 kirjet.");
+      setStatus("Esimese lehe näidis");
+      setContext("Selektor .quote valib HTML-ist tsitaadiplokid. Iga plokk annab tabelisse ühe rea.");
       renderRows(10);
     } else if (step === 4) {
-      setStatus("20 kirjet käes");
-      setContext("KAKS LEHTE ÜHENDATUD", "Päringute vahel oli ühe sekundi paus. Iga kirje juures säilisid märksõnad, lehekülg, URL ja kogumise kuupäev.");
+      setStatus("Kahe lehe näidis");
+      setContext("Eelvaate leheküljenumber avab vastava allikalehe uuel vahelehel.");
       renderRows(20);
     } else if (step === 5) {
-      setStatus("Kvaliteet kontrollitud");
-      setContext("KONTROLL LÄBITUD", "Kirjete arv, lehekülgede katvus, tühjad väljad ja kordused on kontrollitud. Lõplik kontroll on võrdlus algallikaga.");
+      setStatus("Näidisandmed on kontrollitud");
+      setContext("Kirjete arvu, puuduvate väljade ja korduste näitajad on arvutatud brauseri näidisandmetest.");
       renderRows(20);
       renderQuality();
     }
   }
 
-  async function completeStep(step) {
+  function completeStep(step) {
     applyStepResult(step);
-    completed = Math.max(completed, step);
+    completed = step;
     const button = $(`[data-run="${step}"]`);
     button.disabled = true;
     button.querySelector("span").textContent = completedLabels[step - 1];
+    if (step === 1) els.permissionChecklist.disabled = true;
+    if (step === 2) $$("select", els.selectorFields).forEach((select) => { select.disabled = true; });
     if (step === TOTAL_STEPS) {
       $(`[data-lesson="${step}"]`).classList.add("completed");
       els.practiceSuite.classList.remove("locked");
       els.practiceSuite.removeAttribute("aria-disabled");
+      els.practiceSuite.inert = false;
     }
     updateProgress();
     running = false;
-    if (step < TOTAL_STEPS) {
-      await wait(420);
-      showStep(step + 1);
-    } else {
-      showStep(step);
-    }
+    showStep(Math.min(step + 1, TOTAL_STEPS));
     syncHeight();
   }
 
@@ -222,17 +226,16 @@
     const config = dialogConfigs[step];
     pendingDialogStep = step;
     running = true;
-    els.flowDialogKicker.textContent = config.kicker;
     els.dialogApiName.textContent = config.endpoint;
     els.dialogServiceAction.textContent = config.action;
     els.dialogFlowStatus.textContent = "Valmistab päringut ette";
-    els.flowDialogResult.innerHTML = "<b>Päring on teel.</b> Tulemus pole veel saabunud.";
     els.flowDialogClose.disabled = true;
+    els.flowDialogClose.querySelector("span").textContent = "Koostatakse näidistabelit";
     els.dialogFlowStage.classList.remove("sending", "returning");
     els.flowDialog.showModal();
     window.setTimeout(() => {
       els.dialogFlowStage.classList.add("sending");
-      els.dialogFlowStatus.textContent = "Veebileht tagastab HTML-i";
+      els.dialogFlowStatus.textContent = "Veebiserver tagastab HTML-i";
     }, 250);
     window.setTimeout(() => {
       els.dialogFlowStage.classList.remove("sending");
@@ -241,15 +244,15 @@
     }, 1250);
     window.setTimeout(() => {
       els.dialogFlowStage.classList.remove("returning");
-      els.dialogFlowStatus.textContent = "Tulemus on valmis";
-      els.flowDialogResult.innerHTML = `<b>${escapeHtml(config.result)}</b> Vaata tulemust ja jätka.`;
+      els.dialogFlowStatus.textContent = "Näidistabel on valmis";
+      els.flowDialogClose.querySelector("span").textContent = config.close;
       els.flowDialogClose.disabled = false;
       els.flowDialogClose.focus({ preventScroll: true });
     }, 2200);
   }
 
   function runStep(step) {
-    if (running || step !== currentStep || step > completed + 1) return;
+    if (running || step !== currentStep || step !== completed + 1) return;
     if ([3, 4].includes(step)) openFlowDialog(step);
     else {
       running = true;
@@ -261,7 +264,7 @@
     const inputs = $$("input[type=\"checkbox\"]", els.permissionChecklist);
     const checked = inputs.filter((input) => input.checked).length;
     const ready = checked === inputs.length;
-    els.permissionFeedback.textContent = ready ? "Kõik neli kontrolli on kinnitatud. Kraapimisotsus on põhjendatud selle harjutuse piires." : `${checked}/${inputs.length} kontrolli kinnitatud.`;
+    els.permissionFeedback.textContent = `${checked}/${inputs.length} asjaolu läbi vaadatud.`;
     els.permissionFeedback.className = `selection-feedback ${ready ? "success" : ""}`;
     $('[data-run="1"]').disabled = !ready;
   }
@@ -277,9 +280,9 @@
     const correct = values.record === ".quote" && values.text === ".text" && values.author === ".author" && values.tags === ".tags .tag";
     els.selectorFeedback.className = `selection-feedback ${correct ? "success" : selected === 4 ? "error" : ""}`;
     els.selectorFeedback.textContent = correct
-      ? "Õige: väljad leitakse iga .quote-ploki seest ja märksõnade seos säilib."
+      ? "Kõik neli selektorit sobivad näite HTML-iga."
       : selected === 4
-        ? "Mõni selektor lõhub kirje struktuuri. Alusta .quote-plokist ja otsi väljad selle seest."
+        ? "Vähemalt üks selektor valib vale elemendi. Näite HTML-is tähistab klass quote kogu kirjet."
         : `${selected}/4 selektorit valitud.`;
     $('[data-run="2"]').disabled = !correct;
   }
@@ -288,22 +291,13 @@
     const scenario = els.scenarioInput.value;
     const method = els.methodInput.value;
     const answer = decisionAnswers[scenario];
-    let state = "pending";
-    let symbol = "?";
-    let title = "Vali olukord ja meetod";
-    let text = "Eelista kõige lihtsamat ametlikku allikat, mis täidab ülesande.";
-    if (answer && method) {
-      const correct = answer.method === method;
-      state = correct ? "good" : "warn";
-      symbol = correct ? "✓" : "!";
-      title = correct ? answer.title : "Valitud meetod pole siin esimene valik";
-      const recommended = els.methodInput.querySelector(`option[value="${answer.method}"]`).textContent;
-      text = correct ? answer.text : `Sobivam valik on „${recommended}”. ${answer.text}`;
-    }
-    els.decisionPreview.className = `decision-preview ${state}`;
-    els.decisionPreview.querySelector(":scope > span").textContent = symbol;
-    els.decisionPreview.querySelector("h3").textContent = title;
-    els.decisionPreview.querySelector("p").textContent = text;
+    els.decisionPreview.hidden = !answer || !method;
+    if (els.decisionPreview.hidden) return;
+    const correct = answer.method === method;
+    els.decisionPreview.className = `decision-preview ${correct ? "good" : "warn"}`;
+    els.decisionPreview.querySelector(":scope > span").textContent = correct ? "✓" : "!";
+    els.decisionPreview.querySelector("h3").textContent = answer.title;
+    els.decisionPreview.querySelector("p").textContent = answer.text;
     syncHeight();
   }
 
@@ -320,17 +314,25 @@
       button.disabled = [1, 2].includes(step);
     });
     $$("input[type=\"checkbox\"]", els.permissionChecklist).forEach((input) => { input.checked = false; });
-    $$("select", els.selectorFields).forEach((select) => { select.value = ""; });
+    els.permissionChecklist.disabled = false;
+    $$("select", els.selectorFields).forEach((select) => {
+      select.value = "";
+      select.disabled = false;
+    });
+    $(".export-example").open = false;
     els.scenarioInput.value = "";
     els.methodInput.value = "";
     els.practiceSuite.classList.add("locked");
     els.practiceSuite.setAttribute("aria-disabled", "true");
+    els.practiceSuite.inert = true;
     setResultPanelVisible(false);
     els.stageCard.classList.add("awaiting-response");
     els.stageCard.setAttribute("aria-disabled", "true");
     els.statusChip.className = "status-chip neutral";
     els.statusText.textContent = "Kraapimist pole veel käivitatud";
-    setContext("TULEMUS ILMUB PÄRAST PÄRINGUT", "See vaade aktiveerub, kui R on esimese lehe HTML-i küsinud.", "neutral");
+    setContext("");
+    els.missingCount.textContent = "—";
+    els.duplicateCount.textContent = "—";
     els.dataPanel.hidden = true;
     els.qualityResults.hidden = true;
     updatePermissionChecklist();
@@ -352,11 +354,14 @@
   $("#resetButton").addEventListener("click", reset);
   els.inspectorHelpOpen.addEventListener("click", () => els.inspectorHelpDialog.showModal());
   els.inspectorHelpClose.addEventListener("click", () => els.inspectorHelpDialog.close());
-  els.flowDialogClose.addEventListener("click", () => {
-    els.flowDialog.close();
+  els.flowDialogClose.addEventListener("click", () => els.flowDialog.close());
+  els.flowDialog.addEventListener("close", () => {
     const step = pendingDialogStep;
+    if (!step) return;
     pendingDialogStep = 0;
     completeStep(step);
+    $("#result-title").focus({ preventScroll: true });
+    els.stageCard.scrollIntoView({ behavior: "smooth", block: "start" });
   });
   els.flowDialog.addEventListener("cancel", (event) => {
     if (els.flowDialogClose.disabled) event.preventDefault();
