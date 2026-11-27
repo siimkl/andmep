@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Harjutus Statistikaameti API GET-päringu koostamiseks ja tabeli kirjelduse lugemiseks JSON-vastusest.">
   <title>API 1 · GET-päring Statistikaameti API-s</title>
-  <link rel="stylesheet" href="styles.css?v=6">
+  <link rel="stylesheet" href="styles.css?v=7">
   <link rel="stylesheet" href="../api-common.css?v=16">
   <link rel="stylesheet" href="../readability.css?v=3">
 </head>
@@ -108,7 +108,8 @@ Accept: application/json</pre>
           <label class="select-label" for="activitySelect"><span>Tegevusala</span><select id="activitySelect"></select></label>
         </div>
         <fieldset class="period-group" id="periodField">
-          <legend>Vaatlusperiood</legend>
+          <legend>Vaatlusperioodid</legend>
+          <button class="period-clear" id="clearPeriods" type="button">Tühjenda perioodide valik</button>
           <div class="check-pills" id="periodOptions"></div>
         </fieldset>
         <dl class="get-selection-codes" aria-label="Valitud koodid">
@@ -172,6 +173,6 @@ Accept: application/json</pre>
     </footer>
   </main>
   <script src="../api-nav.js"></script>
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=8"></script>
 </body>
 </html>

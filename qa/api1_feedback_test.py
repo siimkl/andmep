@@ -96,6 +96,17 @@ with tempfile.TemporaryDirectory(prefix="andmep-api1-chrome-") as profile:
             evaluate("flowDialogClose.click()")
             wait_until("!stageCard.hidden && !readingSection.hidden && !flowDialog.open")
 
+        def click_visible(selector):
+            point = evaluate(f"""(async selector => {{
+              const element = document.querySelector(selector);
+              element.scrollIntoView({{block:'center',behavior:'instant'}});
+              await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+              const rect = element.getBoundingClientRect();
+              return {{x:rect.x + rect.width/2, y:rect.y + rect.height/2}};
+            }})({json.dumps(selector)})""")
+            for kind in ("mousePressed", "mouseReleased"):
+                command("Input.dispatchMouseEvent", {"type": kind, "button": "left", "clickCount": 1, **point})
+
         snapshots = json.loads((ROOT / "dist/api1/pa111-metadata.json").read_text(encoding="utf-8"))
         send_get()
         assert evaluate("progressValue.textContent") == "33%"
@@ -106,13 +117,20 @@ with tempfile.TemporaryDirectory(prefix="andmep-api1-chrome-") as profile:
         assert evaluate("selectionCounts.textContent") == "12 näitajat · 20 tegevusala · 22 vaatlusperioodi"
         assert evaluate("selectionMath.textContent + ' ' + valueCount.textContent") == "1 × 1 × 3 = 3 väärtust"
         assert evaluate("selectedPeriodCodes.textContent") == "2024Q2, 2025Q2, 2026Q2"
+        assert evaluate("""Array.from(periodOptions.querySelectorAll('input:checked + span .period-checkmark'))
+          .every(mark => getComputedStyle(mark).display !== 'none')""")
+        click_visible("#checkSelection")
+        assert evaluate("""!nextSelectionTask.hidden
+          && periodField.getAttribute('aria-invalid') === 'false'
+          && readingFeedback.classList.contains('success')""")
         evaluate("""(() => {
           indicatorSelect.value = 'GR_W_D5';
           indicatorSelect.dispatchEvent(new Event('change', {bubbles:true}));
           activitySelect.value = 'P';
           activitySelect.dispatchEvent(new Event('change', {bubbles:true}));
-          [...periodOptions.querySelectorAll('input:checked')].forEach(input => input.click());
         })()""")
+        click_visible("#clearPeriods")
+        assert evaluate("clearPeriods.disabled")
         assert evaluate("selectedPeriodCodes.textContent") == "Valik puudub"
         assert evaluate("selectionMath.textContent") == "1 × 1 × 0"
         evaluate("""responsePart.value='Vaatlusperiood';
@@ -141,6 +159,9 @@ with tempfile.TemporaryDirectory(prefix="andmep-api1-chrome-") as profile:
           && indicatorSelect.getAttribute('aria-invalid') === 'true'
           && periodField.getAttribute('aria-invalid') === 'true'""")
         assert "näitajat" in evaluate("readingFeedback.textContent")
+        assert "Lisa 2024. aasta II kvartal, 2025. aasta II kvartal ja 2026. aasta II kvartal." in evaluate(
+            "readingFeedback.textContent"
+        )
 
         def select_for_task(indicator, activity, periods):
             assert evaluate(f"""(([indicator, activity, periods]) => {{
@@ -155,11 +176,22 @@ with tempfile.TemporaryDirectory(prefix="andmep-api1-chrome-") as profile:
             }})({json.dumps([indicator, activity, periods])})""")
             evaluate("checkSelection.click()")
 
-        select_for_task("GR_W_AVG", "TOTAL", ["2026Q2"])
-        assert evaluate("!nextSelectionTask.hidden && valueCount.textContent === '= 1 väärtus'")
+        select_for_task("GR_W_AVG", "TOTAL", ["2024Q2", "2025Q2", "2026Q2"])
+        assert evaluate("!nextSelectionTask.hidden && valueCount.textContent === '= 3 väärtust'")
         evaluate("nextSelectionTask.click()")
         assert evaluate("selectionTaskCount.textContent") == "Ülesanne 2 / 3"
-        select_for_task("GR_W_D5", "P", ["2025Q2", "2026Q2"])
+        select_for_task("GR_W_D5", "P", ["2024Q2", "2026Q2"])
+        assert evaluate("nextSelectionTask.hidden && periodField.getAttribute('aria-invalid') === 'true'")
+        assert evaluate("readingFeedback.textContent") == (
+            "Lisa 2025. aasta II kvartal. Eemalda 2024. aasta II kvartal."
+        )
+        for code, periods_after_click in [
+            ("2024Q2", "2026Q2"),
+            ("2025Q2", "2025Q2, 2026Q2"),
+        ]:
+            click_visible(f'#periodOptions input[value="{code}"] + .period-label')
+            assert evaluate("selectedPeriodCodes.textContent") == periods_after_click
+        click_visible("#checkSelection")
         assert evaluate("!nextSelectionTask.hidden && valueCount.textContent === '= 2 väärtust'")
         evaluate("nextSelectionTask.click()")
         assert evaluate("selectionTaskCount.textContent") == "Ülesanne 3 / 3"
@@ -192,7 +224,9 @@ with tempfile.TemporaryDirectory(prefix="andmep-api1-chrome-") as profile:
         send_get()
         assert evaluate("JSON.parse(responseOutput.textContent)") == snapshots["et"]
         assert evaluate("indicatorSelect.value === 'GR_W_AVG' && activitySelect.value === 'TOTAL' && valueCount.textContent === '= 3 väärtust'")
-        print("API 1 GET flow passed in both languages, with dynamic choices, three selection tasks, quiz and reset.")
+        click_visible("#checkSelection")
+        assert evaluate("!nextSelectionTask.hidden && readingFeedback.classList.contains('success')")
+        print("API 1 passed in both languages, including immediate default validation, period hints and mobile reset.")
     finally:
         process.terminate()
         process.wait(timeout=10)

@@ -2324,12 +2324,39 @@ footer { padding-top: 24px; }
 }
 .get-exercise .period-label {
   min-height: 44px;
+  position: relative;
 }
 .get-exercise .check-pills input:checked + span {
   border-color: #5587b0;
   color: #102f55;
   background: #e4f0fb;
   font-weight: 700;
+}
+#periodField .period-clear {
+  min-height: 44px;
+  margin-bottom: .55rem;
+  padding: .4rem .7rem;
+  border: 1px solid #b8ccd9;
+  border-radius: 8px;
+  color: #173f73;
+  background: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+#periodField .period-clear:disabled {
+  color: #647487;
+  cursor: default;
+}
+.period-checkmark {
+  display: none;
+  position: absolute;
+  inset-block-start: .1rem;
+  inset-inline-end: .25rem;
+  font-size: .75rem;
+  font-style: normal;
+}
+.get-exercise .check-pills input:checked + span .period-checkmark {
+  display: block;
 }
 .get-exercise .check-pills input:focus-visible + span {
   outline: 2px solid #245c9b;

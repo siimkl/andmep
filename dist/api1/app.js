@@ -19,19 +19,19 @@
   const indicatorSelect = $("#indicatorSelect");
   const activitySelect = $("#activitySelect");
   const periodField = $("#periodField");
+  const clearPeriods = $("#clearPeriods");
   const nextSelectionTask = $("#nextSelectionTask");
   const quizSection = $("#quizSection");
   const quizOptions = $("#quizOptions");
   const quizFeedback = $("#quizFeedback");
   const quizNext = $("#quizNext");
 
-  const defaultPeriods = new Set(["2024Q2", "2025Q2", "2026Q2"]);
   const selectionTasks = [
     {
-      prompt: "Vali kõigi tegevusalade keskmine brutokuupalk 2026. aasta II kvartalis.",
+      prompt: "Kontrolli, et algvalik sisaldab kõigi tegevusalade keskmist brutokuupalka 2024., 2025. ja 2026. aasta II kvartalis.",
       indicator: "GR_W_AVG",
       activity: "TOTAL",
-      periods: ["2026Q2"]
+      periods: ["2024Q2", "2025Q2", "2026Q2"]
     },
     {
       prompt: "Vali hariduse tegevusala brutokuupalga mediaan 2025. ja 2026. aasta II kvartalis.",
@@ -67,6 +67,8 @@
     }
   ];
 
+  const listFormat = new Intl.ListFormat("et");
+  const quarters = ["I", "II", "III", "IV"];
   const stepTitles = ["1. GET-päring", "2. Andmevalik", "3. Lühitest"];
   let savedMetadata;
   let response = null;
@@ -185,22 +187,22 @@
     return $$("#periodOptions input:checked").map(input => input.value);
   }
 
-  function fillSelect(select, variable, keepSelection) {
-    const previous = keepSelection ? select.value : variable.values[0];
+  function fillSelect(select, variable, code) {
     const options = variable.values.map((value, index) => {
       return new Option(variable.valueTexts[index] + " · " + value, value);
     });
     select.replaceChildren(...options);
-    if (variable.values.includes(previous)) select.value = previous;
+    if (variable.values.includes(code)) select.value = code;
   }
 
   function renderSelectionChoices(keepSelection) {
     const [indicator, activity, period] = ["Näitaja", "Tegevusala", "Vaatlusperiood"].map(code =>
       response.body.variables.find(variable => variable.code === code)
     );
-    const checkedPeriods = keepSelection ? new Set(selectedPeriods()) : defaultPeriods;
-    fillSelect(indicatorSelect, indicator, keepSelection);
-    fillSelect(activitySelect, activity, keepSelection);
+    const initial = selectionTasks[0];
+    const checkedPeriods = new Set(keepSelection ? selectedPeriods() : initial.periods);
+    fillSelect(indicatorSelect, indicator, keepSelection ? indicatorSelect.value : initial.indicator);
+    fillSelect(activitySelect, activity, keepSelection ? activitySelect.value : initial.activity);
 
     const years = new Map();
     period.values.forEach((code, index) => {
@@ -226,6 +228,11 @@
         const text = document.createElement("span");
         text.className = "period-label";
         text.textContent = name.replace(year + " ", "").replace("kvartal", "kv");
+        const mark = document.createElement("i");
+        mark.className = "period-checkmark";
+        mark.setAttribute("aria-hidden", "true");
+        mark.textContent = "✓";
+        text.append(mark);
         label.append(input, text);
         grid.append(label);
       });
@@ -242,6 +249,7 @@
   function updateSelectionSummary() {
     const periods = selectedPeriods();
     const count = periods.length;
+    clearPeriods.disabled = count === 0;
     $("#selectedIndicatorCode").textContent = indicatorSelect.value;
     $("#selectedActivityCode").textContent = activitySelect.value;
     $("#selectedPeriodCodes").textContent = count ? periods.join(", ") : "Valik puudub";
@@ -266,24 +274,35 @@
     $("#selectionTaskPrompt").textContent = task.prompt;
   }
 
+  function describePeriods(codes) {
+    return listFormat.format(codes.map(code => (
+      code.slice(0, 4) + ". aasta " + quarters[Number(code.at(-1)) - 1] + " kvartal"
+    )));
+  }
+
   function checkSelection(event) {
     event.preventDefault();
     const task = selectionTasks[selectionTaskIndex];
     if (!response || !task) return;
     const periods = selectedPeriods();
+    const missingPeriods = task.periods.filter(code => !periods.includes(code));
+    const extraPeriods = periods.filter(code => !task.periods.includes(code));
+    periodField.setAttribute("aria-invalid", String(Boolean(missingPeriods.length || extraPeriods.length)));
     const checks = [
       { field: indicatorSelect, label: "näitajat", correct: indicatorSelect.value === task.indicator },
-      { field: activitySelect, label: "tegevusala", correct: activitySelect.value === task.activity },
-      { field: periodField, label: "vaatlusperioode",
-        correct: periods.length === task.periods.length && task.periods.every(code => periods.includes(code)) }
+      { field: activitySelect, label: "tegevusala", correct: activitySelect.value === task.activity }
     ];
     checks.forEach(({ field, correct }) => field.setAttribute("aria-invalid", String(!correct)));
-    const mismatches = checks.filter(check => !check.correct);
+
+    const hints = [];
+    const fields = checks.filter(check => !check.correct).map(check => check.label);
+    if (fields.length) hints.push("Kontrolli uuesti " + listFormat.format(fields) + ".");
+    if (missingPeriods.length) hints.push("Lisa " + describePeriods(missingPeriods) + ".");
+    if (extraPeriods.length) hints.push("Eemalda " + describePeriods(extraPeriods) + ".");
     readingFeedback.hidden = false;
-    if (mismatches.length) {
+    if (hints.length) {
       readingFeedback.className = "feedback error";
-      const fields = new Intl.ListFormat("et").format(mismatches.map(check => check.label));
-      readingFeedback.textContent = "Kontrolli uuesti " + fields + ".";
+      readingFeedback.textContent = hints.join(" ");
       nextSelectionTask.hidden = true;
       return;
     }
@@ -394,6 +413,11 @@
   responsePart.addEventListener("change", renderJson);
   readingForm.addEventListener("submit", checkSelection);
   readingForm.addEventListener("change", () => {
+    updateSelectionSummary();
+    clearSelectionFeedback();
+  });
+  clearPeriods.addEventListener("click", () => {
+    $$("#periodOptions input:checked").forEach(input => { input.checked = false; });
     updateSelectionSummary();
     clearSelectionFeedback();
   });
