@@ -65,11 +65,6 @@ const fieldNames = {
 const requiredLabelCount = Object.keys(labelNames).length;
 const requiredFieldCount = Object.keys(fieldNames).length;
 
-const ruleNames = {
-  activity: "kasuta iseteeninduse aktiivsust toevajaduse hinnanguna",
-  current: "lähtu märgendusjuhisest"
-};
-
 function requiredFieldsForRule() {
   if (state.labelRule === "activity") return ["activity"];
   return ["notes", "barriers"];
@@ -102,10 +97,10 @@ function caseDataHtml(item) {
 }
 
 const stageCopy = {
-  1: { title: "Vali andmed ja määra nõuded", story: "<b>Andmete valik eelneb märgendamisele.</b> Valitud väljad ja juhis määravad, mida märgendaja saab põhjendatult otsustada ning mida mudel hiljem õppida saab." },
-  2: { title: "Märgenda tööotsijate kirjed", story: "<b>Iga märgendatud registrikirje lisatakse mudeli treeningandmetesse.</b> Hästi põhjendatud märgend tugineb nähtavale infole ja ühtsele juhisele. Kui kindlat soovitust ei saa teha, peab ebakindlus jääma nähtavaks." },
-  3: { title: "Hinda mudeli väljundeid" },
-  4: { title: "Paranda mudeli arendusprotsessi", story: "<b>Mudeli väljundite hindamine loob parandussisendi.</b> Korduv viga peab jõudma tagasi märgendusjuhisesse, treeningandmetesse, hindamiskriteeriumidesse või mudeli järgmisse versiooni." }
+  1: "Andmed ja märgendusjuhis",
+  2: "Treeningkirjete märgendamine",
+  3: "Soovituste hindamine",
+  4: "Paranduskava koostamine"
 };
 
 const state = {
@@ -277,20 +272,17 @@ function calculateLabelMetrics() {
   const counts = Object.fromEntries(Object.keys(labelNames).map(key => [key, state.labels.filter(value => value === key).length]));
   return {
     ...counts,
-    humanActions: state.reviews.filter(value => value === "human" || value === "correct").length,
-    categories: new Set(state.labels).size,
     aligned: state.labels.filter((value, index) => value === idealLabel(labelCases[index])).length
   };
 }
 
 function labelPatternRows() {
-  return state.labels.map((choice, index) => ({ choice, index })).slice(-5).map(({ choice, index }) => {
+  return state.labels.map((choice, index) => {
     const item = labelCases[index];
     const ideal = idealLabel(item);
     const aligned = choice === ideal;
-    const unavailable = !state.availableLabels.has(ideal);
-    const note = aligned ? "" : unavailable ? ` — vajalik märgend „${labelNames[ideal]}” puudub juhisest` : ` — juhendi järgi sobiks „${labelNames[ideal]}”`;
-    return `<article class="learned-pattern ${aligned ? "good" : "warn"}"><span>${String(index + 1).padStart(2, "0")}</span><div><b>${item.pattern}</b><small>seostub sinu treeningandmetes märgendiga „${labelNames[choice]}”${note}</small></div></article>`;
+    const note = aligned ? "" : `<small>Juhise järgi sobiks „${labelNames[ideal]}”.</small>`;
+    return `<article class="learned-pattern ${aligned ? "good" : "warn"}"><span>${item.id}</span><div><b>${labelNames[choice]}</b><small>${item.pattern}</small>${note}</div></article>`;
   });
 }
 
@@ -298,46 +290,12 @@ function updateImpact() {
   const metrics = calculateLabelMetrics();
   const total = state.labels.length;
   $("#impactNextStep").hidden = !(state.currentStage === 2 && state.completed.has(2));
-  if (state.currentStage === 4) {
-    $("#impactKicker").textContent = "MUDELI EDASIARENDUS";
-    $("#impactTitle").textContent = "Kuidas jõuavad parandused järgmisse versiooni?";
-    $("#impactStatusLabel").textContent = "HINDAMISTULEMUS";
-    $("#impactStatus").textContent = `${state.reviews.length} / ${outputCases.length} kvaliteedimärget`;
-  } else {
-    $("#impactKicker").textContent = "MÄRGENDUSE MÕJU";
-    $("#impactTitle").textContent = "Mida mudel sinu märgenditest õpib?";
-    $("#impactStatusLabel").textContent = "TREENINGKIRJEID";
-    $("#impactStatus").textContent = `${total} / ${labelCases.length} märgendatud`;
-  }
   Object.keys(labelNames).forEach(key => {
-    const available = state.availableLabels.has(key);
-    $(`[data-label-bar="${key}"]`).hidden = !available;
     $(`#${key}LabelCount`).textContent = metrics[key];
-    $(`[data-label-bar="${key}"] i span`).style.width = `${(metrics[key] / labelCases.length) * 100}%`;
   });
   $("#labeledFact").textContent = `${total} / ${labelCases.length}`;
   $("#categoryFact").textContent = `${metrics.aligned} / ${total}`;
-  $("#ambiguityFact").textContent = metrics.review + metrics.supplement;
-
-  let distributionText = state.completed.has(1)
-    ? `Märgendaja näeb ${state.sources.size} andmevälja, saab kasutada ${state.availableLabels.size} märgendit ja järgib reeglit „${ruleNames[state.labelRule]}”. Treeningandmetesse pole veel ühtegi registrikirjet lisatud.`
-    : "Esmalt vali, millised andmeväljad ja milline juhis märgendajale antakse.";
-  if (total && total < labelCases.length) distributionText = `Märgendasid ${total}/${labelCases.length} registrikirjet. Neist ${metrics.aligned} vastab harjutuse juhendile. Iga uus märgend muudab mustrit, mida mudel kogu registrile rakendab.`;
-  if (total === labelCases.length) {
-    const dominant = Object.entries(labelNames).map(([key, label]) => [key, label, metrics[key]]).sort((a, b) => b[2] - a[2])[0];
-    distributionText = dominant[2] >= 3
-      ? `Märgend „${dominant[1]}” esineb ${dominant[2]}/${labelCases.length} näites. Seetõttu kipub mudel seda sarnastes olukordades sagedamini soovitama. Juhendile vastas ${metrics.aligned}/${labelCases.length} märgendit.`
-      : metrics.aligned === labelCases.length
-        ? `Andmestikus on ${metrics.categories} erinevat märgendit. Kõik ${labelCases.length} märgendit vastavad juhendile ja moodustavad järjepidevad treeningnäited.`
-        : `Andmestikus on ${metrics.categories} erinevat märgendit. Juhendile vastab ${metrics.aligned}/${labelCases.length} märgendit. Mudel kasutab treeningul ka juhisega vastuolus olevaid näiteid.`;
-  }
-  $("#distributionSummary").textContent = distributionText;
-
-  const patterns = labelPatternRows();
-  $("#learnedPatterns").innerHTML = patterns.length
-    ? `${patterns.join("")}<article class="learned-pattern warn"><span>!</span><div><b>Seos ei tõesta põhjust</b><small>Mudel näeb koos esinevaid tunnuseid ja märgendeid, mitte inimese tegelikku vajadust.</small></div></article>`
-    : '<div class="empty-pattern">Märgenda esimene registrikirje. Siin näed, millise seose loob mudel registritunnuste ja sinu valitud märgendi vahel.</div>';
-
+  $("#learnedPatterns").innerHTML = labelPatternRows().join("");
 }
 
 function invalidateFrom(stage) {
@@ -369,39 +327,13 @@ function stageValid(stage) {
 
 function updateStage1Feedback() {
   const feedback = $("#stage1Feedback");
-  const labelsLeft = requiredLabelCount - state.availableLabels.size;
-  const fieldsLeft = requiredFieldCount - state.sources.size;
-  if (labelsLeft > 0) {
-    feedback.className = "decision-feedback";
-    feedback.textContent = `Vali veel ${labelsLeft} ${labelsLeft === 1 ? "märgend" : "märgendit"}. Harjutuses on vaja kõiki viit märgendit.`;
-  } else if (fieldsLeft > 0) {
-    feedback.className = "decision-feedback";
-    feedback.textContent = `Vali veel ${fieldsLeft} ${fieldsLeft === 1 ? "andmeväli" : "andmevälja"}. Märgendaja peab harjutuses nägema kõiki viit välja.`;
-  } else if (!state.labelRule) {
-    feedback.className = "decision-feedback warn";
-    feedback.textContent = "Andmeväljad on valitud. Vali märgendusjuhisest lähtuv reegel.";
-  } else if (state.labelRule !== "current") {
-    feedback.className = "decision-feedback warn";
-    feedback.textContent = "Lähtu märgendusjuhisest, et sarnaseid juhtumeid ühtmoodi märgendada.";
-  } else if (!state.missingPolicy || !state.disagreement || !state.audit) {
-    feedback.className = "decision-feedback warn";
-    feedback.textContent = "Vali veel, kuidas käsitleda puuduvat infot ja märgendajate eriarvamusi ning kuidas märgendusvalimit kontrollida.";
-  } else if (state.missingPolicy !== "drop") {
-    feedback.className = "decision-feedback warn";
-    feedback.textContent = "Puuduliku registriinfo põhjal ei saa anda kindlat toevajaduse soovitust. Saada kirje andmeomanikule täiendamiseks.";
-  } else if (state.disagreement !== "expert") {
-    feedback.className = "decision-feedback warn";
-    feedback.textContent = "Märgendajate eriarvamus tuleb lahendada põhjendatud eksperdiotsusega ja juhise ebaselgus dokumenteerida.";
-  } else if (state.audit !== "coverage") {
-    feedback.className = "decision-feedback warn";
-    feedback.textContent = state.audit === "overall"
-      ? "Treeningkirjete koguarv ei näita, kas mõni registri piirkond, keelerühm või teeninduskanal on valimist puudu."
-      : "Täidetud lahtrid ei näita, kas valim katab erinevaid piirkondi, keeli ja teeninduskanaleid. Kontrolli korraga nii katvust kui ka puuduvaid väärtusi.";
-  } else {
-    feedback.className = "decision-feedback good";
-    feedback.textContent = "Kõik märgendid ja andmeväljad on valitud. Juhis on kinnitamiseks valmis.";
-  }
-  $('[data-complete="1"]').disabled = !stageValid(1);
+  const ready = stageValid(1);
+  const answered = state.availableLabels.size === requiredLabelCount && state.sources.size === requiredFieldCount
+    && state.labelRule && state.missingPolicy && state.disagreement && state.audit;
+  feedback.hidden = !answered;
+  feedback.className = ready ? "decision-feedback good" : "decision-feedback warn";
+  feedback.textContent = ready ? "Juhis on kinnitamiseks valmis." : "Vähemalt üks juhise valik vajab täpsustamist.";
+  $('[data-complete="1"]').disabled = !ready;
 }
 
 function renderLabelCase() {
@@ -409,7 +341,8 @@ function renderLabelCase() {
   const actions = $("#labelActions");
   const explanation = $("#labelExplanation");
   $("#labelProgress").textContent = `${state.labels.length} / ${labelCases.length} märgendatud`;
-  $("#stage2Feedback").hidden = Boolean(state.pendingLabel);
+  const feedback = $("#stage2Feedback");
+  feedback.hidden = true;
   if (state.pendingLabel) {
     const { index, choice } = state.pendingLabel;
     const item = labelCases[index];
@@ -435,11 +368,13 @@ function renderLabelCase() {
       $("#labelExplanationTitle").textContent = `Õige vastus: „${labelNames[ideal]}”`;
       $("#labelExplanationText").textContent = `Sinu valik: „${labelNames[choice]}”. ${labelReason(item)} Jätkamisel lisatakse vale märgend treeningandmetesse.`;
     }
-    $("#nextLabelCase").textContent = state.labels.length === labelCases.length ? "Vaata märgenduse kokkuvõtet" : "Jätka järgmise märgendiga";
+    $("#nextLabelCase").textContent = state.labels.length === labelCases.length ? "Lõpeta märgendamine" : "Järgmine treeningkirje";
   } else if (state.labels.length === labelCases.length) {
-    const counts = Object.keys(labelNames).map(key => `${labelNames[key]}: ${state.labels.filter(value => value === key).length}`).join(" · ");
     const aligned = calculateLabelMetrics().aligned;
-    container.innerHTML = `<div class="case-top"><span>MÄRGENDUS VALMIS</span><b>${labelCases.length} registrikirjet</b></div><h4>${aligned}/${labelCases.length} märgendit vastas kinnitatud juhendile</h4><p>${counts}</p><div class="case-meta"><button class="inline-reset" type="button" data-relabel>Märgenda kirjed uuesti</button></div>`;
+    container.innerHTML = `<h4>Märgendus on kinnitamiseks valmis</h4><div class="case-meta"><button class="inline-reset" type="button" data-relabel>Märgenda kirjed uuesti</button></div>`;
+    feedback.hidden = state.completed.has(2) || aligned === labelCases.length;
+    feedback.className = "decision-feedback warn";
+    feedback.textContent = "Osa märgendeid erineb juhisest. Kinnitamisel salvestatakse sinu valitud märgendid.";
     actions.hidden = true;
     explanation.hidden = true;
     $$("#labelActions button").forEach(button => { button.disabled = true; button.classList.remove("selected"); });
@@ -465,8 +400,8 @@ function expectedReview(item, suggestion = simulatedSuggestion(item)) {
 function outputCaseHtml(item, index, suggestion) {
   return `<div class="case-top"><span>${item.id} · ${index + 1}/${outputCases.length}</span><b>KONTROLLKIRJE</b></div>
     <h4>${item.title}</h4><p>${item.text}</p>
-    <div class="output-recommendation"><span>MUDELI SOOVITUS</span><strong>${labelNames[suggestion]}</strong>
-      <div class="confidence-ring"><small>MUDELI KINDLUS</small><b>${item.confidence}%</b></div>
+    <div class="output-recommendation"><span>NÄIDISSOOVITUS</span><strong>${labelNames[suggestion]}</strong>
+      <div class="confidence-ring"><small>NÄITLIK KINDLUS</small><b>${item.confidence}%</b></div>
     </div>`;
 }
 
@@ -474,7 +409,7 @@ function renderOutputCase() {
   const container = $("#outputCase");
   const actions = $("#reviewActions");
   const explanation = $("#reviewExplanation");
-  $("#reviewProgress").textContent = `${state.reviews.length} / ${outputCases.length} kvaliteedimärget`;
+  $("#reviewProgress").textContent = `${state.reviews.length} / ${outputCases.length} hinnatud`;
   if (state.pendingReview) {
     const { index, choice } = state.pendingReview;
     const item = outputCases[index];
@@ -489,9 +424,11 @@ function renderOutputCase() {
     $("#reviewExplanationStatus").textContent = matches ? "HINNANG SOBIB" : "VAATA HINNANG ÜLE";
     $("#reviewExplanationTitle").textContent = matches ? reviewNames[expected] : `Vali hinnanguks „${reviewNames[expected]}”`;
     $("#reviewExplanationText").textContent = item.reason;
+    const training = labelCases[item.trainingIndex];
+    $("#reviewOrigin").textContent = `Näidissoovitus põhineb treeningkirjele ${training.id} määratud märgendil „${labelNames[suggestion]}”.`;
     $("#reviewReference").hidden = expected !== "correct";
     $("#reviewReferenceLabel").textContent = expected === "correct" ? labelNames[item.referenceLabel] : "";
-    $("#nextReviewCase").textContent = state.reviews.length === outputCases.length ? "Jätka kinnitamisega" : "Jätka järgmise väljundiga";
+    $("#nextReviewCase").textContent = state.reviews.length === outputCases.length ? "Vaata hinnangute kokkuvõtet" : "Järgmine kontrollkirje";
   } else if (state.reviews.length === outputCases.length) {
     const summary = Object.keys(reviewNames).map(key => `${reviewNames[key]}: ${state.reviews.filter(value => value === key).length}`).join(" · ");
     const aligned = outputCases.filter((item, index) => state.reviews[index] === expectedReview(item)).length;
@@ -513,22 +450,17 @@ function renderOutputCase() {
 }
 
 function updateStage4() {
-  const unassigned = Object.values(state.ownership).filter(value => !value).length;
-  const button = $('[data-complete="4"]');
-  button.disabled = !stageValid(4);
+  const ready = stageValid(4);
+  $('[data-complete="4"]').disabled = !ready;
   const feedback = $("#stage4Feedback");
-  if (unassigned) {
-    feedback.className = "decision-feedback";
-    feedback.textContent = `Määra veel ${unassigned} vastutusala. Valik „amet ja arenduspartner ühiselt” eeldab ka kirjalikku rollijaotust.`;
-  } else if (!state.cadence || !state.appeal || state.assets.size < 2) {
-    feedback.className = "decision-feedback warn";
-    feedback.textContent = "Vastutajad on määratud. Vali veel ülevaatamise sagedus, vaidlustamise kord ja vähemalt kaks materjali, mis jäävad ametile.";
-  } else {
-    const vendorCount = Object.values(state.ownership).filter(value => value === "vendor" || value === "none").length;
-    const weakAppeal = state.appeal !== "owned";
-    feedback.className = vendorCount || weakAppeal ? "decision-feedback warn" : "decision-feedback good";
-    feedback.textContent = vendorCount ? "Valikud on tehtud, kuid vähemalt üks oluline teadmine jääb ainult arenduspartneri kätte või vastutajata." : weakAppeal ? "Valikud on tehtud, kuid vaidlustamise kord ei seo vigu selgelt ameti seire- ja parandustööga." : "Valikud on tehtud. Vastutus, vaidlustamise kord ja töö jätkamiseks vajalikud teadmised moodustavad terviku.";
-  }
+  feedback.hidden = !ready;
+  if (!ready) return;
+  const externalOrUnassigned = Object.values(state.ownership).some(value => value === "vendor" || value === "none");
+  const weakAppeal = state.appeal !== "owned";
+  feedback.className = externalOrUnassigned || weakAppeal ? "decision-feedback warn" : "decision-feedback good";
+  feedback.textContent = externalOrUnassigned ? "Vähemalt üks ülesanne jääb ainult arenduspartnerile või vastutajata."
+    : weakAppeal ? "Valitud vaidlustamise kord jätab lahtiseks, kuidas amet vea parandamist jälgib."
+      : "Paranduskava on kinnitamiseks valmis.";
 }
 
 function updateRuleAvailability() {
@@ -649,16 +581,6 @@ function updateAvailableLabelUI() {
   });
 }
 
-function updateLabelingBrief() {
-  const brief = $("#labelingBrief");
-  if (!brief) return;
-  const fields = selectedFieldNames();
-  const labels = Object.keys(labelNames).filter(key => state.availableLabels.has(key)).map(key => labelNames[key]);
-  brief.innerHTML = fields.length
-    ? `<span>EELMISES ETAPIS KINNITATUD LÄHTEÜLESANNE / MÄRGENDUSJUHIS</span><p><b>Lubatud märgendid:</b> ${labels.join(", ") || "määramata"}. <b>Nähtavad väljad:</b> ${fields.join(", ")}. <b>Reegel:</b> ${ruleNames[state.labelRule] || "määramata"}. <b>Puuduv info:</b> registrikirje märgendatakse andmete täiendamiseks ja saadetakse andmeomanikule. Märgendaja tohib kasutada ainult kirjel kuvatud infot.</p>`
-    : "";
-}
-
 function updateControls() {
   updateRuleAvailability();
   updateAvailableLabelUI();
@@ -671,15 +593,7 @@ function updateControls() {
   state.appeal = $("#appealPolicy").value;
   updateAuditAvailability();
   updateProcedureAvailability();
-  updateLabelingBrief();
   updateStage1Feedback();
-  $("#stage2Feedback").className = stageValid(2) ? "decision-feedback good" : "decision-feedback";
-  if (stageValid(2)) {
-    const aligned = calculateLabelMetrics().aligned;
-    $("#stage2Feedback").textContent = aligned === labelCases.length
-      ? `Kõik ${labelCases.length} märgendit vastavad kinnitatud juhendile. Need moodustavad mudelile järjepidevad treeningnäited.`
-      : `${aligned}/${labelCases.length} märgendit vastab kinnitatud juhendile. Mudel kasutab treeningul kõiki viit näidet, sealhulgas juhisega vastuolus olevaid märgendeid.`;
-  }
   const policyFeedback = reviewPolicyFeedback[state.intervention];
   const stage3Feedback = $("#stage3Feedback");
   stage3Feedback.hidden = !policyFeedback;
@@ -703,79 +617,19 @@ function updateFocusState() {
   confirmReview.disabled = reviewConfirmed || !stageValid(3);
   confirmReview.querySelector("span").textContent = reviewConfirmed ? "Kvaliteedihinnangud kinnitatud" : "Kinnita kvaliteedihinnangud";
 
-  const impactLocked = !labelingConfirmed;
-  const impactCard = $("#impactCard");
   const stageDone = state.completed.has(state.currentStage);
-  const impactVisible = stageDone && (state.currentStage === 2 || state.currentStage === 4);
-  impactCard.hidden = !impactVisible;
-  $(".lab-grid").classList.toggle("impact-pending", !impactVisible);
-  impactCard.classList.toggle("is-muted", impactLocked);
-  impactCard.classList.toggle("is-labeling-locked", impactLocked);
-  impactCard.setAttribute("aria-disabled", String(impactLocked));
-  const impactLockedNotice = $("#impactLockedNotice");
-  impactLockedNotice.hidden = !impactLocked;
-  if (impactLocked) {
-    const labelingStarted = state.completed.has(1);
-    impactLockedNotice.querySelector("span").textContent = labelingStarted
-      ? "MÕJUVADE AVANEB PÄRAST MÄRGENDUSE KINNITAMIST"
-      : "MÕJUVADE POLE VEEL AVATUD";
-    impactLockedNotice.querySelector("p").textContent = labelingStarted
-      ? `Märgendasid ${state.labels.length}/${labelCases.length} registrikirjet. Mõjuvaade avaneb alles pärast seda, kui kõik viis kirjet on märgendatud ja vajutad „Kinnita märgendus”.`
-      : "Kinnita esmalt andmed ja märgendusjuhis. Seejärel märgenda viis tööotsija registrikirjet.";
-  }
+  const summaryActive = state.currentStage === 2 && labelingConfirmed;
+  $("#impactCard").hidden = !summaryActive;
+  $(".lab-grid").classList.toggle("impact-pending", !summaryActive);
 
   const controlCard = $(".control-card");
-  const summaryActive = impactVisible && state.currentStage === 2;
   controlCard.inert = summaryActive;
   controlCard.classList.toggle("summary-inactive", summaryActive);
   controlCard.classList.toggle("focus-active", !stageDone);
-  $("#activeTaskCue").hidden = stageDone;
-  if (stageDone) return;
 
-  let title = "Tee järgmine valik";
-  let detail = "Jätka selles paneelis. Siin on kõik selle etapi valikud.";
-  if (state.currentStage === 1) {
-    if (state.availableLabels.size < requiredLabelCount) {
-      title = `Vali kõik ${requiredLabelCount} märgendit`;
-      detail = "Märgendid määravad, milliseid soovitusi saab mudel hiljem eristada.";
-    } else if (state.sources.size < requiredFieldCount) {
-      title = `Vali kõik ${requiredFieldCount} andmevälja`;
-      detail = "Need väljad kuvatakse igal märgendataval kirjel.";
-    } else if (state.labelRule !== "current") title = "Vali märgendusjuhisest lähtuv reegel";
-    else if (!state.missingPolicy || state.missingPolicy !== "drop") title = "Vali puuduliku info korral andmete täiendamine";
-    else if (!state.disagreement || state.disagreement !== "expert") title = "Vali eriarvamuse lahendamiseks põhjendatud eksperdiotsus";
-    else if (!state.audit) title = "Vali märgendusvalimi kontroll";
-    else if (state.audit !== "coverage") title = "Vali kontroll, mis näitab valimi katvust ja puuduvaid andmeid";
-    else title = "Kinnita andmed ja märgendusjuhis";
-    if (state.availableLabels.size === requiredLabelCount && state.sources.size === requiredFieldCount) {
-      detail = "Mõjuvaade avaneb pärast viie registrikirje märgendamist ja märgenduse kinnitamist.";
-    }
-  } else if (state.currentStage === 2) {
-    if (state.pendingLabel) title = "Vaata tagasisidet ja jätka järgmise märgendiga";
-    else if (state.labels.length === labelCases.length) title = "Kinnita viie registrikirje märgendus";
-    else title = `Märgenda registrikirje ${state.labels.length + 1}/${labelCases.length}`;
-    detail = state.labels.length === labelCases.length && !state.pendingLabel
-      ? "Kõik viis registrikirjet on märgendatud. Vajuta „Kinnita märgendus”, et avada mõjuvaade."
-      : "Kasuta ainult kirjel nähtavat registriinfot ja kinnitatud juhist. Mõjuvaade avaneb pärast märgenduse kinnitamist.";
-  } else if (state.currentStage === 3) {
-    if (state.pendingReview) title = state.reviews.length === outputCases.length
-      ? "Vaata tagasisidet ja jätka kinnitamisega"
-      : "Vaata tagasisidet ja jätka järgmise väljundiga";
-    else if (!state.intervention) title = "Vali, kuidas amet mudeli kohta tagasisidet kogub";
-    else if (state.reviews.length === outputCases.length) title = "Kinnita neli kvaliteedihinnangut";
-    else title = `Lisa väljundile kvaliteedimärge ${state.reviews.length + 1}/${outputCases.length}`;
-    detail = stageValid(3)
-      ? "Vajuta „Kinnita kvaliteedihinnangud”, et liikuda paranduskava juurde."
-      : "Võrdle kuvatud soovitust kontrollkirje infoga. Sisu tuleb kontrollida ka siis, kui mudel on väga kindel.";
-  } else if (state.currentStage === 4) {
-    const unassigned = Object.values(state.ownership).filter(value => !value).length;
-    if (unassigned) title = `Määra veel ${unassigned} vastutusala`;
-    else if (!state.cadence || !state.appeal || state.assets.size < 2) title = "Lõpeta jälgimise ja parandamise valikud";
-    else title = "Koosta mudeli paranduskava";
-    detail = "Määra, kuidas hindamisel leitud vead jõuavad andmetesse, juhisesse ja mudeli järgmisse versiooni.";
-  }
-  $("#activeTaskCue b").textContent = title;
-  $("#activeTaskCue small").textContent = detail;
+  const taskCue = $("#activeTaskCue");
+  taskCue.hidden = state.currentStage !== 1 || stageDone;
+  taskCue.querySelector("b").textContent = `Märgendid ${state.availableLabels.size}/${requiredLabelCount} · andmeväljad ${state.sources.size}/${requiredFieldCount}`;
 }
 
 function updateNavigation() {
@@ -784,24 +638,30 @@ function updateNavigation() {
     button.disabled = stage > state.maxUnlocked;
     button.classList.toggle("active", stage === state.currentStage);
     button.classList.toggle("done", state.completed.has(stage));
-    button.toggleAttribute("aria-current", stage === state.currentStage);
+    if (stage === state.currentStage) button.setAttribute("aria-current", "step");
+    else button.removeAttribute("aria-current");
   });
   $$(".decision-stage").forEach(section => {
     const active = Number(section.dataset.stage) === state.currentStage;
     section.hidden = !active;
     section.classList.toggle("active", active);
   });
+  if (state.currentStage === 2 || state.currentStage === 3) {
+    const progress = $(`[data-stage="${state.currentStage}"] .case-progress`);
+    const guide = $("#labelGuide");
+    if (progress.previousElementSibling !== guide) {
+      progress.before(guide);
+      guide.open = state.currentStage === 2;
+    }
+  }
   $("#stageCounter").textContent = `ETAPP ${state.currentStage} / 4`;
-  $("#storyIndex").textContent = String(state.currentStage).padStart(2, "0");
-  $("#storyText").innerHTML = stageCopy[state.currentStage].story ?? "";
-  $("#progressText").textContent = state.completed.size === 4 ? "Mudeli paranduskava valmis" : stageCopy[state.currentStage].title;
+  $("#progressText").textContent = state.completed.size === 4 ? "Harjutus lõpetatud" : `${state.currentStage}. ${stageCopy[state.currentStage]}`;
   const progress = state.completed.size * 25;
   $("#progressValue").textContent = `${progress}%`;
   $("#progressBar").style.width = `${progress}%`;
   $("#completedCount").textContent = state.completed.size;
   $("#previousStage").disabled = state.currentStage === 1;
   $("#nextStage").disabled = state.currentStage >= state.maxUnlocked || state.currentStage === 4;
-  $("#lessonDots").innerHTML = [1,2,3,4].map(value => `<i class="${value === state.currentStage ? "active" : state.completed.has(value) ? "done" : ""}"></i>`).join("");
   updateFocusState();
 }
 
@@ -822,39 +682,42 @@ function focusImpactSummary() {
 
 const dialogMessages = {
   1: {
-    startLabel: "ANDMED JA JUHIS",
-    start: "Valisid andmeväljad ja märgendid ning kinnitasid juhise",
-    middleLabel: "MÄRGENDAMINE",
-    endLabel: "MUDELI ÕPPIMINE",
-    end: "Mudel õpib märgendatud kirjetest"
+    title: "Andmete ja juhise kokkuvõte",
+    startLabel: "ANDMEVÄLJAD",
+    start: "Märgendaja näeb iga kirje juures viit välja.",
+    middleLabel: "MÄRGENDID",
+    middle: "Valida saab viie märgendi vahel.",
+    endLabel: "JÄRGMINE ETAPP",
+    end: "Kinnitatud juhise järgi märgendatakse viis kirjet.",
+    continueText: "Märgendamise juurde"
   },
   2: {
-    startLabel: "MÄRGENDAMINE",
-    start: "Märgendasid viis registrikirjet",
+    title: "Märgendus kinnitatud",
+    startLabel: "TREENINGKIRJED",
+    start: "Valisid viiele kirjele märgendi.",
     middleLabel: "TREENINGANDMED",
-    middle: "Märgendatud kirjetest said treeningandmed",
-    endLabel: "MUDELI SOOVITUSED",
-    end: "Mudel rakendab õpitud seoseid kogu registrile",
-    continueText: "Vaata märgenduse mõju",
+    middle: "Kinnitamisel salvestati sinu valitud märgendid.",
+    endLabel: "KONTROLLKIRJED",
+    end: "Nende põhjal kuvatakse näidissoovitused.",
+    continueText: "Märgenduse kokkuvõtte juurde",
     sections: [
-      { title: "Millest mudel õpib?", text: "Mudel õpib kõigist treeningkirjetest, sealhulgas neist, mis said eksliku märgendi." },
-      { title: "Mõju järgmistele soovitustele", text: "See, kui järjepidevalt sa märgendeid kasutasid, mõjutab teistele tööotsijatele antavaid soovitusi." }
+      { title: "Märgendusvea mõju", text: "Kui treeningkirje sai juhisest erineva märgendi, ilmub see märgend ka seotud kontrollkirje soovitusena." }
     ]
   },
   4: {
+    title: "Paranduskava kinnitatud",
     startLabel: "VASTUTUS",
-    start: "Määrasid vastutajad ja parandamise korra",
+    start: "Valisid, kelle ülesanne on juhist ja andmeid hallata.",
     middleLabel: "PARANDUSKAVA",
-    middle: "Hindamisel leitud vead seoti juhise ja treeningandmetega",
-    endLabel: "JÄRGMINE MUDELIVERSIOON",
-    end: "Järgmist mudeliversiooni saab kontrollitult parandada",
-    continueText: "Vaata mudeli paranduskava",
+    middle: "Määrasid ülevaatamise sageduse ja vaidlustamise korra.",
+    endLabel: "KONTROLLMATERJALID",
+    end: "Valisid materjalid, mille alusel saab parandusi kontrollida.",
+    continueText: "Paranduskava juurde",
     sections: [
       {
-        title: "Mida tasub säilitada?",
-        items: ["Märgendusjuhise versioon", "Vaidlustatud näidete põhjendused", "Mudeli väljundite hindamistulemused", "Kontrollitud testkirjed"]
+        title: "Kuidas kontrollida parandust?",
+        text: "Hindamisel leitud vea põhjal saab koostada kontrollkirje. Sama kirje abil saab järgmises versioonis kontrollida, kas viga kordub."
       },
-      { title: "Kontroll järgmises versioonis", text: "Nende materjalide abil saad kontrollida, kas viga sai parandatud või kordub ka uues mudeliversioonis." }
     ]
   }
 };
@@ -899,7 +762,9 @@ function completeStage(stage) {
   if (stage === 3) {
     showStage(4, false);
     $("#stage4Title").focus({ preventScroll: true });
-    $(".control-card").scrollIntoView({ behavior: "smooth", block: "start" });
+    requestAnimationFrame(() => {
+      $(".control-card").scrollIntoView({ behavior: "instant", block: "start" });
+    });
     return;
   }
   updateNavigation();
@@ -909,17 +774,16 @@ function completeStage(stage) {
   if (stage === 1) {
     const fields = selectedFieldNames();
     const labels = Object.keys(labelNames).filter(key => state.availableLabels.has(key)).map(key => labelNames[key]);
-    message.middle = `Kirjeid märgendades saad kasutada ${labels.length} märgendit ja ${fields.length} andmevälja`;
     message.sections = [
       { title: "Valitud märgendid", items: labels },
       { title: "Märgendajale nähtavad väljad", items: fields },
       confirmedRuleSection($("#missingPolicy")),
       confirmedRuleSection($("#labelRule")),
       confirmedRuleSection($("#disagreementPolicy")),
-      confirmedRuleSection($("#representationAudit")),
-      { title: "Mida mudel saab õppida?", text: "Mudel õpib seoseid treeningkirjetes olevate andmeväljade ja märgendite põhjal." }
+      confirmedRuleSection($("#representationAudit"))
     ];
   }
+  $("#dialogTitle").textContent = message.title;
   $("#dialogStage").textContent = `${stage} / 4`;
   $("#dialogStartLabel").textContent = message.startLabel;
   $("#dialogStart").textContent = message.start;
@@ -928,7 +792,7 @@ function completeStage(stage) {
   $("#dialogEndLabel").textContent = message.endLabel;
   $("#dialogEnd").textContent = message.end;
   renderDialogInsight(message.sections);
-  $("#dialogContinue span").textContent = message.continueText ?? "Jätka järgmise etapiga";
+  $("#dialogContinue span").textContent = message.continueText;
   const dialog = $("#impactDialog");
   dialog.dataset.completedStage = stage;
   dialog.showModal();
@@ -941,14 +805,31 @@ function completeStage(stage) {
 
 function renderResults() {
   const metrics = calculateLabelMetrics();
-  const attentionCount = metrics.review + metrics.supplement;
+  const alignedReviews = outputCases.filter((item, index) => state.reviews[index] === expectedReview(item)).length;
   const tradeoffs = [
-    ["1", "Juhise järjepidevus", metrics.aligned === labelCases.length ? "Kasutasid kinnitatud juhist kõigi registrikirjete puhul järjepidevalt. See ei tõesta, et juhis ise on hea, kuid teeb andmestiku tähenduse kontrollitavaks." : `${labelCases.length - metrics.aligned} märgendit erines kinnitatud juhendist. Mudel ei oska neid eksimuseks pidada, vaid õpib neist samamoodi nagu teistest näidetest.`],
-    ["2", "Ebakindluse säilitamine", attentionCount ? `${metrics.supplement} registrikirjet vajab andmete täiendamist ja ${metrics.review} soovitust ametniku ülevaatust. Nii ei muutu puudulik või vastuoluline info põhjendamatult kindlaks väljundiks.` : "Kõik registrikirjed said kindla toe märgendi. See teeb andmestiku lihtsamaks, kuid peidab puuduliku ja vastuolulise info."],
-    ["3", "Märgendist soovituseni", "Mudel rakendab treeningandmetest õpitud seoseid uutele registrikirjetele. Seetõttu võib märgendusviga korduda paljudes soovitustes."],
-    ["4", "Parandus jõuab treeningandmetesse", state.appeal === "owned" ? "Vaidlustatud soovituse põhjus jõuab seirelogisse ning võib muuta juhist, testprofiile ja andmestiku järgmist versiooni." : "Üksik viga võib saada lahenduse, kuid selle põhjus ei pruugi järgmisse märgendusvooru jõuda."]
+    ["Märgenduse vastavus juhisele", `Kinnitatud juhisele vastas ${metrics.aligned} märgendit ${labelCases.length}-st.`],
+    ["Puudulik või vastuoluline info", `Sinu märgendite järgi suunati andmete täiendamisele ${metrics.supplement} kirjet ja inimese ülevaatusele ${metrics.review} kirjet.`],
+    ["Kontrollkirjete hinnangud", `Harjutuse kontrolliga kattus ${alignedReviews} hinnangut ${outputCases.length}-st.`],
+    ["Vaidlustusest paranduse kavandamiseni", state.appeal === "owned"
+      ? "Sinu valitud korras lisatakse parandus seirelogisse. Logi põhjal saab otsustada, mida juhises, treeningandmetes või kontrollkirjetes muuta."
+      : "Sinu valitud kord jätab lahtiseks, kuidas jõuab vaidlustuse põhjus ameti seirelogisse ja järgmisse märgendusvooru."]
   ];
-  $("#tradeoffList").innerHTML = tradeoffs.map(([index, heading, text]) => `<article><span>${index}</span><div><b>${heading}</b><p>${text}</p></div></article>`).join("");
+  $("#tradeoffList").innerHTML = tradeoffs.map(([heading, text]) => `<article><b>${heading}</b><p>${text}</p></article>`).join("");
+
+  const choices = $$("#ownershipGrid select, #maintenanceCadence, #appealPolicy").map(confirmedRuleSection);
+  choices.push({
+    title: "Säilitatavad materjalid",
+    text: $$("#exitAssets input:checked").map(input => input.closest("label").querySelector("b").textContent).join(", ")
+  });
+  $("#planSummary").replaceChildren(...choices.map(({ title, text }) => {
+    const row = document.createElement("div");
+    const term = document.createElement("dt");
+    const description = document.createElement("dd");
+    term.textContent = title;
+    description.textContent = text;
+    row.append(term, description);
+    return row;
+  }));
   $("#resultSection").hidden = false;
 }
 
@@ -1019,23 +900,13 @@ $("#labelActions").addEventListener("click", event => {
   invalidateFrom(2);
   const index = state.labels.length;
   const choice = button.dataset.label;
-  const item = labelCases[index];
-  const ideal = idealLabel(item);
-  const idealAvailable = state.availableLabels.has(ideal);
   state.labels.push(choice);
   state.pendingLabel = { index, choice };
-  const message = !idealAvailable
-    ? `Juhisest puudub vajalik märgend „${labelNames[ideal]}”.`
-    : choice === ideal
-      ? `Õige märgend: „${labelNames[ideal]}”.`
-      : `Vale märgend. Õige vastus: „${labelNames[ideal]}”; sinu valik: „${labelNames[choice]}”.`;
-  $("#stage2Feedback").textContent = message;
   updateControls();
 });
 
 $("#nextLabelCase").addEventListener("click", () => {
   state.pendingLabel = null;
-  if (state.labels.length < labelCases.length) $("#stage2Feedback").textContent = `Märgenda registrikirje ${state.labels.length + 1}/${labelCases.length}. Kasuta ainult kirjel nähtavat infot ja kinnitatud juhist.`;
   updateControls();
   $("#labelCase").scrollIntoView({ behavior: "smooth", block: "center" });
 });
@@ -1044,7 +915,6 @@ $("#undoLabelChoice").addEventListener("click", () => {
   if (!state.pendingLabel) return;
   state.labels.pop();
   state.pendingLabel = null;
-  $("#stage2Feedback").textContent = "Vali sellele registrikirjele uus märgend. Kasuta ainult kirjel nähtavat infot ja kinnitatud juhist.";
   updateControls();
 });
 

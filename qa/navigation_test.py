@@ -396,13 +396,13 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 state["modelExample"] = assert_api3_flow()
             elif route == "ai-andmetoo":
                 intro = evaluate("document.querySelector('.labeling-instruction-intro').textContent.replace(/\\s+/g,' ').trim()")
-                assert intro == "MIS ON MÄRGENDUSJUHIS? Märgendusjuhis on ühine reeglistik, mis selgitab, mida iga märgend tähendab ja millise nähtava info põhjal seda kasutada. Selge juhis aitab eri märgendajatel samasuguste registriandmetega tööotsijaid ühtemoodi hinnata ning loob mudelile järjepidevad treeningandmed.", intro
+                assert "Märgendusjuhis kirjeldab, mida iga märgend tähendab" in intro, intro
                 label_requirement = json.loads(evaluate("JSON.stringify({cue:activeTaskCue.querySelector('b').textContent,intro:document.querySelector('#availableLabelChoices .choice-intro').textContent})"))
-                assert label_requirement == {"cue": "Vali kõik 5 märgendit", "intro": "Vali kõik viis märgendit."}, label_requirement
-                assert evaluate("document.querySelector('#sourceChoices .choice-intro').textContent") == "Vali kõik viis andmevälja."
+                assert label_requirement == {"cue": "Märgendid 0/5 · andmeväljad 0/5", "intro": "Märgi kõik viis harjutuses kasutatavat märgendit."}, label_requirement
+                assert evaluate("document.querySelector('#sourceChoices .choice-intro').textContent") == "Märgi kõik viis välja, mida märgendaja kirje juures näeb."
                 evaluate("document.querySelector('#availableLabelChoices input[value=\"fast\"]').click(); document.querySelector('#availableLabelChoices input[value=\"standard\"]').click()")
-                two_labels = json.loads(evaluate("JSON.stringify({button:document.querySelector('[data-complete=\"1\"]').disabled,cue:activeTaskCue.querySelector('b').textContent,feedback:stage1Feedback.textContent})"))
-                assert two_labels["button"] and two_labels["cue"] == "Vali kõik 5 märgendit" and "Vali veel 3 märgendit" in two_labels["feedback"], two_labels
+                assert evaluate("document.querySelector('[data-complete=\"1\"]').disabled && stage1Feedback.hidden")
+                assert evaluate("activeTaskCue.querySelector('b').textContent") == "Märgendid 2/5 · andmeväljad 0/5"
                 choices = json.loads(evaluate("JSON.stringify({rules:[...labelRule.options].map(option=>option.textContent),audits:[...representationAudit.options].map(option=>option.textContent),missing:[...missingPolicy.options].map(option=>option.textContent),disagreement:[...disagreementPolicy.options].map(option=>option.textContent)})"))
                 assert choices["rules"] == [
                     "Vali üks reegel",
@@ -444,12 +444,11 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert "aktiivsuse hulk" in wrong["ruleHint"].lower() and "koguarv" in wrong["auditHint"].lower() and "teadmata" in wrong["missingHint"].lower() and "ei lahenda" in wrong["disagreementHint"].lower(), wrong
                 evaluate("labelRule.value='current'; labelRule.dispatchEvent(new Event('change',{bubbles:true})); representationAudit.value='coverage'; representationAudit.dispatchEvent(new Event('change',{bubbles:true})); missingPolicy.value='drop'; missingPolicy.dispatchEvent(new Event('change',{bubbles:true})); disagreementPolicy.value='expert'; disagreementPolicy.dispatchEvent(new Event('change',{bubbles:true}))")
                 assert evaluate("document.querySelector('[data-complete=\"1\"]').disabled")
-                assert evaluate("activeTaskCue.querySelector('b').textContent") == "Vali kõik 5 andmevälja"
-                assert "Vali veel 1 andmeväli" in evaluate("stage1Feedback.textContent")
+                assert evaluate("activeTaskCue.querySelector('b').textContent") == "Märgendid 5/5 · andmeväljad 4/5"
                 evaluate("document.querySelector('#sourceChoices input[value=\"freshness\"]').click()")
                 evaluate("document.querySelector('#availableLabelChoices input[value=\"self\"]').click()")
                 assert evaluate("document.querySelector('[data-complete=\"1\"]').disabled")
-                assert "Vali veel 1 märgend" in evaluate("stage1Feedback.textContent")
+                assert evaluate("activeTaskCue.querySelector('b').textContent") == "Märgendid 4/5 · andmeväljad 5/5"
                 evaluate("document.querySelector('#availableLabelChoices input[value=\"self\"]').click()")
                 correct = json.loads(evaluate("JSON.stringify({button:document.querySelector('[data-complete=\"1\"]').disabled,ruleInvalid:labelRule.getAttribute('aria-invalid'),auditInvalid:representationAudit.getAttribute('aria-invalid'),missingInvalid:missingPolicy.getAttribute('aria-invalid'),disagreementInvalid:disagreementPolicy.getAttribute('aria-invalid'),ruleGood:ruleAvailability.classList.contains('good'),auditGood:auditAvailability.classList.contains('good'),missingGood:missingPolicyFeedback.classList.contains('good'),disagreementGood:disagreementFeedback.classList.contains('good')})"))
                 assert correct == {"button": False, "ruleInvalid": "false", "auditInvalid": "false", "missingInvalid": "false", "disagreementInvalid": "false", "ruleGood": True, "auditGood": True, "missingGood": True, "disagreementGood": True}, correct
@@ -461,13 +460,12 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 stage1_captions = json.loads(evaluate("""JSON.stringify(
                     [...document.querySelectorAll('#impactDialog .flow-node small')].map(node => node.textContent)
                 )"""))
-                assert stage1_captions == ["ANDMED JA JUHIS", "MÄRGENDAMINE", "MUDELI ÕPPIMINE"], stage1_captions
-                assert evaluate("dialogMiddle.textContent") == "Kirjeid märgendades saad kasutada 5 märgendit ja 5 andmevälja"
+                assert stage1_captions == ["ANDMEVÄLJAD", "MÄRGENDID", "JÄRGMINE ETAPP"], stage1_captions
+                assert evaluate("dialogTitle.textContent") == "Andmete ja juhise kokkuvõte"
                 assert evaluate("[...dialogInsight.querySelectorAll('h3')].map(title => title.textContent)") == [
                     "Valitud märgendid", "Märgendajale nähtavad väljad",
                     "Kui soovituseks vajalik registriinfo puudub", "Mille põhjal määratakse uus märgend?",
                     "Kui kaks märgendajat sama kirje puhul ei nõustu", "Mida kontrollitakse enne märgendamise algust?",
-                    "Mida mudel saab õppida?",
                 ]
                 assert evaluate("[...dialogInsight.querySelectorAll('ul')].map(list => list.children.length)") == [5, 5]
                 assert "Andmete kontrollimise aeg" in evaluate("dialogInsight.textContent")
@@ -494,27 +492,25 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 command("Emulation.setDeviceMetricsOverride", {"width": 1440, "height": 1000, "deviceScaleFactor": 1, "mobile": False})
                 evaluate("dialogContinue.click()")
                 time.sleep(0.25)
-                five_case_start = json.loads(evaluate("JSON.stringify({total:labelCases.length,progress:labelProgress.textContent,step:document.querySelector('[data-step=\"2\"] small').textContent,caseId:document.querySelector('#labelCase .case-top span').textContent,caseTitle:document.querySelector('#labelCase h4').textContent,trainingIds:labelCases.map(item=>item.id),trainingTitles:labelCases.map(item=>item.title),outputIds:outputCases.map(item=>item.id),outputTitles:outputCases.map(item=>item.title),briefing:document.querySelector('.briefing-card').textContent})"))
-                assert evaluate("parseFloat(getComputedStyle(activeTaskCue.querySelector('small')).fontSize)") >= 16
+                five_case_start = json.loads(evaluate("JSON.stringify({total:labelCases.length,progress:labelProgress.textContent,step:document.querySelector('[data-step=\"2\"] b').textContent,caseId:document.querySelector('#labelCase .case-top span').textContent,caseTitle:document.querySelector('#labelCase h4').textContent,trainingIds:labelCases.map(item=>item.id),trainingTitles:labelCases.map(item=>item.title),outputIds:outputCases.map(item=>item.id),outputTitles:outputCases.map(item=>item.title),briefing:document.querySelector('.briefing-card').textContent})"))
+                assert evaluate("activeTaskCue.hidden && labelGuide.open && labelGuide.closest('[data-stage]').dataset.stage === '2'")
                 assert five_case_start["total"] == 5 and five_case_start["progress"] == "0 / 5 märgendatud", five_case_start
                 assert evaluate("document.querySelectorAll('#labelCase .case-data-grid > div').length") == 5
                 assert evaluate("labelCases.every(item => Object.keys(fieldNames).every(key => item.fields[key]))")
                 assert "Andmete kontrollimise aeg" in evaluate("labelCase.textContent")
-                assert five_case_start["step"] == "5 registrikirjet · valik, põhjendus ja parandus" and five_case_start["caseId"] == "T-101 · 1/5" and five_case_start["caseTitle"] == "Tööotsija T-101", five_case_start
+                assert five_case_start["step"] == "Treeningkirjete märgendamine" and five_case_start["caseId"] == "T-101 · 1/5" and five_case_start["caseTitle"] == "Tööotsija T-101", five_case_start
                 assert five_case_start["trainingIds"] == ["T-101", "T-102", "T-103", "T-104", "T-105"] and five_case_start["trainingTitles"] == ["Tööotsija T-101", "Tööotsija T-102", "Tööotsija T-103", "Tööotsija T-104", "Tööotsija T-105"], five_case_start
                 assert five_case_start["outputIds"] == ["T-201", "T-202", "T-203", "T-204"] and five_case_start["outputTitles"] == ["Tööotsija T-201", "Tööotsija T-202", "Tööotsija T-203", "Tööotsija T-204"], five_case_start
                 briefing = five_case_start["briefing"]
-                assert "igale registreeritud tööotsijale" in briefing, briefing
-                assert "Ametnik otsustab" in briefing and "kasutada tehisarumudeli soovitust" in briefing, briefing
-                assert "märgendad viis anonüümset tööotsija kirjet" in briefing and ".csv" not in briefing, briefing
-                assert "hindad mudeli väljundeid" in briefing and "mida järgmises mudeliversioonis parandada" in briefing, briefing
+                assert "Lõpliku otsuse teeb ametnik" in briefing, briefing
+                assert "viis treeningkirjet" in briefing and "nelja eraldi kontrollkirje" in briefing, briefing
+                assert "seob iga kontrollkirje ühe treeningkirjega" in briefing, briefing
                 assert not evaluate("Boolean(document.querySelector('.case-rule-hint'))"), "Kinnitatud reegli plokk on alles"
                 evaluate("document.querySelector('#labelActions button[data-label=\"supplement\"]').click()")
-                label_feedback = json.loads(evaluate("JSON.stringify({result:labelExplanation.dataset.result,status:labelExplanationStatus.textContent,title:labelExplanationTitle.textContent,text:labelExplanationText.textContent,summary:stage2Feedback.textContent,summaryHidden:stage2Feedback.hidden})"))
+                label_feedback = json.loads(evaluate("JSON.stringify({result:labelExplanation.dataset.result,status:labelExplanationStatus.textContent,title:labelExplanationTitle.textContent,text:labelExplanationText.textContent,summaryHidden:stage2Feedback.hidden})"))
                 assert label_feedback["result"] == "incorrect" and label_feedback["status"] == "VALE MÄRGEND", label_feedback
                 assert label_feedback["title"] == "Õige vastus: „Kiire tugi”", label_feedback
                 assert "Sinu valik: „Andmete täiendamine”." in label_feedback["text"] and "vale märgend treeningandmetesse" in label_feedback["text"], label_feedback
-                assert "Vale märgend." in label_feedback["summary"] and "Õige vastus: „Kiire tugi”" in label_feedback["summary"], label_feedback
                 assert label_feedback["summaryHidden"], label_feedback
                 evaluate("labelExplanation.scrollIntoView({block:'center'})")
                 time.sleep(0.25)
@@ -529,29 +525,31 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 })()""")
                 time.sleep(0.25)
                 before_summary = json.loads(evaluate("JSON.stringify({progress:labelProgress.textContent,nextText:nextLabelCase.textContent,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),centerDelta:Math.round(Math.abs((document.querySelector('.control-card').getBoundingClientRect().left+document.querySelector('.control-card').getBoundingClientRect().width/2)-innerWidth/2))})"))
-                assert before_summary["progress"] == "5 / 5 märgendatud" and before_summary["nextText"] == "Vaata märgenduse kokkuvõtet", before_summary
+                assert before_summary["progress"] == "5 / 5 märgendatud" and before_summary["nextText"] == "Lõpeta märgendamine", before_summary
                 assert before_summary["impactHidden"] and before_summary["pending"] and before_summary["centerDelta"] <= 10, before_summary
                 evaluate("nextLabelCase.click()")
                 time.sleep(0.25)
-                five_case_end = json.loads(evaluate("JSON.stringify({progress:labelProgress.textContent,summary:document.querySelector('#labelCase .case-top b').textContent,completeDisabled:document.querySelector('[data-complete=\"2\"]').disabled,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),fact:labeledFact.textContent,centerDelta:Math.round(Math.abs((document.querySelector('.control-card').getBoundingClientRect().left+document.querySelector('.control-card').getBoundingClientRect().width/2)-innerWidth/2)),cue:activeTaskCue.textContent})"))
-                assert five_case_end["progress"] == "5 / 5 märgendatud" and five_case_end["summary"] == "5 registrikirjet" and not five_case_end["completeDisabled"], five_case_end
-                assert five_case_end["impactHidden"] and five_case_end["pending"] and five_case_end["centerDelta"] <= 10 and "Kinnita märgendus" in five_case_end["cue"], five_case_end
+                five_case_end = json.loads(evaluate("JSON.stringify({progress:labelProgress.textContent,completeDisabled:document.querySelector('[data-complete=\"2\"]').disabled,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),centerDelta:Math.round(Math.abs((document.querySelector('.control-card').getBoundingClientRect().left+document.querySelector('.control-card').getBoundingClientRect().width/2)-innerWidth/2))})"))
+                assert five_case_end["progress"] == "5 / 5 märgendatud" and not five_case_end["completeDisabled"], five_case_end
+                assert five_case_end["impactHidden"] and five_case_end["pending"] and five_case_end["centerDelta"] <= 10, five_case_end
                 screenshot("ai-andmetoo-before-label-confirmation.png")
                 evaluate("document.querySelector('[data-complete=\"2\"]').click()")
                 time.sleep(0.25)
                 after_confirmation = json.loads(evaluate("JSON.stringify({impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),dialogOpen:impactDialog.open,dialogAction:dialogContinue.textContent.trim()})"))
-                assert after_confirmation == {"impactHidden": False, "pending": False, "dialogOpen": True, "dialogAction": "Vaata märgenduse mõju"}, after_confirmation
+                assert after_confirmation == {"impactHidden": False, "pending": False, "dialogOpen": True, "dialogAction": "Märgenduse kokkuvõtte juurde"}, after_confirmation
                 stage2_captions = json.loads(evaluate("""JSON.stringify(
                     [...document.querySelectorAll('#impactDialog .flow-node small')].map(node => node.textContent)
                 )"""))
-                assert stage2_captions == ["MÄRGENDAMINE", "TREENINGANDMED", "MUDELI SOOVITUSED"], stage2_captions
+                assert stage2_captions == ["TREENINGKIRJED", "TREENINGANDMED", "KONTROLLKIRJED"], stage2_captions
                 assert evaluate("[...dialogInsight.querySelectorAll('h3')].map(title => title.textContent)") == [
-                    "Millest mudel õpib?", "Mõju järgmistele soovitustele"
+                    "Märgendusvea mõju"
                 ]
                 evaluate("dialogContinue.click()")
                 time.sleep(0.25)
                 impact_transition = json.loads(evaluate("JSON.stringify({stage:state.currentStage,dialogOpen:impactDialog.open,impactHidden:impactCard.hidden,impactTitle:impactTitle.textContent,nextHidden:impactNextStep.hidden,nextText:continueFromImpact.textContent.trim(),focused:document.activeElement===impactCard})"))
-                assert impact_transition == {"stage": 2, "dialogOpen": False, "impactHidden": False, "impactTitle": "Mida mudel sinu märgenditest õpib?", "nextHidden": False, "nextText": "Jätka mudeli väljundite hindamisega", "focused": True}, impact_transition
+                assert impact_transition == {"stage": 2, "dialogOpen": False, "impactHidden": False, "impactTitle": "Treeningkirjete märgenduse kokkuvõte", "nextHidden": False, "nextText": "Soovituste hindamise juurde", "focused": True}, impact_transition
+                assert evaluate("[...document.querySelectorAll('.label-counts dd')].map(count => count.textContent)") == ["1"] * 5
+                assert evaluate("categoryFact.textContent") == "5 / 5"
                 assert evaluate("stageCounter.textContent") == "ETAPP 2 / 4"
                 assert evaluate("document.querySelector('.control-card').inert")
                 inactive_palette = evaluate("""(() => {
@@ -568,11 +566,10 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 time.sleep(0.25)
                 stage3 = json.loads(evaluate("""JSON.stringify({
                   stepTitle: document.querySelector('[data-step="3"] b').textContent,
-                  stepDetail: document.querySelector('[data-step="3"] small').textContent,
                   stageTitle: document.querySelector('[data-stage="3"] .control-title h3').textContent,
                   stageLead: document.querySelector('[data-stage="3"] .control-title p').textContent,
                   transition: document.querySelector('[data-stage="3"] .labeling-instruction-intro').textContent,
-                  cue: activeTaskCue.textContent,
+                  guideAvailable: labelGuide.closest('[data-stage]').dataset.stage === '3' && !labelGuide.open,
                   impactHidden: impactCard.hidden,
                   pending: document.querySelector('.lab-grid').classList.contains('impact-pending'),
                   centerDelta: Math.round(Math.abs((document.querySelector('.control-card').getBoundingClientRect().left+document.querySelector('.control-card').getBoundingClientRect().width/2)-innerWidth/2)),
@@ -587,15 +584,14 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                   buttons: [...document.querySelectorAll('#reviewActions button')].map(button => button.textContent),
                   complete: document.querySelector('[data-complete="3"] span').textContent
                 })"""))
-                assert stage3["stepTitle"] == "Hinda mudeli väljundeid" and "kvaliteedimärge" in stage3["stepDetail"] and "arendusmeeskonnale" in stage3["stepDetail"], stage3
-                assert stage3["stageTitle"] == "Kui kvaliteetsed on mudeli soovitused?" and "Teenuseotsuse eest vastutab ametnik" in stage3["stageLead"] and "varem valitud märgendid" in stage3["stageLead"], stage3
-                assert "Märgendamistöö on lõppenud." in stage3["transition"] and "uute registrikirjete" in stage3["transition"] and "arendajal ja tooteomanikul" in stage3["transition"], stage3
+                assert stage3["stepTitle"] == stage3["stageTitle"] == "Soovituste hindamine", stage3
+                assert "kuvatud info ja märgendusjuhisega" in stage3["stageLead"] and stage3["guideAvailable"], stage3
+                assert "Kindlusprotsendid on harjutuse näited" in stage3["transition"], stage3
                 assert stage3["impactHidden"] and stage3["pending"] and stage3["centerDelta"] <= 10, stage3
                 assert evaluate("stageCounter.textContent") == "ETAPP 3 / 4"
                 assert evaluate("!document.querySelector('.control-card').inert")
-                assert "tagasisidet kogub" in stage3["cue"] and "Võrdle kuvatud soovitust kontrollkirje infoga" in stage3["cue"], stage3
                 assert stage3["policyLabel"] == "Kuidas peaks amet mudeli kohta tagasisidet koguma?" and len(stage3["policyOptions"]) == 5 and stage3["policyOptions"][1] == "Hinda iga kasutatud soovitust", stage3
-                assert stage3["recommendationLabel"] == "MUDELI SOOVITUS" and stage3["confidenceLabel"] == "MUDELI KINDLUS" and not stage3["qualityPromptExists"] and not stage3["impactLabelExists"], stage3
+                assert stage3["recommendationLabel"] == "NÄIDISSOOVITUS" and stage3["confidenceLabel"] == "NÄITLIK KINDLUS" and not stage3["qualityPromptExists"] and not stage3["impactLabelExists"], stage3
                 assert not stage3["modelComparisonExists"] and not stage3["latestImpactExists"], stage3
                 assert stage3["buttons"] == ["Kasutatav", "Vajab parandamist", "Hinnanguks pole piisavalt infot"] and stage3["complete"] == "Kinnita kvaliteedihinnangud", stage3
                 rating_matrix = evaluate("""outputCases.map(item =>
@@ -619,6 +615,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert quality_feedback["mark"] == "Vajab parandamist" and quality_feedback["title"] == "Vajab parandamist" and quality_feedback["result"] == "correct", quality_feedback
                 assert "Varasem takistus on lahendatud" in quality_feedback["text"] and "rohkem aega" in quality_feedback["feedback"] and quality_feedback["impactHidden"] and quality_feedback["pending"], quality_feedback
                 assert evaluate("!reviewReference.hidden && reviewReferenceLabel.textContent === 'Iseseisev jätkamine'")
+                assert "T-101 määratud märgendil „Kiire tugi”" in evaluate("reviewOrigin.textContent")
                 screenshot("ai-andmetoo-quality-feedback.png")
                 evaluate("nextReviewCase.click()")
                 for recommendation, rating in [("Andmete täiendamine", "accept"), ("Tavaplaan", "accept"), ("Inimese ülevaatus", "human")]:
@@ -651,12 +648,15 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 evaluate("document.querySelector('[data-complete=\"4\"]').click()")
                 time.sleep(0.25)
                 after_plan_confirmation = json.loads(evaluate("JSON.stringify({dialogOpen:impactDialog.open,completed:state.completed.has(4),completedCount:completedCount.textContent,impactHidden:impactCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('impact-pending'),impactTitle:document.querySelector('#impactTitle').textContent})"))
-                assert after_plan_confirmation == {"dialogOpen": True, "completed": True, "completedCount": "4", "impactHidden": False, "pending": False, "impactTitle": "Kuidas jõuavad parandused järgmisse versiooni?"}, after_plan_confirmation
+                assert after_plan_confirmation == {"dialogOpen": True, "completed": True, "completedCount": "4", "impactHidden": True, "pending": True, "impactTitle": "Treeningkirjete märgenduse kokkuvõte"}, after_plan_confirmation
                 assert evaluate("[...dialogInsight.querySelectorAll('h3')].map(title => title.textContent)") == [
-                    "Mida tasub säilitada?", "Kontroll järgmises versioonis"
+                    "Kuidas kontrollida parandust?"
                 ]
-                assert evaluate("dialogInsight.querySelectorAll('li').length") == 4
                 assert evaluate("!resultSection.hidden && tradeoffList.children.length === 4")
+                assert evaluate("planSummary.querySelectorAll('dd').length") == 7
+                assert "Ameti valdkonnaeksperdid" in evaluate("planSummary.textContent")
+                assert "Vaidlustatud registrinäited koos põhjendustega" in evaluate("planSummary.textContent")
+                assert "Kontrollitud testprofiilid" not in evaluate("planSummary.textContent")
                 assert evaluate("!resultSection.querySelector('#profileTitle, #profileText, #profileTags')")
                 evaluate("dialogContinue.click(); document.querySelector('[data-step=\"2\"]').click()")
                 assert evaluate("document.querySelector('[data-complete=\"2\"]').disabled")
@@ -669,12 +669,14 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                   }
                 })()""")
                 assert not evaluate("document.querySelector('[data-complete=\"2\"]').disabled")
+                assert evaluate("!stage2Feedback.hidden")
                 assert evaluate("document.querySelector('[data-complete=\"2\"]').textContent.trim()") == "Kinnita märgendus"
                 assert evaluate("document.querySelector('[data-step=\"3\"]').disabled")
                 evaluate("document.querySelector('[data-complete=\"2\"]').click(); dialogContinue.click(); continueFromImpact.click()")
                 assert evaluate("document.querySelector('#outputCase .output-recommendation strong').textContent") == "Iseseisev jätkamine"
                 evaluate("document.querySelector('#reviewActions button[data-review=\"accept\"]').click()")
                 assert evaluate("!reviewExplanation.hidden && reviewExplanation.dataset.result === 'correct'")
+                assert "T-101 määratud märgendil „Iseseisev jätkamine”" in evaluate("reviewOrigin.textContent")
                 evaluate("nextReviewCase.click()")
                 assert "T-202" in evaluate("outputCase.textContent")
                 assert evaluate("document.querySelector('#outputCase .output-recommendation strong').textContent") == "Kiire tugi"
@@ -682,7 +684,8 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert evaluate("reviewExplanation.dataset.result") == "incorrect"
                 assert evaluate("reviewExplanationTitle.textContent") == "Vali hinnanguks „Vajab parandamist”"
                 assert evaluate("!reviewReference.hidden && reviewReferenceLabel.textContent === 'Andmete täiendamine'")
-                assert evaluate("reviewReference.querySelector('small').textContent") == "Mudel peaks soovitama"
+                assert evaluate("reviewReference.querySelector('small').textContent") == "Juhise järgi sobiv märgend"
+                assert "T-103 määratud märgendil „Kiire tugi”" in evaluate("reviewOrigin.textContent")
                 assert not evaluate("reviewReference.querySelector('button') !== null")
                 assert "Andmete täiendamine" not in evaluate("reviewExplanationText.textContent")
                 evaluate("reviewExplanation.scrollIntoView({block:'center',behavior:'instant'})")
@@ -703,7 +706,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert evaluate("reviewExplanation.dataset.result") == "correct"
                 assert evaluate("!reviewReference.hidden && reviewReferenceLabel.textContent === 'Tavaplaan'")
                 evaluate("nextReviewCase.click(); document.querySelector('#reviewActions [data-review=\"correct\"]').click()")
-                assert evaluate("nextReviewCase.textContent") == "Jätka kinnitamisega"
+                assert evaluate("nextReviewCase.textContent") == "Vaata hinnangute kokkuvõtet"
                 evaluate("nextReviewCase.click()")
                 command("Emulation.setDeviceMetricsOverride", {"width": 390, "height": 844, "deviceScaleFactor": 1, "mobile": True})
                 confirm_quality_and_check_transition()
