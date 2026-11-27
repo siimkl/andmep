@@ -6,7 +6,7 @@ Avalik rakendus: https://siimkl.github.io/andmep/
 
 ## Moodulid
 
-- API 1: API kaudu andmete pärimise näide
+- API 1: GET-päring Statistikaameti API-s
 - API 2: API-andmete töötlemine R-is
 - API 3: keelemudeli kasutamine API kaudu
 - Veebikraapimine R-is

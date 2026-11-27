@@ -80,88 +80,71 @@ with tempfile.TemporaryDirectory(prefix="andmep-api1-chrome-") as profile:
         command("Page.reload", {"ignoreCache": True})
         wait_until("document.readyState === 'complete'")
 
-        initial = json.loads(evaluate("""JSON.stringify({
-          title: document.title,
-          heading: document.querySelector('.hero-title').textContent.trim(),
-          purpose: document.querySelector('.hero-description').textContent.replace(/\\s+/g, ' ').trim(),
-          task: document.querySelector('.briefing-card').textContent.replace(/\\s+/g, ' ').trim(),
-          progress: progressText.textContent,
-          metadataButton: getMetadata.textContent.trim(),
-          hasChart: Boolean(document.querySelector('.result-viz, .bar-chart')),
-          sourceLabel: document.querySelector('.service-node small').textContent,
-          sourceName: document.querySelector('.service-node b').textContent,
-          overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth
-        })"""))
-        assert initial["title"] == "API 1 · API kaudu andmete pärimise näide", initial
-        assert initial["heading"] == "API kaudu andmete pärimise näide", initial
-        assert "Harjutuse eesmärk" in initial["purpose"], initial
-        assert "Miks kasutatakse siin API-t?" in initial["task"], initial
-        assert "väikest andmehulka teadlikult" in initial["task"], initial
-        assert initial["progress"] == "1. Tabeli kirjeldus", initial
-        assert initial["metadataButton"] == "Ava tabeli kirjeldus (GET)→", initial
-        assert not initial["hasChart"] and not initial["overflow"], initial
-        assert initial["sourceLabel"] == "ANDMEALLIKAS" and initial["sourceName"] == "Tabel PA111", initial
+        assert evaluate("document.title") == "API 1 · GET-päring Statistikaameti API-s"
+        assert evaluate("progressText.textContent") == "1. GET-päring"
+        assert evaluate("requestPreview.textContent") == (
+            "GET https://andmed.stat.ee/api/v1/et/stat/PA111\nAccept: application/json"
+        )
+        assert evaluate("stageCard.hidden && readingSection.hidden && quizSection.hidden")
+        assert not evaluate("document.body.textContent.includes('POST')")
         screenshot("api1-feedback-initial.png")
 
-        evaluate("getMetadata.click()")
-        wait_until("!flowDialogClose.disabled")
-        evaluate("flowDialogClose.click()")
-        wait_until("!sendRequest.disabled")
-        evaluate("sendRequest.click()")
-        wait_until("!flowDialogClose.disabled")
-        evaluate("flowDialogClose.click()")
-        wait_until("!resultSummary.hidden")
-        evaluate("resultSummary.scrollIntoView({block:'center', behavior:'instant'})")
-        time.sleep(0.2)
+        def send_get():
+            evaluate("getMetadata.click()")
+            wait_until("flowDialog.open && !flowDialogClose.disabled")
+            assert evaluate("dialogFlowStatus.textContent === '200 OK'")
+            evaluate("flowDialogClose.click()")
+            wait_until("!stageCard.hidden && !readingSection.hidden && !flowDialog.open")
 
-        result = json.loads(evaluate("""JSON.stringify({
-          periods: [...document.querySelectorAll('#resultValues dt')].map(node => node.textContent.trim()),
-          values: [...document.querySelectorAll('#resultValues dd')].map(node => node.textContent.replace(/\\s+/g, ' ').trim()),
-          comparison: resultComparison.textContent.replace(/\\s+/g, ' ').trim(),
-          note: resultSummaryNote.textContent.replace(/\\s+/g, ' ').trim(),
-          responseValues: [...document.querySelectorAll('.response-value')].map(node => Number(node.textContent)),
-          rawValues: JSON.parse(responseOutput.textContent).value,
-          overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth
-        })"""))
-        assert result["periods"] == ["2024 II kv", "2025 II kv", "2026 II kv"], result
-        assert result["values"] == ["2 007 €", "2 126 €", "2 243 €"], result
-        assert result["rawValues"] == result["responseValues"] == [2007, 2126, 2243], result
-        assert "119 € (5,9%)" in result["comparison"], result
-        assert "117 € (5,5%)" in result["comparison"], result
-        assert "236 € (11,8%)" in result["comparison"], result
-        assert "Statistikaameti tabeli PA111 kontrollväärtused" in result["note"], result
-        assert not result["overflow"], result
+        snapshots = json.loads((ROOT / "dist/api1/pa111-metadata.json").read_text(encoding="utf-8"))
+        send_get()
+        assert evaluate("progressValue.textContent") == "33%"
+        assert evaluate("JSON.parse(responseOutput.textContent)") == snapshots["et"]
+        assert evaluate("liveResponse.href") == "https://andmed.stat.ee/api/v1/et/stat/PA111"
+        evaluate("""responsePart.value='Vaatlusperiood';
+          responsePart.dispatchEvent(new Event('change', {bubbles:true}));""")
+        period = evaluate("JSON.parse(responseOutput.textContent)")
+        assert period["valueTexts"][period["values"].index("2026Q2")] == "2026 II kvartal"
         screenshot("api1-feedback-result.png")
 
-        evaluate("[...validationFields.querySelectorAll('input')].forEach(input => input.click())")
-        evaluate("decoderOptions.querySelector('[data-code=\"404\"]').click()")
-        assert evaluate("!decoderHint.hidden && !decoderNext.hidden && decoderQuestionNumber.textContent === '1 / 4'")
-        time.sleep(2)
-        assert evaluate("!decoderHint.hidden && decoderQuestionNumber.textContent === '1 / 4'")
-        evaluate("decoderNext.click()")
-        assert evaluate("decoderHint.hidden && decoderNext.hidden && decoderQuestionNumber.textContent === '2 / 4'")
-        for selector, feedback, next_button in [
-            ("#methodOptions [data-method=manual]", "methodFeedback", "methodNext"),
-            ("#conceptOptions [data-answer='1']", "conceptFeedback", "conceptNext"),
-        ]:
-            evaluate(f"document.querySelector({json.dumps(selector)}).click()")
-            assert evaluate(f"!{feedback}.hidden && !{next_button}.hidden")
-            evaluate(f"{next_button}.click()")
-            assert evaluate(f"{feedback}.hidden && {next_button}.hidden")
+        evaluate("""requestLanguage.value='en';
+          requestLanguage.dispatchEvent(new Event('change', {bubbles:true}));""")
+        assert evaluate("requestPath.textContent") == "/api/v1/en/stat/PA111"
+        assert evaluate("responsePath.textContent") == "/api/v1/et/stat/PA111"
+        send_get()
+        wait_until("responsePath.textContent === '/api/v1/en/stat/PA111'")
+        assert evaluate("JSON.parse(responseOutput.textContent)") == snapshots["en"]
+        assert evaluate("liveResponse.href") == "https://andmed.stat.ee/api/v1/en/stat/PA111"
+
+        evaluate("indicatorCode.value='NR_EMPL'; activityCode.value='TOTAL'; periodCode.value='2026Q2'; checkCodes.click()")
+        assert evaluate("quizSection.hidden && indicatorCode.getAttribute('aria-invalid') === 'true'")
+        assert "Näitaja" in evaluate("readingFeedback.textContent")
+        evaluate("indicatorCode.value='GR_W_AVG'; checkCodes.click()")
+        assert evaluate("!quizSection.hidden && progressValue.textContent === '67%' && indicatorCode.disabled")
+
+        evaluate("quizOptions.children[1].click()")
+        assert evaluate("!quizFeedback.hidden && !quizNext.hidden && quizCount.textContent === 'Küsimus 1 / 3'")
+        time.sleep(1.9)
+        assert evaluate("quizCount.textContent === 'Küsimus 1 / 3'")
+        evaluate("quizNext.click()")
+        for answer in (1, 2):
+            evaluate(f"quizOptions.children[{answer}].click()")
+            evaluate("quizNext.click()")
+        assert evaluate("!quizSummary.hidden && progressValue.textContent === '100%'")
+        assert "2 / 3" in evaluate("quizScore.textContent")
 
         command("Emulation.setDeviceMetricsOverride", {"width": 390, "height": 844, "deviceScaleFactor": 1, "mobile": True})
-        command("Page.navigate", {"url": URL})
-        wait_until("document.readyState === 'complete'")
-        mobile = json.loads(evaluate("""JSON.stringify({
-          width: document.documentElement.clientWidth,
-          overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
-          headingFits: document.querySelector('.hero-title').getBoundingClientRect().right <= innerWidth,
-          briefingFits: document.querySelector('.briefing-card').getBoundingClientRect().right <= innerWidth
-        })"""))
-        assert mobile == {"width": 390, "overflow": False, "headingFits": True, "briefingFits": True}, mobile
+        assert evaluate("document.documentElement.scrollWidth <= innerWidth")
+        evaluate("stageCard.scrollIntoView({block:'start', behavior:'instant'})")
         screenshot("api1-feedback-mobile.png")
 
-        print(json.dumps({"initial": initial, "result": result, "mobile": mobile}, ensure_ascii=True, indent=2))
+        evaluate("resetButton.click()")
+        assert evaluate("""requestLanguage.value === 'et' && progressValue.textContent === '0%'
+          && stageCard.hidden && readingSection.hidden && quizSection.hidden
+          && !indicatorCode.disabled && indicatorCode.value === ''""")
+        send_get()
+        assert evaluate("JSON.parse(responseOutput.textContent)") == snapshots["et"]
+        print("API 1 GET flow passed in both response languages, including metadata reading, quiz and reset.")
     finally:
         process.terminate()
         process.wait(timeout=10)

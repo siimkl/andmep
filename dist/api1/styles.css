@@ -1542,50 +1542,6 @@ footer { padding-top: 24px; }
 .response-context.error span { color: #8f2737; }
 .response-context + .terminal { margin-top: 8px; }
 
-/* Link every returned POST value to the codes that produced it. */
-.response-value,
-.response-code {
-  display: inline-block;
-  border-radius: 5px;
-  transition: color .18s ease, background-color .18s ease, box-shadow .18s ease, transform .18s ease;
-}
-.response-value {
-  margin: 1px 0;
-  padding: 0 6px;
-  border: 1px solid #e8a04d;
-  color: #843b06;
-  background: #fff0d8;
-  box-shadow: 0 2px 6px rgba(132,59,6,.1);
-  font-weight: 850;
-  cursor: help;
-}
-.response-value:hover,
-.response-value:focus-visible,
-.response-value.is-linked {
-  color: #fff;
-  background: #d75b0a;
-  box-shadow: 0 0 0 3px rgba(238,126,36,.24), 0 6px 14px rgba(132,59,6,.22);
-  outline: none;
-  transform: translateY(-1px);
-}
-.response-code {
-  padding: 0 3px;
-  color: #174f86;
-  border-bottom: 2px solid #8ec7df;
-  background: #edf8fc;
-}
-.response-code.is-linked {
-  color: #073d70;
-  background: #cceefa;
-  box-shadow: 0 0 0 3px rgba(25,137,184,.18);
-}
-.request-code-shared.is-linked {
-  color: #704006;
-  border-bottom-color: #e8a04d;
-  background: #fff0d8;
-  box-shadow: 0 0 0 3px rgba(238,126,36,.16);
-}
-
 @media (max-width: 760px) {
   .response-context {
     grid-template-columns: 1fr;
@@ -1663,36 +1619,6 @@ footer { padding-top: 24px; }
   font-weight: 800;
 }
 .result-viz-note b { color: #102f55; }
-
-/* On desktop, let both GET and POST responses use the height created by the choices card. */
-@media (min-width: 1041px) {
-  .stage-card.response-metadata,
-  .stage-card.response-data {
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    overflow: hidden;
-  }
-  .stage-card.response-metadata .terminal,
-  .stage-card.response-data .terminal {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    min-height: 420px;
-    overflow: hidden;
-  }
-  .stage-card.response-metadata .terminal pre,
-  .stage-card.response-data .terminal pre {
-    flex: 1 1 auto;
-    max-height: none;
-    min-height: 0;
-  }
-}
-
-@media (max-width: 1040px) {
-  .stage-card.response-metadata,
-  .stage-card.response-data { height: auto !important; }
-}
 
 /* One coherent question flow for the method-choice exercise. */
 .compass-card {
@@ -2286,4 +2212,125 @@ footer { padding-top: 24px; }
   .result-summary {
     padding: 1rem;
   }
+}
+
+/* GET-päringu tööala. */
+.hero::after {
+  content: none;
+}
+.get-steps {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 0;
+  list-style: none;
+}
+.get-steps .step {
+  min-width: 0;
+  cursor: default;
+}
+.get-lab {
+  grid-template-columns: minmax(0, .8fr) minmax(0, 1.32fr);
+  align-items: start;
+}
+.get-lab .control-card,
+.get-lab .get-response,
+.get-exercise {
+  min-width: 0;
+}
+.get-lab .control-head h2,
+.get-exercise h2 {
+  margin: 0;
+  color: #102f55;
+  font-size: clamp(1.25rem, 2vw, 1.6rem);
+}
+.get-lab .control-card > p,
+.get-response > p,
+.get-exercise > p,
+.get-exercise #quizSummary p {
+  max-width: 75ch;
+  color: #38546b;
+  line-height: 1.55;
+}
+.get-lab .full-request-preview pre {
+  padding: .65rem;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.get-lab .full-request-preview p {
+  padding: 0 .65rem .65rem;
+  color: #38546b;
+  line-height: 1.5;
+}
+.get-action {
+  margin-top: .75rem;
+}
+.get-response-address {
+  display: grid;
+  gap: .25rem;
+}
+.get-response-address code {
+  overflow-wrap: anywhere;
+}
+.get-response .terminal pre {
+  min-height: 0;
+  max-height: 24rem;
+  overflow: auto;
+  white-space: pre;
+}
+.get-exercise {
+  margin-top: var(--space-block, 1.25rem);
+  padding: clamp(16px, 2.5vw, 28px);
+  background: #fff;
+}
+.get-code-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .75rem;
+}
+.get-exercise .primary-button {
+  width: fit-content;
+}
+.get-exercise .feedback {
+  margin-top: .75rem;
+}
+.get-question-count {
+  color: #38546b;
+}
+.get-answers {
+  display: grid;
+  gap: .5rem;
+  max-width: 42rem;
+}
+.get-answers button {
+  min-height: 44px;
+  padding: .6rem .8rem;
+  border: 1px solid #b8ccd9;
+  border-radius: 8px;
+  background: #f5f9fb;
+  color: #173f73;
+  text-align: left;
+  cursor: pointer;
+}
+.get-answers button:disabled {
+  cursor: default;
+}
+.get-answers button.correct {
+  border-color: #63a8a0;
+  background: #e8f6f4;
+}
+.get-answers button.wrong {
+  border-color: #c97962;
+  background: #fff1ec;
+}
+.shell :is(.get-exercise, .get-exercise .feedback, #requestError)[hidden] {
+  display: none;
+}
+
+@media (max-width: 1040px) {
+  .get-lab { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  .get-steps { grid-template-columns: minmax(0, 1fr); }
+  .get-steps .step { min-height: 44px; }
+  .get-code-fields { grid-template-columns: minmax(0, 1fr); }
+  .get-response .terminal pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 }

@@ -401,10 +401,10 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 return {text: badge.textContent.trim(), fontSize: parseFloat(style.fontSize),
                   height: badge.getBoundingClientRect().height, background: style.backgroundColor, color: style.color};
             })()""")
-            expected_counter = {"kraapimine": "SAMM 1 / 5", "ai-andmetoo": "ETAPP 1 / 4"}.get(route, "SAMM 1 / 4")
+            expected_counter = {"api1": "SAMM 1 / 3", "kraapimine": "SAMM 1 / 5", "ai-andmetoo": "ETAPP 1 / 4"}.get(route, "SAMM 1 / 4")
             assert badge_state["text"] == expected_counter and badge_state["fontSize"] >= 16 and badge_state["height"] >= 40, {route: badge_state}
             assert badge_state["background"] == "rgb(35, 79, 136)" and badge_state["color"] == "rgb(255, 255, 255)", {route: badge_state}
-            if route != "ai-andmetoo":
+            if route not in ("ai-andmetoo", "api1"):
                 inactive_palette = evaluate("""(() => {
                   const panel = document.querySelector('.practice-suite.locked');
                   return [getComputedStyle(panel).backgroundColor, getComputedStyle(panel).opacity,
@@ -414,13 +414,15 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
             module_states[route] = state
             screenshot(f"{route}-initial.png")
 
-            if route in ("api1", "api2"):
+            if route == "api1":
+                assert state["heading"] == "GET-päring Statistikaameti API-s"
+                assert evaluate("readingSection.hidden && quizSection.hidden")
+            elif route == "api2":
                 evaluate("document.querySelector('#getMetadata').click()")
                 revealed = json.loads(evaluate("JSON.stringify({hidden:document.querySelector('.stage-card').hidden,pending:document.querySelector('.lab-grid').classList.contains('result-pending')})"))
                 assert revealed == {"hidden": False, "pending": False}, {route: revealed}
                 wait_for_counter("SAMM 2 / 4")
-                if route == "api2":
-                    state["rExample"] = assert_api2_result()
+                state["rExample"] = assert_api2_result()
             elif route == "api3":
                 evaluate("document.querySelector('[data-run=\"1\"]').click()")
                 revealed = json.loads(evaluate("JSON.stringify({hidden:stageCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('result-pending')})"))
