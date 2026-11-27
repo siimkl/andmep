@@ -18,8 +18,8 @@
     selectionFields: $("#selectionFields"), indicatorSelect: $("#indicatorSelect"), activitySelect: $("#activitySelect"), periodOptions: $("#periodOptions"),
     selectionMath: $("#selectionMath"), valueCount: $("#valueCount"), sendSection: $("#sendSection"),
     sendFields: $("#sendFields"), requestPreview: $("#requestPreview"), sendRequest: $("#sendRequest"),
-    requestFeedback: $("#requestFeedback"), resultViz: $("#resultViz"), chartTitle: $("#chartTitle"),
-    barChart: $("#barChart"), chartInsight: $("#chartInsight"), validationSection: $("#validationSection"),
+    requestFeedback: $("#requestFeedback"), resultSummary: $("#resultSummary"), resultSummaryTitle: $("#resultSummaryTitle"),
+    resultSummaryNote: $("#resultSummaryNote"), resultValues: $("#resultValues"), resultComparison: $("#resultComparison"), validationSection: $("#validationSection"),
     validationFields: $("#validationFields"), checkScore: $("#checkScore"), takeaway: $("#takeaway"),
     practiceSuite: $(".practice-suite"),
     decoderRound: $("#decoderRound"), decoderBar: $("#decoderBar"), decoderScore: $("#decoderScore"), decoderPrompt: $("#decoderPrompt"),
@@ -116,7 +116,7 @@
   });
 
   const methodRounds = [
-    { text: "Vaja on kolme väärtust ühest veebitabelist.", correct: "manual", why: "Väikese ühekordse ülesande puhul on kõige lihtsam kasutada veebitabelit." },
+    { text: "Vaja on kolme väärtust ühest veebitabelist.", correct: "manual", why: "Väikese ühekordse ülesande puhul on kõige lihtsam kasutada veebitabelit. Praeguses harjutuses kasutatakse kolme väärtust API tööpõhimõtte õppimiseks." },
     { text: "Suur andmestik on juba CSV-failina saadaval.", correct: "file", why: "Kui valmis fail on olemas, on kõige lihtsam see alla laadida." },
     { text: "Statistikat tuleb igal kuul automaatselt uuendada.", correct: "api", why: "API sobib, sest sama päringut saab automaatselt korrata." },
     { text: "API puudub, kuid vajalik avalik info on veebilehel nähtav.", correct: "scrape", why: "Kui API-t pole, võib kaaluda kraapimist. Enne kontrolli kasutustingimusi." },
@@ -133,7 +133,7 @@
   const conceptRounds = [
     {
       prompt: "Mida saad teada GET-päringuga tabelile PA111?",
-      options: ["Palgaandmed kohe", "Tabeli muutujad ja valikud", "Ainult failinime", "RStudio joonise"],
+      options: ["Palgaandmed kohe", "Tabeli muutujad ja valikud", "Ainult tabeli nime", "Valmis joonise"],
       correct: 1,
       why: "GET-vastus kirjeldab tabeli muutujaid ja lubatud valikuid."
     },
@@ -241,7 +241,7 @@
     state.currentStep = step;
     els.currentStepLabel.textContent = `SAMM ${step} / 4`;
     const percent = step === 1 ? 0 : step === 2 ? 25 : step === 3 ? 50 : completed ? 100 : 75;
-    const labels = { 1: "Küsi metaandmed", 2: "Vali andmed", 3: "Küsi andmed", 4: completed ? "Kontroll tehtud" : "Kontrolli vastust" };
+    const labels = { 1: "1. Tabeli kirjeldus", 2: "2. Andmevalik", 3: "3. Andmepäring", 4: completed ? "4. Kontroll lõpetatud" : "4. Vastuse kontroll" };
     els.progressValue.textContent = `${percent}%`;
     els.progressText.textContent = labels[step];
     els.progressBar.style.width = `${percent}%`;
@@ -371,7 +371,7 @@
   }
 
   function openFlowDialog(method) {
-    els.flowDialogKicker.textContent = `SINU ${method}-PÄRING LIIGUB`;
+    els.flowDialogKicker.textContent = `${method}-PÄRINGU LIIKUMINE`;
     els.flowStatus.textContent = "Päring käib…";
     els.dialogFlowStatus.textContent = "Valmistab päringut ette";
     els.flowDialogResult.innerHTML = `<b>${method}-päring on teel.</b> Vastus pole veel saabunud.`;
@@ -386,10 +386,10 @@
     els.flowStatus.textContent = "Vastus käes";
     els.dialogFlowStatus.textContent = "200 OK · Vastus on käes";
     els.flowDialogResult.innerHTML = method === "GET"
-      ? "<b>200 OK.</b> Teenus saatis tabeli kirjelduse ja valikud kliendile tagasi."
-      : "<b>200 OK.</b> Teenus saatis andmed kliendile tagasi.";
+      ? "<b>200 OK.</b> Statistikaameti API saatis tabeli kirjelduse ja valikud kliendile tagasi."
+      : "<b>200 OK.</b> Statistikaameti API saatis valitud andmed kliendile tagasi.";
     els.flowDialogResult.className = "success";
-    els.flowDialogClose.querySelector("span").textContent = method === "GET" ? "Vaata saadud metaandmeid" : "Vaata saadud vastust";
+    els.flowDialogClose.querySelector("span").textContent = method === "GET" ? "Vaata tabeli kirjeldust" : "Vaata andmepäringu vastust";
     els.flowDialogClose.disabled = false;
     dialogTarget = target;
     els.flowDialogClose.focus({ preventScroll: true });
@@ -424,7 +424,7 @@
     await wait(800);
 
     activate(2);
-    setFlowStatus("Teenus töötleb päringut");
+    setFlowStatus("Andmeallikast koostatakse vastust");
     await wait(800);
 
     flows.forEach(flow => {
@@ -454,21 +454,21 @@
     els.stageCard.classList.remove("awaiting-response");
     els.stageCard.removeAttribute("aria-disabled");
     els.getMetadata.disabled = true;
-    els.getMetadata.querySelector("span").textContent = "API töötleb…";
-    setStory(1, "<b>Klient saadab GET-päringu.</b> Aadress osutab tabelile PA111. Päringu keha pole vaja.");
+    els.getMetadata.querySelector("span").textContent = "GET-päring on töötlemisel…";
+    setStory(1, "<b>GET-päringu aadress osutab tabelile PA111.</b> Selle päringu jaoks ei ole päringukeha vaja.");
     hideGuide(els.getMetadata);
     await animateFlow("GET liigub", "GET");
     showResponse(metadataResponse);
     els.terminalTitle.textContent = "metaandmed.json";
     setStatus("200 OK", "success");
-    setResponseContext("GET-PÄRINGU VASTUS", "Teenuselt päringu tulemusena saadud täielikud metaandmed. Keri JSON-i sees, et näha kõiki väärtusi.", "metadata");
-    setStory(2, "<b>Teenuselt päringu tulemusena saadud vastus sisaldab metaandmeid.</b> Need kirjeldavad tabeli muutujaid ja valikuid. Palgaandmeid siin veel ei ole.");
+    setResponseContext("GET-PÄRINGU VASTUS", "Vastus sisaldab tabeli PA111 kirjeldust: muutujaid, koode ja lubatud valikuid. Kõik väärtused on nähtavad JSON-i sees kerides.", "metadata");
+    setStory(2, "<b>GET-vastus sisaldab tabeli kirjeldust ehk metaandmeid.</b> Need kirjeldavad muutujaid ja lubatud valikuid; palgaandmeid selles vastuses veel ei ole.");
     state.metadata = true;
     els.selectionSection.classList.remove("locked");
     els.selectionFields.disabled = false;
     els.sendSection.classList.remove("locked");
     els.sendFields.disabled = false;
-    els.getMetadata.querySelector("span").textContent = "Metaandmed saadud";
+    els.getMetadata.querySelector("span").textContent = "Tabeli kirjeldus on avatud";
     award("metadata", 15);
     setProgress(2);
     updateRequestPreview();
@@ -517,20 +517,37 @@
     return Math.max(1, Math.round(wageBase + timeIndex * 35 + activityIndex * 12));
   }
 
-  function renderChart(periods, values) {
-    const max = Math.max(...values);
-    const min = Math.min(...values);
+  function renderResultSummary(periods, values, officialValues) {
     const unit = indicatorUnit();
-    els.barChart.innerHTML = periods.map((period, index) => {
-      const height = 45 + (values[index] / max) * 50;
-      const label = formatPeriod(period);
-      const display = `${formatValue(values[index])} ${unit}`;
-      return `<div class="chart-column"><span class="chart-value">${display}</span><i class="chart-bar" style="--bar-height:${height}%"></i><span class="chart-label">${label}</span></div>`;
+    const indicatorName = els.indicatorSelect.selectedOptions[0].textContent.split(" · ")[0];
+    els.resultSummaryTitle.textContent = indicatorName;
+    els.resultSummaryNote.textContent = officialValues
+      ? "Need on Statistikaameti tabeli PA111 kontrollväärtused. Kolme arvu puhul näitavad täpsed väärtused ja erinevused muutust selgemalt kui joonis."
+      : "See valik kasutab simulatsiooni õppeandmeid, mitte ametlikku statistikat. Täpsed väärtused ja erinevused on esitatud arvudena.";
+    els.resultValues.innerHTML = periods.map((period, index) => {
+      return `<div><dt>${escapeHtml(formatPeriod(period))}</dt><dd>${escapeHtml(formatValue(values[index]))} <span>${escapeHtml(unit)}</span></dd></div>`;
     }).join("");
-    const change = max === min ? "Väärtused on võrdsed" : `Vastuse väärtuste vahe: ${Number((max - min).toFixed(1))} ${unit}`;
-    els.chartTitle.textContent = els.indicatorSelect.selectedOptions[0].textContent.split(" · ")[0];
-    els.chartInsight.innerHTML = `<span>↗</span><b>${change}.</b> Muutus on nähtav. Enne järeldust kontrolli näitaja tähendust.`;
-    els.resultViz.hidden = false;
+
+    if (values.length < 2) {
+      els.resultComparison.innerHTML = "Ühe väärtuse põhjal ei saa ajas toimunud muutust hinnata.";
+    } else {
+      const changes = values.slice(1).map((value, index) => {
+        const previous = values[index];
+        const difference = Number((value - previous).toFixed(1));
+        const percentage = previous === 0 ? null : Math.abs(difference / previous * 100);
+        const direction = difference > 0 ? "suurenes" : difference < 0 ? "vähenes" : "ei muutunud";
+        const amount = difference === 0 ? "" : ` ${formatValue(Math.abs(difference))} ${unit}`;
+        const percent = percentage === null || difference === 0 ? "" : ` (${percentage.toFixed(1).replace(".", ",")}%)`;
+        return `<li><b>${escapeHtml(formatPeriod(periods[index]))} → ${escapeHtml(formatPeriod(periods[index + 1]))}:</b> väärtus ${direction}${escapeHtml(amount)}${escapeHtml(percent)}.</li>`;
+      });
+      const totalDifference = Number((values.at(-1) - values[0]).toFixed(1));
+      const totalPercentage = values[0] === 0 ? null : Math.abs(totalDifference / values[0] * 100);
+      const totalDirection = totalDifference > 0 ? "suurenes" : totalDifference < 0 ? "vähenes" : "ei muutunud";
+      const totalAmount = totalDifference === 0 ? "" : ` ${formatValue(Math.abs(totalDifference))} ${unit}`;
+      const totalPercent = totalPercentage === null || totalDifference === 0 ? "" : ` (${totalPercentage.toFixed(1).replace(".", ",")}%)`;
+      els.resultComparison.innerHTML = `<b>Muutus perioodide vahel</b><ul>${changes.join("")}</ul><span>Kogu valitud ajavahemikus väärtus ${totalDirection}${escapeHtml(totalAmount)}${escapeHtml(totalPercent)}.</span>`;
+    }
+    els.resultSummary.hidden = false;
   }
 
   async function sendPost() {
@@ -543,12 +560,12 @@
     }
 
     els.sendRequest.disabled = true;
-    els.sendRequest.querySelector("span").textContent = "API töötleb…";
+    els.sendRequest.querySelector("span").textContent = "POST-päring on töötlemisel…";
     els.requestFeedback.hidden = true;
-    els.resultViz.hidden = true;
+    els.resultSummary.hidden = true;
     setProgress(3);
     setStory(3, "<b>POST-päring saadab sinu valiku JSON-vormingus.</b> API tagastab valikule vastavad andmed.");
-    setGuide("POST-päring liigub. Jälgi klienti, otspunkti ja teenust", null, "Päring liigub");
+    setGuide("POST-päring liigub kliendist API otspunkti ja vastus tagasi", null, "Päring liigub");
     await animateFlow("POST liigub", "POST");
 
     const periods = selectedPeriods();
@@ -569,18 +586,18 @@
         : "Õppeandmed — mitte ametlik statistika"
     };
     showPostResponse(postResponse, periods, values);
-    renderChart(periods, values);
+    renderResultSummary(periods, values, officialValues);
     setStatus("200 OK", "success");
     els.terminalTitle.textContent = "andmed.json";
     els.requestFeedback.hidden = false;
     els.requestFeedback.className = "feedback success";
-    els.requestFeedback.innerHTML = "<b>Päring õnnestus tehniliselt.</b> Vaata nüüd, millised andmed API tagastas.";
-    setStory(3, "<b>POST-päringu vastus on käes.</b> Vaata esmalt JSON-vastust ja saadud väärtusi.");
+    els.requestFeedback.innerHTML = "<b>Päring õnnestus tehniliselt.</b> JSON-vastus ja arvuline kokkuvõte näitavad API tagastatud andmeid.";
+    setStory(3, "<b>POST-vastus sisaldab valitud andmeid.</b> Esiletõstetud arvud on samas järjekorras nagu vastuses loetletud vaatlusperioodid.");
     state.successfulPost = true;
     award("post", 25);
     els.sendRequest.disabled = false;
-    els.sendRequest.querySelector("span").textContent = "Saada POST-päring uuesti";
-    setResponseContext("POST-PÄRINGU VASTUS", "Värvilised arvud on API tagastatud väärtused. Liigu arvule, et näha, milliste päringukoodidega see seotud on.", "data");
+    els.sendRequest.querySelector("span").textContent = "Saada andmepäring uuesti";
+    setResponseContext("POST-PÄRINGU VASTUS", "Esiletõstetud arvud on API tagastatud väärtused. Arvule liikudes kuvatakse sellega seotud näitaja, tegevusala ja perioodi kood.", "data");
     setGuide("Vaata kõigepealt POST-päringu vastust", els.responseContext, "Näita vastust");
     completeFlowDialog("POST", els.responseContext);
     syncHeight();
@@ -789,17 +806,17 @@
     els.indicatorSelect.selectedIndex = 0;
     els.activitySelect.selectedIndex = 0;
     els.getMetadata.disabled = false;
-    els.getMetadata.querySelector("span").textContent = "Küsi metaandmed";
-    els.sendRequest.querySelector("span").textContent = "Saada POST-päring";
+    els.getMetadata.querySelector("span").textContent = "Ava tabeli kirjeldus (GET)";
+    els.sendRequest.querySelector("span").textContent = "Saada valitud andmete päring (POST)";
     els.requestFeedback.hidden = true;
-    els.resultViz.hidden = true;
+    els.resultSummary.hidden = true;
     els.takeaway.hidden = true;
     els.checkScore.textContent = "0/4";
     els.terminalTitle.textContent = "vastus.json";
     setStatus("—", "neutral");
-    setResponseContext("API VASTUS", "Pärast päringu saatmist näed siin teenuselt saadud vastust.");
+    setResponseContext("API VASTUS", "Päringu vastus kuvatakse siin JSON-vormingus.");
     showResponse({ status: "Päringut pole veel saadetud" });
-    setStory(1, "<b>Alusta tabeli kirjeldusest.</b> GET-päring näitab, milliseid andmeid saab küsida.");
+    setStory(1, "<b>Esimene vastus kirjeldab tabelit.</b> GET-päring näitab, milliseid andmeid saab järgmises päringus valida.");
     els.flowStatus.textContent = "Päringut pole veel saadetud";
     updateRequestPreview();
     renderDecoderRound();
