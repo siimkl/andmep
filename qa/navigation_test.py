@@ -99,6 +99,62 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
             click_element(f'.practicum-link[href="./{route}/"]')
             wait_for_path(f"/{route}/")
 
+        def submit_api2_request():
+            evaluate("""new Promise(resolve => {
+              const observer = new MutationObserver(() => {
+                if (flowDialogClose.disabled) return;
+                observer.disconnect();
+                resolve(true);
+              });
+              observer.observe(flowDialogClose, {attributes: true, attributeFilter: ['disabled']});
+              sendRequest.click();
+            })""")
+            evaluate("flowDialogClose.click()")
+            wait_for_counter("SAMM 4 / 4")
+
+        def assert_api2_result():
+            evaluate("flowDialogClose.click()")
+            submit_api2_request()
+            result = evaluate(r"""({
+              rows: [...rTableRows.rows].map(row => [...row.cells].map(cell => cell.textContent.replace(/\s+/g, ' '))),
+              values: JSON.parse(responseOutput.textContent).value,
+              comparison: rComparison.textContent,
+              example: rExampleCode.textContent,
+              visible: !rResult.hidden && !validationFields.disabled,
+              chartRemoved: !document.querySelector('.bar-chart, .result-viz')
+            })""")
+            assert result["rows"] == [
+                ["2024 II kv", "2 007 €", "—"],
+                ["2025 II kv", "2 126 €", "+119 €"],
+                ["2026 II kv", "2 243 €", "+117 €"],
+            ], result
+            assert result["values"] == [2007, 2126, 2243] and "+236 €" in result["comparison"], result
+            assert "diff(andmed$vaartus)" in result["example"] and result["visible"] and result["chartRemoved"], result
+            evaluate("document.querySelector('.r-example').open = true; rResult.scrollIntoView({block:'start', behavior:'instant'})")
+            screenshot("api2-r-result-desktop.png")
+
+            command("Emulation.setDeviceMetricsOverride", {"width": 390, "height": 844, "deviceScaleFactor": 1, "mobile": True})
+            evaluate("rResult.scrollIntoView({block:'start', behavior:'instant'})")
+            assert evaluate("""document.documentElement.scrollWidth === document.documentElement.clientWidth
+              && document.querySelector('.r-result-table').getBoundingClientRect().right <= innerWidth""")
+            screenshot("api2-r-result-mobile.png")
+            command("Emulation.setDeviceMetricsOverride", {"width": 1440, "height": 1000, "deviceScaleFactor": 1, "mobile": False})
+
+            evaluate("[...validationFields.querySelectorAll('input')].forEach(input => input.click())")
+            assert evaluate("progressValue.textContent === '100%' && !document.querySelector('.practice-suite').classList.contains('locked')")
+            evaluate("[0, 1, 2, 3, 4, 5].forEach(step => workflowOptions.querySelector(`[data-step=\"${step}\"]`).click()); workflowNext.click()")
+            assert evaluate("!document.querySelector('[data-test=rcode]').hidden && practiceCompleted.textContent === '1 / 5'")
+            evaluate("[...selectionFields.querySelectorAll('input:checked')].slice(1).forEach(input => input.click())")
+            submit_api2_request()
+            assert evaluate("""rTableRows.rows.length === 1
+              && rComparison.textContent.includes('vähemalt kaht perioodi')
+              && checkScore.textContent === '0/4'
+              && document.querySelector('.practice-suite').inert
+              && !validationFields.disabled""")
+            evaluate("[...validationFields.querySelectorAll('input')].forEach(input => input.click())")
+            assert evaluate("!document.querySelector('.practice-suite').inert && practiceCompleted.textContent === '1 / 5'")
+            return result["example"]
+
         def assert_shared_footer(columns):
             footer = evaluate("""(() => {
               const text = nodes => [...nodes].map(node => node.textContent.trim());
@@ -257,6 +313,8 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 revealed = json.loads(evaluate("JSON.stringify({hidden:document.querySelector('.stage-card').hidden,pending:document.querySelector('.lab-grid').classList.contains('result-pending')})"))
                 assert revealed == {"hidden": False, "pending": False}, {route: revealed}
                 wait_for_counter("SAMM 2 / 4")
+                if route == "api2":
+                    state["rExample"] = assert_api2_result()
             elif route == "api3":
                 evaluate("document.querySelector('[data-run=\"1\"]').click()")
                 revealed = json.loads(evaluate("JSON.stringify({hidden:stageCard.hidden,pending:document.querySelector('.lab-grid').classList.contains('result-pending')})"))

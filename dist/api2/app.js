@@ -9,8 +9,8 @@
     progressValue: $("#progressValue"), progressText: $("#progressText"), progressBar: $("#progressBar"), completedCount: $("#completedCount"),
     currentStepLabel: $("#currentStepLabel"),
     resetButton: $("#resetButton"),
-    labGrid: $(".lab-grid"), stageCard: $(".stage-card"), controlCard: $(".control-card"), flowStatus: $("#flowStatus"), storyIndex: $("#storyIndex"), storyText: $("#storyText"),
-    flowDialog: $("#flowDialog"), flowDialogKicker: $("#flowDialogKicker"), dialogFlowStage: $("#dialogFlowStage"), dialogFlowStatus: $("#dialogFlowStatus"),
+    labGrid: $(".lab-grid"), stageCard: $(".stage-card"), controlCard: $(".control-card"), flowStatus: $("#flowStatus"),
+    flowDialog: $("#flowDialog"), dialogFlowStage: $("#dialogFlowStage"), dialogFlowStatus: $("#dialogFlowStatus"),
     flowDialogResult: $("#flowDialogResult"), flowDialogClose: $("#flowDialogClose"),
     responseContext: $("#responseContext"), responseContextLabel: $("#responseContextLabel"), responseContextText: $("#responseContextText"),
     responseOutput: $("#responseOutput"), terminalTitle: $("#terminalTitle"), statusBadge: $("#statusBadge"),
@@ -18,12 +18,13 @@
     selectionFields: $("#selectionFields"), indicatorSelect: $("#indicatorSelect"), activitySelect: $("#activitySelect"), periodOptions: $("#periodOptions"),
     selectionMath: $("#selectionMath"), valueCount: $("#valueCount"), sendSection: $("#sendSection"),
     sendFields: $("#sendFields"), requestPreview: $("#requestPreview"), sendRequest: $("#sendRequest"),
-    requestFeedback: $("#requestFeedback"), resultViz: $("#resultViz"), chartTitle: $("#chartTitle"),
-    barChart: $("#barChart"), chartInsight: $("#chartInsight"), validationSection: $("#validationSection"),
+    requestFeedback: $("#requestFeedback"), rResult: $("#rResult"), rDataSource: $("#rDataSource"),
+    rTableCaption: $("#rTableCaption"), rTableRows: $("#rTableRows"), rComparison: $("#rComparison"),
+    rExampleCode: $("#rExampleCode"), validationSection: $("#validationSection"),
     validationFields: $("#validationFields"), checkScore: $("#checkScore"), takeaway: $("#takeaway"),
     practiceSuite: $(".practice-suite"), practiceCompleted: $("#practiceCompleted"), testMap: $("#testMap"),
     practiceCelebration: $("#practiceCelebration"), restartTests: $("#restartTests"),
-    workflowKicker: $("#workflowKicker"), workflowRound: $("#workflowRound"), workflowScore: $("#workflowScore"),
+    workflowKicker: $("#workflowKicker"), workflowRound: $("#workflowRound"),
     workflowBar: $("#workflowBar"), workflowQuestionNumber: $("#workflowQuestionNumber"), workflowPrompt: $("#workflowPrompt"),
     workflowOptions: $("#workflowOptions"), workflowFeedback: $("#workflowFeedback"), workflowNext: $("#workflowNext")
   };
@@ -31,12 +32,12 @@
   const initialState = () => ({
     metadata: false, successfulPost: false, responseViewed: false, checks: 0, currentStep: 1,
     xp: 0, awards: new Set(), completedTests: new Set(), unlockedTests: new Set(["workflow"]), activeTest: "workflow",
-    workflow: { next: 0, mistakes: 0, complete: false },
+    workflow: { next: 0, complete: false },
     quizzes: {
-      rcode: { index: 0, score: 0, locked: false, complete: false, wrongAnswers: 0, hintUsed: false },
-      url: { index: 0, score: 0, locked: false, complete: false, wrongAnswers: 0, hintUsed: false },
-      method: { index: 0, score: 0, locked: false, complete: false, wrongAnswers: 0, hintUsed: false },
-      detective: { index: 0, score: 0, locked: false, complete: false, wrongAnswers: 0, hintUsed: false }
+      rcode: { index: 0, score: 0, locked: false, complete: false },
+      url: { index: 0, score: 0, locked: false, complete: false },
+      method: { index: 0, score: 0, locked: false, complete: false },
+      detective: { index: 0, score: 0, locked: false, complete: false }
     }
   });
   let state = initialState();
@@ -126,8 +127,7 @@
 
   const quizDefinitions = {
     rcode: {
-      label: "R-i käsud",
-      completion: "R-i põhitööriistad on paigas: oskad valikut koostada, tabelit uurida ja andmemahtu hinnata.",
+      completion: "Päringu valikud koondatakse vektorisse. Vastuse tabeli ehitust näitab str() ja ridade arvu nrow().",
       rounds: [
         {
           prompt: "Milline R-i funktsioon koondab kolm perioodikoodi üheks valikuks?",
@@ -135,7 +135,7 @@
           why: "c() ühendab väärtused vektoriks: c(\"2024Q2\", \"2025Q2\", \"2026Q2\")."
         },
         {
-          prompt: "Millise käsuga kontrollid, kas palgad-tabelis on oodatud kolm rida?",
+          prompt: "Milline käsk ütleb, kas andmetabelis palgad on oodatud kolm rida?",
           options: ["names(palgad)", "str(palgad)", "nrow(palgad)", "View(url)"], correct: 2,
           why: "nrow(palgad) tagastab andmetabeli ridade arvu."
         },
@@ -152,8 +152,7 @@
       ]
     },
     url: {
-      label: "URL-päring",
-      completion: "Open‑Meteo GET-päring on valmis: tunned parameetrite algust, eraldajat ja Tallinna seitsme päeva valikut.",
+      completion: "Päringu aadressis määravad koordinaadid asukoha ja forecast_days prognoosi pikkuse.",
       rounds: [
         {
           prompt: "Mis märk alustab URL-is päringuparameetrite osa?",
@@ -163,12 +162,12 @@
         {
           prompt: "Mis märk eraldab URL-is latitude-, longitude- ja daily-parameetrid?",
           options: ["+", ":", "&", "="], correct: 2,
-          why: "& eraldab üksteisele järgnevad parameetrid; = seob parameetri selle väärtusega."
+          why: "Märk & eraldab järjestikused parameetrid. Võrdusmärk seob parameetri selle väärtusega."
         },
         {
           prompt: "Milline koordinaadipaar viib Open‑Meteo päringu Tallinnasse?",
           options: ["58.38, 26.73", "59.44, 24.75", "57.78, 26.03", "60.17, 24.94"], correct: 1,
-          why: "Slaidide Tallinna näites on latitude=59.44 ja longitude=24.75."
+          why: "Latitude tähistab laiuskraadi ja longitude pikkuskraadi. Tallinna näites on need vastavalt 59.44 ja 24.75."
         },
         {
           prompt: "Milline URL-i osa küsib seitsme päeva prognoosi?",
@@ -178,13 +177,12 @@
       ]
     },
     method: {
-      label: "Meetodi valik",
-      completion: "Meetod valitud: lähtud nüüd ülesande mahust, korduvusest ja olemasolevast ligipääsust.",
+      completion: "Meetodi valik sõltub andmemahust, ülesande korduvusest ja andmete kättesaadavusest.",
       rounds: [
         {
           prompt: "Vaja on kolme väärtust ühest veebitabelist ainult ühe korra.",
           options: ["Veebiliides / käsitsi", "Fail", "API", "Kraapimine"], correct: 0,
-          why: "Väikese ühekordse ülesande puhul on veebiliides sageli kõige lihtsam."
+          why: "Kolme arvu leiab ühekordseks tööks hõlpsasti veebitabelist. Praktikumis illustreerivad samad arvud API-päringu ja R-i töötluse seost."
         },
         {
           prompt: "Suur andmestik on juba valmis CSV-failina saadaval.",
@@ -204,23 +202,22 @@
         {
           prompt: "Kaks süsteemi peavad andmeid regulaarselt vahetama.",
           options: ["Käsitsi", "CSV e-postiga", "API", "Ekraanipildid"], correct: 2,
-          why: "Süsteemide korduva andmevahetuse jaoks on API loomulik valik."
+          why: "API abil saab sama andmevahetust regulaarselt korrata."
         }
       ]
     },
     detective: {
-      label: "Vastuse tõlgendamine",
-      completion: "Juhtum lahendatud: eristad tehnilist edu, andmete tähendust ja eri API-de vastusestruktuure.",
+      completion: "Olekukood kirjeldab päringu tehnilist tulemust. Vastuses olevate arvude tähendus selgub andmete struktuurist ja kirjeldusest.",
       rounds: [
         {
           prompt: "API vastab „200 OK”. Mida saad kindlalt järeldada?",
           options: ["Andmed on sisuliselt õiged", "Päring õnnestus tehniliselt", "Ühik on euro", "Kõik perioodid saabusid"], correct: 1,
-          why: "200 OK kinnitab tehnilist õnnestumist; sisu, ühik ja perioodid vajavad eraldi kontrolli."
+          why: "200 OK kinnitab tehnilist õnnestumist. Sisu, ühik ja perioodid vajavad eraldi kontrolli."
         },
         {
           prompt: "API vastab „404 Not Found”. Mida kontrollid esimesena?",
           options: ["Tabeli aadressi ja koodi", "Arvude keskmist", "Joonise värvi", "CSV eraldajat"], correct: 0,
-          why: "404 viitab, et soovitud ressurssi ei leitud; kontrolli otspunkti ja tabeli koodi."
+          why: "404 tähendab, et küsitud ressurssi ei leitud. Esmalt tasub kontrollida otspunkti aadressi ja tabeli koodi."
         },
         {
           prompt: "API vastab „429 Too Many Requests”. Mis on mõistlik tegevus?",
@@ -235,7 +232,7 @@
         {
           prompt: "Kas sama Open‑Meteo päring annab homme tingimata täpselt sama prognoosi?",
           options: ["Jah, API vastus ei muutu", "Ei, prognoos uueneb", "Jah, kui URL on sama", "Ainult RStudio otsustab"], correct: 1,
-          why: "Ilmaprognoos on ajas uuenev hinnang; sama päringu tulemus võib järgmisel päeval muutuda."
+          why: "Ilmaprognoos uueneb. Sama päringu tulemus võib järgmisel päeval muutuda."
         },
         {
           prompt: "Mida kontrollid enne PA111 palgaväärtuste kasutamist?",
@@ -255,8 +252,8 @@
     ],
     url: [
       "See märk paikneb otspunkti ja esimese parameetri vahel.",
-      "Parameetri nimi ja väärtus kasutavad = märki; parameetrite omavaheliseks eraldamiseks on teine märk.",
-      "Tartu näide algab 58.38 ja 26.73; Tallinn asub põhja ja lääne pool.",
+      "Võrdusmärk seob parameetri nime väärtusega. Parameetrite vahele käib teine märk.",
+      "Esimene arv on põhjalaius. Teine arv on idapikkus.",
       "Parameetri nimi koosneb sõnadest forecast ja days."
     ],
     method: [
@@ -362,7 +359,12 @@
     state.currentStep = step;
     els.currentStepLabel.textContent = `SAMM ${step} / 4`;
     const percent = step === 1 ? 0 : step === 2 ? 25 : step === 3 ? 50 : completed ? 100 : 75;
-    const labels = { 1: "Küsi metaandmed", 2: "Vali andmed", 3: "Küsi andmed", 4: completed ? "Kontroll tehtud" : "Kontrolli vastust" };
+    const labels = {
+      1: "1. Tabeli kirjeldus",
+      2: "2. Andmevalik",
+      3: "3. Andmepäring",
+      4: completed ? "Põhiülesanne lõpetatud" : "4. Vastuse kontroll ja töötlus"
+    };
     els.progressValue.textContent = `${percent}%`;
     els.progressText.textContent = labels[step];
     els.progressBar.style.width = `${percent}%`;
@@ -379,10 +381,6 @@
     syncHeight();
   }
 
-  function setStory(index, html) {
-    els.storyIndex.textContent = String(index).padStart(2, "0");
-    els.storyText.innerHTML = html;
-  }
   function setResultPanelVisible(visible) {
     els.stageCard.hidden = !visible;
     els.labGrid.classList.toggle("result-pending", !visible);
@@ -406,7 +404,7 @@
 
     const responseLines = JSON.stringify(data, null, 2).split("\n").map(line => {
       const trimmed = line.trim();
-      if (trimmed === '"values": [') {
+      if (trimmed === '"value": [') {
         insideValues = true;
         return escapeHtml(line);
       }
@@ -420,7 +418,7 @@
         if (valueMatch) {
           const index = valueIndex++;
           const period = periods[index];
-          const hint = `API tagastas: ${formatValue(values[index])} ${unit} · ${indicator} · ${activity} · ${period}`;
+          const hint = `${formatValue(values[index])} ${unit} · ${indicator} · ${activity} · ${period}`;
           return `${escapeHtml(valueMatch[1])}<span class="response-value" tabindex="0" data-result-index="${index}" title="${escapeHtml(hint)}" aria-label="${escapeHtml(hint)}">${escapeHtml(valueMatch[2])}</span>${valueMatch[3]}`;
         }
       }
@@ -448,7 +446,7 @@
       .forEach(item => item.classList.toggle("is-linked", active));
   }
   function setResponseContext(label, text, kind = "neutral") {
-    const fillDesktopHeight = (kind === "metadata" || kind === "data") && window.matchMedia("(min-width: 1041px)").matches;
+    const fillDesktopHeight = kind === "metadata" && window.matchMedia("(min-width: 1041px)").matches;
     const controlHeight = fillDesktopHeight ? els.controlCard.getBoundingClientRect().height : null;
     els.responseContextLabel.textContent = label;
     els.responseContextText.textContent = text;
@@ -457,17 +455,10 @@
     els.stageCard.classList.add(`response-${kind}`);
     els.stageCard.style.height = fillDesktopHeight ? `${controlHeight}px` : "";
   }
-  function setGuide(_text, target, _buttonText = "Näita kohta") {
-    $$(".next-target").forEach(item => item.classList.remove("next-target"));
+  function highlightNext(target = null) {
+    $$(".is-next").forEach(item => item.classList.remove("is-next"));
     const guideTarget = target?.closest(".next-action-guide.contextual") || target;
-    if (guideTarget) guideTarget.classList.add("next-target");
-    syncHeight();
-  }
-
-  function hideGuide(target = null) {
-    $$(".next-target").forEach(item => item.classList.remove("next-target"));
-    const guideTarget = target?.closest(".next-action-guide.contextual") || target;
-    if (guideTarget) guideTarget.classList.add("next-target");
+    if (guideTarget) guideTarget.classList.add("is-next");
     syncHeight();
   }
 
@@ -481,43 +472,52 @@
     }
     if (state.checks === 4) {
       setProgress(4, true);
-      setStory(4, "<b>Vastus on vaadatud ja kontrollitud.</b> Järgmisena kinnista API 1 ja API 2 teemad viies lühikeses harjutuses.");
-      setGuide("Vastus on kontrollitud. Alusta esimesest harjutusest", els.workflowKicker, "Näita harjutust");
+      highlightNext(els.workflowKicker);
       return;
     }
     setProgress(4);
-    setStory(4, "<b>Vastus on vaadatud.</b> Nüüd kontrolli vastuse sisu ja tähendust.");
     const firstCheck = $("#validationFields .check-card:not(:has(input:checked))") || $("#validationFields .check-card");
-    setGuide("Nüüd kontrolli vastuse sisu ja tähendust", firstCheck, "Alusta kontrolli");
+    highlightNext(firstCheck);
+  }
+
+  function resetValidation() {
+    state.responseViewed = false;
+    state.checks = 0;
+    els.validationSection.classList.add("locked");
+    els.validationSection.setAttribute("aria-disabled", "true");
+    els.validationFields.disabled = true;
+    $$("#validationFields input").forEach(input => { input.checked = false; });
+    els.checkScore.textContent = "0/4";
+    els.takeaway.hidden = true;
+    setPracticeLocked(true);
   }
 
   function openFlowDialog(method) {
-    els.flowDialogKicker.textContent = `SINU ${method}-PÄRING LIIGUB`;
     els.flowStatus.textContent = "Päring käib…";
-    els.dialogFlowStatus.textContent = "Valmistab päringut ette";
-    els.flowDialogResult.innerHTML = `<b>${method}-päring on teel.</b> Vastus pole veel saabunud.`;
+    els.dialogFlowStatus.textContent = `${method}-päring on teel`;
+    els.flowDialogResult.textContent = "";
     els.flowDialogResult.className = "";
     els.flowDialogClose.disabled = true;
-    els.flowDialogClose.querySelector("span").textContent = "Oota vastust…";
+    els.flowDialogClose.querySelector("span").textContent = "Päring on töötlemisel";
     dialogTarget = null;
     if (!els.flowDialog.open) els.flowDialog.showModal();
   }
 
   function completeFlowDialog(method, target) {
-    els.flowStatus.textContent = "Vastus käes";
-    els.dialogFlowStatus.textContent = "200 OK · Vastus on käes";
-    els.flowDialogResult.innerHTML = method === "GET"
-      ? "<b>200 OK.</b> Teenus saatis tabeli kirjelduse ja valikud kliendile tagasi."
-      : "<b>200 OK.</b> Teenus saatis andmed kliendile tagasi.";
+    els.flowStatus.textContent = "Vastus saabus";
+    els.dialogFlowStatus.textContent = "200 OK";
+    els.flowDialogResult.textContent = method === "GET"
+      ? "GET-vastus sisaldab tabeli kirjeldust ja valikuid."
+      : "POST-vastus sisaldab valitud andmeid.";
     els.flowDialogResult.className = "success";
-    els.flowDialogClose.querySelector("span").textContent = method === "GET" ? "Vaata saadud metaandmeid" : "Vaata saadud vastust";
+    els.flowDialogClose.querySelector("span").textContent = method === "GET" ? "Vaata tabeli kirjeldust" : "Vaata vastust ja R-i näidet";
     els.flowDialogClose.disabled = false;
     dialogTarget = target;
     els.flowDialogClose.focus({ preventScroll: true });
   }
 
-  async function animateFlow(label, dialogMethod = null) {
-    if (dialogMethod) openFlowDialog(dialogMethod);
+  async function animateFlow(method) {
+    openFlowDialog(method);
     const stages = [{ stage: els.dialogFlowStage, status: els.dialogFlowStatus }];
     const flows = stages.map(({ stage, status }) => ({
       stage,
@@ -545,7 +545,7 @@
     await wait(800);
 
     activate(2);
-    setFlowStatus("Teenus töötleb päringut");
+    setFlowStatus("API koostab vastuse tabeli PA111 põhjal");
     await wait(800);
 
     flows.forEach(flow => {
@@ -566,7 +566,7 @@
       flow.stage.classList.remove("returning");
       flow.nodes.forEach(node => node.classList.remove("flow-active"));
     });
-    setFlowStatus("Vastus käes");
+    setFlowStatus("Vastus saabus");
   }
 
   async function loadMetadata() {
@@ -575,25 +575,23 @@
     els.stageCard.classList.remove("awaiting-response");
     els.stageCard.removeAttribute("aria-disabled");
     els.getMetadata.disabled = true;
-    els.getMetadata.querySelector("span").textContent = "API töötleb…";
-    setStory(1, "<b>Klient saadab GET-päringu.</b> Aadress osutab tabelile PA111. Päringu keha pole vaja.");
-    hideGuide(els.getMetadata);
-    await animateFlow("GET liigub", "GET");
+    els.getMetadata.querySelector("span").textContent = "GET-päring on töötlemisel";
+    highlightNext();
+    await animateFlow("GET");
     showResponse(metadataResponse);
     els.terminalTitle.textContent = "metaandmed.json";
     setStatus("200 OK", "success");
-    setResponseContext("GET-PÄRINGU VASTUS", "Teenuselt päringu tulemusena saadud täielikud metaandmed. Keri JSON-i sees, et näha kõiki väärtusi.", "metadata");
-    setStory(2, "<b>Teenuselt päringu tulemusena saadud vastus sisaldab metaandmeid.</b> Need kirjeldavad tabeli muutujaid ja valikuid. Palgaandmeid siin veel ei ole.");
+    setResponseContext("GET-PÄRINGU VASTUS", "Väli values sisaldab valikute koode ja valueTexts nende nimetusi. POST-päringusse lähevad koodid.", "metadata");
     state.metadata = true;
     els.selectionSection.classList.remove("locked");
     els.selectionFields.disabled = false;
     els.sendSection.classList.remove("locked");
     els.sendFields.disabled = false;
-    els.getMetadata.querySelector("span").textContent = "Metaandmed saadud";
+    els.getMetadata.querySelector("span").textContent = "Tabeli kirjeldus on avatud";
     award("metadata", 15);
     setProgress(2);
     updateRequestPreview();
-    setGuide("Vali soovitud andmed", els.selectionSection, "Näita valikuid");
+    highlightNext(els.selectionSection);
     completeFlowDialog("GET", els.responseContext);
   }
 
@@ -603,7 +601,7 @@
   }
 
   function indicatorUnit() {
-    if (els.indicatorSelect.value === "NR_EMPL") return "tuh";
+    if (els.indicatorSelect.value === "NR_EMPL") return "töötajat";
     if (els.indicatorSelect.value === "GR_W_AVG_SM") return "%";
     return "€";
   }
@@ -629,7 +627,7 @@
     const year = Number(period.slice(0, 4));
     const quarter = Number(period.slice(-1));
     const timeIndex = (year - 2024) * 4 + quarter - 2;
-    if (indicator === "NR_EMPL") return Number((100 + timeIndex * .7 + activityIndex * 1.2).toFixed(1));
+    if (indicator === "NR_EMPL") return 100000 + timeIndex * 700 + activityIndex * 1200;
     if (indicator === "GR_W_AVG_SM") return Number((5.2 + timeIndex * .08 - activityIndex * .05).toFixed(1));
     const wageBase = {
       GR_W_AVG: 2007, GR_W_D1: 1150, GR_W_D2: 1320, GR_W_D3: 1490, GR_W_D4: 1660,
@@ -638,20 +636,43 @@
     return Math.max(1, Math.round(wageBase + timeIndex * 35 + activityIndex * 12));
   }
 
-  function renderChart(periods, values) {
-    const max = Math.max(...values);
-    const min = Math.min(...values);
+  function renderRResult(periods, values, officialValues) {
     const unit = indicatorUnit();
-    els.barChart.innerHTML = periods.map((period, index) => {
-      const height = 45 + (values[index] / max) * 50;
-      const label = formatPeriod(period);
-      const display = `${formatValue(values[index])} ${unit}`;
-      return `<div class="chart-column"><span class="chart-value">${display}</span><i class="chart-bar" style="--bar-height:${height}%"></i><span class="chart-label">${label}</span></div>`;
-    }).join("");
-    const change = max === min ? "Väärtused on võrdsed" : `Vastuse väärtuste vahe: ${Number((max - min).toFixed(1))} ${unit}`;
-    els.chartTitle.textContent = els.indicatorSelect.selectedOptions[0].textContent.split(" · ")[0];
-    els.chartInsight.innerHTML = `<span>↗</span><b>${change}.</b> Muutus on nähtav. Enne järeldust kontrolli näitaja tähendust.`;
-    els.resultViz.hidden = false;
+    const changeUnit = unit === "%" ? "protsendipunkti" : unit;
+    const formatChange = difference => {
+      const rounded = Number(difference.toFixed(1));
+      const sign = rounded > 0 ? "+" : rounded < 0 ? "−" : "";
+      return `${sign}${formatValue(Math.abs(rounded))} ${changeUnit}`;
+    };
+    const indicatorName = els.indicatorSelect.selectedOptions[0].textContent.split(" · ")[0];
+    const activityName = els.activitySelect.selectedOptions[0].textContent.split(" · ")[0];
+    els.rTableCaption.textContent = `${indicatorName}. ${activityName}.`;
+    els.rDataSource.textContent = officialValues
+      ? "Need palgaväärtused pärinevad Statistikaameti tabelist PA111."
+      : "Vastus sisaldab õppimiseks loodud näidisväärtusi.";
+    const rows = periods.map((period, index) => {
+      const row = document.createElement("tr");
+      const periodCell = document.createElement("th");
+      periodCell.scope = "row";
+      periodCell.textContent = formatPeriod(period);
+      row.appendChild(periodCell);
+      row.insertCell().textContent = `${formatValue(values[index])} ${unit}`;
+      row.insertCell().textContent = index === 0 ? "—" : formatChange(values[index] - values[index - 1]);
+      return row;
+    });
+    els.rTableRows.replaceChildren(...rows);
+    els.rComparison.textContent = values.length === 1
+      ? "Muutuse arvutamiseks on vaja vähemalt kaht perioodi."
+      : `Muutus esimesest valitud perioodist viimaseni on ${formatChange(values.at(-1) - values[0])}.`;
+    els.rExampleCode.textContent = [
+      "andmed <- data.frame(",
+      `  periood = c(${periods.map(period => JSON.stringify(period)).join(", ")}),`,
+      `  vaartus = c(${values.join(", ")})`,
+      ")",
+      "andmed$muutus <- c(NA_real_, round(diff(andmed$vaartus), 1))",
+      "print(andmed)"
+    ].join("\n");
+    els.rResult.hidden = false;
   }
 
   async function sendPost() {
@@ -664,19 +685,22 @@
     }
 
     els.sendRequest.disabled = true;
-    els.sendRequest.querySelector("span").textContent = "API töötleb…";
+    els.sendRequest.querySelector("span").textContent = "POST-päring on töötlemisel";
     els.requestFeedback.hidden = true;
-    els.resultViz.hidden = true;
+    els.rResult.hidden = true;
+    state.successfulPost = false;
+    resetValidation();
     setProgress(3);
-    setStory(3, "<b>POST-päring saadab sinu valiku JSON-vormingus.</b> API tagastab valikule vastavad andmed.");
-    setGuide("POST-päring liigub. Jälgi klienti, otspunkti ja teenust", null, "Päring liigub");
-    await animateFlow("POST liigub", "POST");
+    highlightNext();
+    await animateFlow("POST");
 
     const periods = selectedPeriods();
     const values = periods.map(simulatedValue);
     const officialValues = usesOfficialPa111Values(periods);
     const postResponse = {
-      class: "dataset", label: officialValues ? "PA111 vastus" : "Näitlik vastus",
+      version: "2.0",
+      class: "dataset",
+      label: "PA111 näidisvastus",
       id: ["Näitaja", "Tegevusala", "Vaatlusperiood"],
       size: [1, 1, periods.length],
       dimension: {
@@ -684,25 +708,17 @@
         Tegevusala: { category: { index: [els.activitySelect.value] } },
         Vaatlusperiood: { category: { index: periods } }
       },
-      values,
-      note: officialValues
-        ? "PA111 ametliku tabeli kontrollväärtused"
-        : "Õppeandmed — mitte ametlik statistika"
+      value: values,
     };
     showPostResponse(postResponse, periods, values);
-    renderChart(periods, values);
+    renderRResult(periods, values, officialValues);
     setStatus("200 OK", "success");
     els.terminalTitle.textContent = "andmed.json";
-    els.requestFeedback.hidden = false;
-    els.requestFeedback.className = "feedback success";
-    els.requestFeedback.innerHTML = "<b>Päring õnnestus tehniliselt.</b> Vaata nüüd, millised andmed API tagastas.";
-    setStory(3, "<b>POST-päringu vastus on käes.</b> Vaata esmalt JSON-vastust ja saadud väärtusi.");
     state.successfulPost = true;
     award("post", 25);
     els.sendRequest.disabled = false;
-    els.sendRequest.querySelector("span").textContent = "Saada POST-päring uuesti";
-    setResponseContext("POST-PÄRINGU VASTUS", "Värvilised arvud on API tagastatud väärtused. Liigu arvule, et näha, milliste päringukoodidega see seotud on.", "data");
-    setGuide("Vaata kõigepealt POST-päringu vastust", els.responseContext, "Näita vastust");
+    els.sendRequest.querySelector("span").textContent = "Saada andmepäring uuesti";
+    setResponseContext("POST-PÄRINGU VASTUS", "Välja value arvud on perioodikoodidega samas järjekorras. Arvule liikudes tõstetakse esile sellega seotud koodid.", "data");
     completeFlowDialog("POST", els.responseContext);
     syncHeight();
   }
@@ -716,13 +732,13 @@
       setPracticeLocked(false);
       award("validation", 25);
       setProgress(4, true);
-      setStory(4, "<b>Sisu ja tähendus on kontrollitud.</b> Järgmisena kinnista API 1 ja API 2 teemad viies lühikeses harjutuses.");
-      setGuide("Kontroll on tehtud. Alusta esimesest harjutusest", els.workflowKicker, "Näita harjutust");
+      highlightNext(els.workflowKicker);
       window.setTimeout(() => els.workflowOptions.scrollIntoView({ behavior: "smooth", block: "center" }), 220);
     } else if (state.successfulPost) {
+      setPracticeLocked(true);
       setProgress(4);
       const nextCheck = $("#validationFields .check-card:not(:has(input:checked))");
-      setGuide(`Kontrollitud ${state.checks}/4. Jätka järgmise küsimusega`, nextCheck, "Näita järgmist");
+      highlightNext(nextCheck);
     }
     syncHeight();
   }
@@ -731,8 +747,8 @@
     els.practiceSuite.classList.toggle("locked", locked);
     if (locked) els.practiceSuite.setAttribute("aria-disabled", "true");
     else els.practiceSuite.removeAttribute("aria-disabled");
-    $$("button", els.practiceSuite).forEach(button => { button.disabled = locked; });
-    if (!locked) syncTestMap();
+    els.practiceSuite.inert = locked;
+    syncTestMap();
   }
 
   function updateQuestionVisual(question, numberLabel, index, total) {
@@ -787,17 +803,17 @@
     heading.textContent = title;
     const detail = document.createElement("span");
     detail.textContent = message;
-    copy.append(heading, detail);
+    copy.append(heading);
+    if (message) copy.append(detail);
     target.replaceChildren(icon, copy);
   }
 
   function revealHint(id) {
     const quiz = state.quizzes[id];
     const ui = testElements(id);
-    quiz.hintUsed = true;
     ui.hintPanel.textContent = quizHints[id][quiz.index];
     ui.hintPanel.hidden = false;
-    ui.hint.textContent = "💡 Vihje avatud";
+    ui.hint.textContent = "Vihje on kuvatud";
     ui.hint.disabled = true;
   }
 
@@ -822,20 +838,18 @@
     syncTestMap();
     if (state.completedTests.size === 5) {
       els.practiceCelebration.hidden = false;
-      setGuide("Kõik viis harjutust on tehtud. Soovi korral alusta uuesti", els.resetButton, "Alusta algusest");
+      highlightNext();
     }
   }
 
   function resetWorkflowTest() {
     state.workflow.next = 0;
-    state.workflow.mistakes = 0;
     state.workflow.complete = false;
     els.workflowRound.textContent = `0 / ${workflowSteps.length}`;
-    els.workflowScore.textContent = "start";
     els.workflowBar.style.width = "0%";
     els.workflowQuestionNumber.textContent = `1 / ${workflowSteps.length}`;
-    els.workflowPrompt.textContent = "Alusta paketi laadimisest. Seejärel liigu metaandmetest andmetabelini.";
-    setTestFeedback(els.workflowFeedback, "", "Sinu käik", "Klõpsa sammul, mis peab tulema esimesena.");
+    els.workflowPrompt.textContent = "Millises järjekorras saab pxweb-iga koostada API-päringu ja teisendada vastuse tabeliks?";
+    els.workflowFeedback.replaceChildren();
     els.workflowNext.hidden = true;
     $$("button[data-step]", els.workflowOptions).forEach(button => {
       button.disabled = false;
@@ -849,12 +863,11 @@
     if (!button || state.workflow.complete || button.classList.contains("placed")) return;
     const chosen = Number(button.dataset.step);
     if (chosen !== state.workflow.next) {
-      state.workflow.mistakes += 1;
       button.classList.remove("wrong");
       void button.offsetWidth;
       button.classList.add("wrong");
       window.setTimeout(() => button.classList.remove("wrong"), 520);
-      setTestFeedback(els.workflowFeedback, "bad", "See samm tuleb hiljem", `Otsi praegu sammu: ${workflowSteps[state.workflow.next]}`);
+      setTestFeedback(els.workflowFeedback, "bad", "See samm tuleb hiljem", workflowSteps[state.workflow.next]);
       return;
     }
 
@@ -864,19 +877,17 @@
     state.workflow.next += 1;
     const done = state.workflow.next === workflowSteps.length;
     els.workflowRound.textContent = `${state.workflow.next} / ${workflowSteps.length}`;
-    els.workflowScore.textContent = state.workflow.mistakes ? `${state.workflow.mistakes} ${state.workflow.mistakes === 1 ? "eksimus" : "eksimust"}` : "puhas rada";
     els.workflowBar.style.width = `${(state.workflow.next / workflowSteps.length) * 100}%`;
     els.workflowQuestionNumber.textContent = `${Math.min(state.workflow.next + 1, workflowSteps.length)} / ${workflowSteps.length}`;
 
     if (done) {
       state.workflow.complete = true;
-      els.workflowPrompt.textContent = "Töövoog valmis: paketist ja metaandmetest jõudsid kontrollitava R-i andmetabelini.";
-      setTestFeedback(els.workflowFeedback, "good", "Töövoog on koos", "Valik koostatakse enne andmepäringut ning vastus muudetakse tabeliks alles pärast päringut.");
+      els.workflowPrompt.textContent = "Kõik kuus tööetappi on järjestatud.";
+      setTestFeedback(els.workflowFeedback, "good", "Töövoog on valmis", "GET-vastus annab valikute koodid. POST-vastusest saab koostada R-i andmetabeli.");
       els.workflowNext.hidden = false;
       markTestComplete("workflow");
-      setGuide("R-i töövoo harjutus on tehtud. Järgmisena vaata R-i käske", $("#rcodeKicker"), "Näita harjutust");
     } else {
-      setTestFeedback(els.workflowFeedback, "good", `Samm ${state.workflow.next} on paigas`, `Järgmisena: ${workflowSteps[state.workflow.next]}`);
+      setTestFeedback(els.workflowFeedback, "good", `Samm ${state.workflow.next} on paigas`);
     }
     syncHeight();
   }
@@ -891,17 +902,14 @@
     ui.round.textContent = `${quiz.index + 1} / ${definition.rounds.length}`;
     ui.score.textContent = `${quiz.score} ${quiz.score === 1 ? "õige" : "õiget"}`;
     ui.bar.style.width = `${(quiz.index / definition.rounds.length) * 100}%`;
-    const instruction = id === "url" ? "Vali õige URL-i osa." : id === "method" ? "Vali kõige praktilisem meetod." : id === "detective" ? "Vali kõige täpsem järeldus." : "Vali puuduv käsk või tulemus.";
-    setTestFeedback(ui.feedback, "", "Mõtle esmalt ise", `${instruction} Vajadusel ava vihje.`);
+    ui.feedback.replaceChildren();
     ui.next.hidden = true;
     delete ui.next.dataset.advanceTo;
-    ui.next.textContent = quiz.index === definition.rounds.length - 1 ? "Lõpeta harjutus ✓" : "Järgmine →";
+    ui.next.textContent = quiz.index === definition.rounds.length - 1 ? "Lõpeta harjutus" : "Järgmine küsimus";
     quiz.locked = false;
-    quiz.wrongAnswers = 0;
-    quiz.hintUsed = false;
     ui.hint.hidden = false;
     ui.hint.disabled = false;
-    ui.hint.textContent = "💡 Ava vihje";
+    ui.hint.textContent = "Kuva vihje";
     ui.hintPanel.hidden = true;
     ui.hintPanel.textContent = "";
     const letters = ["A", "B", "C", "D"];
@@ -933,11 +941,10 @@
     const ui = testElements(id);
 
     if (!correct) {
-      quiz.wrongAnswers += 1;
       button.disabled = true;
       button.classList.add("wrong");
       revealHint(id);
-      setTestFeedback(ui.feedback, "bad", "Veel mitte — proovi uuesti", quizHints[id][quiz.index]);
+      setTestFeedback(ui.feedback, "bad", "See vastus ei sobi");
       syncHeight();
       return;
     }
@@ -951,8 +958,7 @@
     });
     ui.score.textContent = `${quiz.score} ${quiz.score === 1 ? "õige" : "õiget"}`;
     ui.bar.style.width = `${((quiz.index + 1) / definition.rounds.length) * 100}%`;
-    const title = quiz.wrongAnswers ? "Leidsid õige vastuse" : "Õige esimesel katsel";
-    setTestFeedback(ui.feedback, "good", title, round.why);
+    setTestFeedback(ui.feedback, "good", "Õige vastus", round.why);
     ui.hint.hidden = true;
     ui.hintPanel.hidden = true;
     ui.next.hidden = false;
@@ -980,7 +986,7 @@
 
     quiz.complete = true;
     const ui = testElements(id);
-    ui.prompt.textContent = `${definition.label} läbitud: ${quiz.score}/${definition.rounds.length} õiget.`;
+    ui.prompt.textContent = `Õigeid vastuseid ${quiz.score}/${definition.rounds.length}.`;
     setTestFeedback(ui.feedback, "good", "Harjutus tehtud", definition.completion);
     ui.hint.hidden = true;
     ui.hintPanel.hidden = true;
@@ -989,8 +995,7 @@
     if (nextId) {
       ui.next.hidden = false;
       ui.next.dataset.advanceTo = nextId;
-      ui.next.textContent = `Jätka: ${quizDefinitions[nextId].label} →`;
-      setGuide(`${definition.label} tehtud. Järgmisena: ${quizDefinitions[nextId].label}`, $(`#${nextId}Kicker`), "Näita harjutust");
+      ui.next.textContent = "Järgmine harjutus";
     } else {
       ui.next.hidden = true;
       window.setTimeout(() => els.practiceCelebration.scrollIntoView({ behavior: "smooth", block: "center" }), 120);
@@ -1002,9 +1007,9 @@
     state.completedTests = new Set();
     state.unlockedTests = new Set(["workflow"]);
     state.activeTest = "workflow";
-    state.workflow = { next: 0, mistakes: 0, complete: false };
+    state.workflow = { next: 0, complete: false };
     Object.keys(quizDefinitions).forEach(id => {
-      state.quizzes[id] = { index: 0, score: 0, locked: false, complete: false, wrongAnswers: 0, hintUsed: false };
+      state.quizzes[id] = { index: 0, score: 0, locked: false, complete: false };
     });
     els.practiceCompleted.textContent = "0 / 5";
     els.practiceCelebration.hidden = true;
@@ -1017,8 +1022,8 @@
 
   function resetLab() {
     state = initialState();
-    if (els.flowDialog.open) els.flowDialog.close();
     dialogTarget = null;
+    if (els.flowDialog.open) els.flowDialog.close();
     setResultPanelVisible(false);
     els.stageCard.classList.add("awaiting-response");
     els.stageCard.setAttribute("aria-disabled", "true");
@@ -1026,31 +1031,24 @@
     els.selectionFields.disabled = true;
     els.sendSection.classList.add("locked");
     els.sendFields.disabled = true;
-    els.validationSection.classList.add("locked");
-    els.validationSection.setAttribute("aria-disabled", "true");
-    els.validationFields.disabled = true;
+    resetValidation();
     $$("#selectionFields input[type='checkbox']").forEach(input => { input.checked = defaultPeriods.has(input.value); });
-    $$("#validationFields input").forEach(input => { input.checked = false; });
     els.indicatorSelect.selectedIndex = 0;
     els.activitySelect.selectedIndex = 0;
     els.getMetadata.disabled = false;
-    els.getMetadata.querySelector("span").textContent = "Küsi metaandmed";
-    els.sendRequest.querySelector("span").textContent = "Saada POST-päring";
+    els.getMetadata.querySelector("span").textContent = "Ava tabeli kirjeldus (GET)";
+    els.sendRequest.querySelector("span").textContent = "Saada andmepäring (POST)";
     els.requestFeedback.hidden = true;
-    els.resultViz.hidden = true;
-    els.takeaway.hidden = true;
-    els.checkScore.textContent = "0/4";
+    els.rResult.hidden = true;
     els.terminalTitle.textContent = "vastus.json";
     setStatus("—", "neutral");
-    setResponseContext("API VASTUS", "Pärast päringu saatmist näed siin teenuselt saadud vastust.");
+    setResponseContext("API VASTUS", "Vastus kuvatakse JSON-vormingus.");
     showResponse({ status: "Päringut pole veel saadetud" });
-    setStory(1, "<b>Alusta tabeli kirjeldusest.</b> GET-päring näitab, milliseid andmeid saab küsida.");
     els.flowStatus.textContent = "Päringut pole veel saadetud";
     updateRequestPreview();
     resetTests();
-    setPracticeLocked(true);
     setProgress(1);
-    hideGuide(els.getMetadata);
+    highlightNext(els.getMetadata);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -1080,16 +1078,22 @@
     const value = event.target.closest(".response-value");
     if (value) toggleResultLinks(value.dataset.resultIndex, false);
   });
-  els.flowDialogClose.addEventListener("click", () => {
-    const viewingPostResponse = state.successfulPost && dialogTarget === els.responseContext;
-    els.flowDialog.close();
-    window.setTimeout(() => dialogTarget?.scrollIntoView({ behavior: "smooth", block: "center" }), 120);
-    if (viewingPostResponse) window.setTimeout(advanceToValidation, 3200);
+  els.flowDialogClose.addEventListener("click", () => els.flowDialog.close());
+  els.flowDialog.addEventListener("cancel", event => {
+    if (els.flowDialogClose.disabled) event.preventDefault();
+  });
+  els.flowDialog.addEventListener("close", () => {
+    if (!dialogTarget) return;
+    const target = dialogTarget;
+    dialogTarget = null;
+    if (state.successfulPost) advanceToValidation();
+    target.focus({ preventScroll: true });
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
   });
   els.resetButton.addEventListener("click", resetLab);
   els.selectionFields.addEventListener("change", () => {
     updateRequestPreview();
-    if (state.metadata && !state.successfulPost) setGuide("Saada valitud andmete POST-päring", els.sendRequest, "Näita nuppu");
+    if (state.metadata && !state.successfulPost) highlightNext(els.sendRequest);
   });
   els.validationFields.addEventListener("change", updateChecks);
   els.workflowOptions.addEventListener("click", chooseWorkflowStep);
@@ -1121,6 +1125,6 @@
   resetTests();
   setPracticeLocked(true);
   setProgress(1);
-  hideGuide(els.getMetadata);
+  highlightNext(els.getMetadata);
   window.setTimeout(syncHeight, 100);
 })();

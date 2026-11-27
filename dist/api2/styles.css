@@ -129,20 +129,7 @@ h1 span { color: var(--blue); }
 .terminal-bar em.error { color: var(--red); background: rgba(255,108,124,.12); }
 .terminal pre { min-height: 202px; max-height: 310px; margin: 0; padding: 19px; overflow: auto; color: #acd9f5; font: 400 11px/1.65 "DM Mono",monospace; white-space: pre-wrap; }
 
-.result-viz { margin-top: 12px; padding: 18px; border: 1px solid rgba(49,168,255,.2); border-radius: 17px; background: linear-gradient(145deg, rgba(49,168,255,.08), rgba(4,19,31,.72)); overflow: hidden; }
-.result-viz[hidden] { display: none; }
-.result-viz-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
-.result-viz-head h3 { margin: 0; font-size: 15px; }
 .demo-chip { padding: 5px 8px; border: 1px solid rgba(255,122,47,.22); border-radius: 99px; color: #ffa778; background: rgba(255,122,47,.08); font-size: 8px; font-weight: 800; letter-spacing: .1em; }
-.bar-chart { display: flex; align-items: end; gap: 14px; height: 180px; margin-top: 14px; padding: 18px 10px 0; border-bottom: 1px solid rgba(131,208,255,.18); background: repeating-linear-gradient(0deg, rgba(131,208,255,.055) 0 1px, transparent 1px 44px); }
-.chart-column { display: flex; flex: 1; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 6px; }
-.chart-value { color: #dff5ff; font: 500 10px "DM Mono",monospace; }
-.chart-bar { width: min(58px, 72%); min-height: 6px; height: var(--bar-height); border-radius: 9px 9px 2px 2px; background: linear-gradient(180deg, var(--orange), #ff985f 40%, var(--blue)); box-shadow: 0 0 28px rgba(49,168,255,.15); transform-origin: bottom; animation: rise-bar .75s cubic-bezier(.2,.8,.2,1) both; }
-.chart-label { color: #7891a5; font-size: 9px; }
-@keyframes rise-bar { from { transform: scaleY(0); opacity: .2; } to { transform: scaleY(1); opacity: 1; } }
-.chart-insight { display: flex; align-items: center; gap: 9px; margin: 14px 0 0; color: #8fa6b8; font-size: 9px; line-height: 1.45; }
-.chart-insight span { display: grid; place-items: center; width: 25px; height: 25px; flex: 0 0 auto; border-radius: 8px; color: #06251b; background: var(--green); font-weight: 800; }
-.chart-insight b { color: #dce9f2; }
 
 .control-card { padding: 24px; }
 .control-head { align-items: center; padding-bottom: 18px; }
@@ -618,14 +605,7 @@ body.guide-hidden { padding-bottom: 0; }
 .terminal-bar em.success { color: #087b7d; background: #dff3f1; }
 .terminal-bar em.error { color: #ad3547; background: #f9e5e8; }
 .terminal pre { color: #173f73; background: #f8fafc; }
-.result-viz { border-color: #bfdae7; background: linear-gradient(145deg, #eef6fa, #fff); }
 .demo-chip { color: #087f82; border-color: #9fd4d2; background: #e7f7f5; }
-.bar-chart { border-color: #bfceda; background: repeating-linear-gradient(0deg, rgba(47,96,160,.07) 0 1px, transparent 1px 44px); }
-.chart-value { color: #173f73; }
-.chart-bar { background: linear-gradient(180deg, #07979a, #0aa7d8 45%, #2f60a0); box-shadow: 0 0 22px rgba(10,167,216,.14); }
-.chart-label, .chart-insight { color: #60778a; }
-.chart-insight span { color: #fff; background: #07979a; }
-.chart-insight b { color: #173f73; }
 
 .control-card { background: #fff; }
 .control-title > span { color: #fff; background: #2f60a0; }
@@ -753,11 +733,7 @@ body { font-size: 16px; }
 .terminal-bar b { font-size: 12px; }
 .terminal-bar em { font-size: 11px; }
 .terminal pre { font-size: 13px; line-height: 1.7; }
-.result-viz-head h3 { font-size: 17px; }
 .demo-chip { font-size: 10px; }
-.chart-value { font-size: 12px; }
-.chart-label { font-size: 11px; }
-.chart-insight { font-size: 12px; }
 
 .control-title h3 { font-size: 16px; }
 .control-title p { font-size: 13px; line-height: 1.5; }
@@ -855,7 +831,7 @@ body { color: #102f55; background-color: #eef3f7; }
 .next-target { outline-color: rgba(8,127,166,.7) !important; box-shadow: 0 0 0 9px rgba(8,127,166,.12), 0 12px 26px rgba(16,47,85,.18) !important; }
 
 .card-heading h2, .validation-intro h2, .compass-copy h2, .recipe-copy h2, .decoder-head h2,
-.control-title h3, .result-viz-head h3 { color: #102f55; }
+.control-title h3 { color: #102f55; }
 .live-chip { border-color: #b9ccd9; color: #344f68; }
 .flow-stage { border-color: #b7ccd9; }
 .node small { color: #3f5a71; }
@@ -869,9 +845,6 @@ body { color: #102f55; background-color: #eef3f7; }
 .terminal-bar { border-color: #bfced9; }
 .terminal-bar b { color: #3b576e; }
 .terminal pre { color: #102f55; }
-.result-viz { border-color: #a9c8d8; }
-.chart-value, .chart-insight b { color: #102f55; }
-.chart-label, .chart-insight { color: #3d586f; }
 
 .control-section { border-color: #c1d1dc; }
 .control-section.locked { opacity: .68; }
@@ -1176,8 +1149,7 @@ footer b { color: #183f70; }
 .method-options { gap: var(--space-tight); }
 .control-section { padding: 22px 0; }
 .story-strip { margin-top: var(--space-block); }
-.terminal,
-.result-viz { margin-top: var(--space-block); }
+.terminal { margin-top: var(--space-block); }
 footer { padding-top: 24px; }
 
 @media (max-width: 760px) {
@@ -1636,53 +1608,22 @@ footer { padding-top: 24px; }
   .period-year-grid .period-label { padding: 4px 2px; font-size: 10px; }
 }
 
-/* Clarify that the chart is a separate RStudio visualization of the API response. */
-.result-viz-note {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 12px 0 0;
-  padding: 10px 12px;
-  border: 1px solid #b7ccda;
-  border-radius: 11px;
-  color: #38546b;
-  background: #f4f8fb;
-  font-size: 13px;
-  line-height: 1.45;
-}
-.result-viz-note > span:first-child {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  flex: 0 0 auto;
-  border-radius: 9px;
-  color: #fff;
-  background: #2f60a0;
-  font-size: 16px;
-  font-weight: 800;
-}
-.result-viz-note b { color: #102f55; }
-
-/* On desktop, let both GET and POST responses use the height created by the choices card. */
+/* Keep the longer metadata response scrollable alongside the choices. */
 @media (min-width: 1041px) {
-  .stage-card.response-metadata,
-  .stage-card.response-data {
+  .stage-card.response-metadata {
     display: flex;
     flex-direction: column;
     min-height: 0;
     overflow: hidden;
   }
-  .stage-card.response-metadata .terminal,
-  .stage-card.response-data .terminal {
+  .stage-card.response-metadata .terminal {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
     min-height: 420px;
     overflow: hidden;
   }
-  .stage-card.response-metadata .terminal pre,
-  .stage-card.response-data .terminal pre {
+  .stage-card.response-metadata .terminal pre {
     flex: 1 1 auto;
     max-height: none;
     min-height: 0;
@@ -1690,8 +1631,7 @@ footer { padding-top: 24px; }
 }
 
 @media (max-width: 1040px) {
-  .stage-card.response-metadata,
-  .stage-card.response-data { height: auto !important; }
+  .stage-card.response-metadata { height: auto !important; }
 }
 
 /* One coherent question flow for the method-choice exercise. */
@@ -2514,3 +2454,135 @@ footer { padding-top: 24px; }
 .progress-meta{display:flex;justify-content:space-between;margin-top:10px;color:#405b72;font-size:11px}
 .progress-meta b{color:#056f72}
 @media(max-width:680px){.hero-copy h1.hero-title{font-size:clamp(34px,10.5vw,48px)}.hero-copy .hero-subtitle{font-size:24px}.hero-copy .hero-description{font-size:14px}}
+
+.shell .hero-copy h1.hero-title {
+  font-size: clamp(2rem, 4.7vw, 3.8rem);
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.briefing-card {
+  display: block;
+  padding: clamp(1rem, 2vw, 1.5rem);
+  background: #f7fbfe;
+}
+
+.briefing-card h2 {
+  margin: 0 0 .5rem;
+  font-size: 1.25rem;
+}
+
+.briefing-card .briefing-context {
+  margin-top: .7rem;
+}
+
+.step.active::after { content: none; }
+
+.stepper .step:not(.active):not(.done) {
+  opacity: 1;
+  color: #405a70;
+}
+
+.shell .is-next {
+  outline: 2px solid #567fa4;
+  outline-offset: 3px;
+}
+
+.stage-card.response-data { align-self: start; }
+
+.stage-card.response-data .terminal pre {
+  min-height: 0;
+  max-height: 16rem;
+}
+
+.r-result {
+  margin-top: 1.25rem;
+  padding: clamp(.85rem, 2vw, 1.25rem);
+  border: 1px solid #bdd0de;
+  border-radius: 14px;
+  background: #f4f8fb;
+}
+
+.r-result[hidden] { display: none; }
+
+.r-result h3, .practice-card .test-head h3 {
+  margin: 0;
+  color: #102f55;
+  font-size: clamp(1.125rem, 2.3vw, 1.4rem);
+  line-height: 1.3;
+}
+
+.r-result p { color: #38546b; }
+
+.r-result-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  color: #102f55;
+  background: #fff;
+  text-align: left;
+}
+
+.r-result-table caption {
+  padding-bottom: .55rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.r-result-table th, .r-result-table td {
+  padding: .6rem .5rem;
+  border-bottom: 1px solid #c8d7e2;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.r-result-table thead th { background: #e6eff6; }
+
+.r-result .r-comparison {
+  margin-bottom: 0;
+  font-weight: 700;
+}
+
+.r-example {
+  margin-top: 1rem;
+  background: #fff;
+}
+
+.r-example summary {
+  display: list-item;
+  list-style: revert;
+  padding-inline: 1rem;
+  font-weight: 700;
+}
+
+.r-example summary::-webkit-details-marker { display: inline; }
+
+.r-example p {
+  margin: .75rem 1rem;
+}
+
+.r-example .r-code {
+  max-height: none;
+  padding: .85rem 1rem;
+  overflow: auto;
+  color: #102f55;
+  background: #eef4f8;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.validation-source > span:first-child {
+  width: auto;
+  padding-inline: .45rem;
+  font-size: .875rem;
+}
+
+.test-action-row:has(.test-feedback:empty) {
+  display: none;
+}
+
+.practice-card.test-complete::before { content: none; }
+
+@media (max-width: 680px) {
+  .r-result-table th, .r-result-table td { padding-inline: .3rem; }
+}
