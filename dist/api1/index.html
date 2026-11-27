@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Harjutus Statistikaameti API GET-päringu koostamiseks ja tabeli kirjelduse lugemiseks JSON-vastusest.">
   <title>API 1 · GET-päring Statistikaameti API-s</title>
-  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="styles.css?v=8">
   <link rel="stylesheet" href="../api-common.css?v=16">
   <link rel="stylesheet" href="../readability.css?v=3">
 </head>
@@ -55,7 +55,10 @@
 Accept: application/json</pre>
           <p>Päisega <code>Accept</code> küsib klient JSON-vastust. Sellel GET-päringul päringukeha puudub.</p>
         </details>
-        <button class="primary-button get-action" id="getMetadata" type="button">Saada GET-päring</button>
+        <div class="get-request-actions">
+          <button class="primary-button get-action" id="getMetadata" type="button">Saada GET-päring</button>
+          <a id="continueToSelection" href="#readingTitle" hidden>Andmevaliku juurde</a>
+        </div>
         <p class="feedback error" id="requestError" role="status" hidden></p>
       </section>
 
@@ -94,13 +97,16 @@ Accept: application/json</pre>
     </dialog>
 
     <section class="card get-exercise" id="readingSection" aria-labelledby="readingTitle" hidden>
-      <h2 id="readingTitle">Andmevalik</h2>
+      <h2 id="readingTitle" tabindex="-1">Andmevalik</h2>
       <p>Näitaja, tegevusala ja vaatlusperioodide valikud pärinevad GET-vastuse metaandmetest. Valikute muutmisel uuenevad all kuvatud koodid ja kombinatsioonide arv.</p>
       <p class="selection-source-note"><b>Metaandmetest leitud</b><span id="selectionCounts"></span></p>
       <form id="readingForm">
         <div class="selection-task" id="selectionTask">
-          <p id="selectionTaskCount"></p>
-          <h3 id="selectionTaskPrompt" tabindex="-1"></h3>
+          <div class="selection-task-header">
+            <p class="selection-task-count" id="selectionTaskCount"></p>
+            <p>Lahenda kolm ülesannet järjest.</p>
+          </div>
+          <h3 id="selectionTaskPrompt" aria-describedby="selectionTaskCount" tabindex="-1"></h3>
         </div>
         <p id="selectionComplete" role="status" hidden>Kolm andmevaliku ülesannet on tehtud. Andmevalikuid saab edasi katsetada.</p>
         <div class="get-code-fields">
@@ -173,6 +179,6 @@ Accept: application/json</pre>
     </footer>
   </main>
   <script src="../api-nav.js"></script>
-  <script src="app.js?v=8"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>

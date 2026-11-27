@@ -108,8 +108,25 @@ with tempfile.TemporaryDirectory(prefix="andmep-api1-chrome-") as profile:
                 command("Input.dispatchMouseEvent", {"type": kind, "button": "left", "clickCount": 1, **point})
 
         snapshots = json.loads((ROOT / "dist/api1/pa111-metadata.json").read_text(encoding="utf-8"))
+        command("Network.enable")
+        command("Network.setBlockedURLs", {"urls": ["*pa111-metadata.json*"]})
+        evaluate("getMetadata.click()")
+        wait_until("!requestError.hidden && !flowDialog.open")
+        assert evaluate("!getMetadata.disabled && !requestLanguage.disabled && stageCard.hidden")
+        command("Network.setBlockedURLs", {"urls": []})
         send_get()
         assert evaluate("progressValue.textContent") == "33%"
+        assert evaluate("""getMetadata.disabled && requestLanguage.disabled
+          && getMetadata.textContent === 'GET-päring tehtud'
+          && currentStepLabel.textContent === 'SAMM 1 / 3'
+          && !continueToSelection.hidden""")
+        evaluate("getMetadata.dispatchEvent(new MouseEvent('click', {bubbles:true}))")
+        assert evaluate("!flowDialog.open && progressValue.textContent === '33%'")
+        evaluate("continueToSelection.click()")
+        assert evaluate("document.activeElement === readingTitle")
+        assert evaluate("selectionTaskCount.textContent") == "Ülesanne 1 / 3"
+        evaluate("readingSection.scrollIntoView({block:'start', behavior:'instant'})")
+        screenshot("api1-selection-first-task.png")
         assert evaluate("JSON.parse(responseOutput.textContent)") == snapshots["et"]
         assert evaluate("liveResponse.href") == "https://andmed.stat.ee/api/v1/et/stat/PA111"
         assert evaluate("""indicatorSelect.options.length === 12 && activitySelect.options.length === 20
@@ -139,14 +156,23 @@ with tempfile.TemporaryDirectory(prefix="andmep-api1-chrome-") as profile:
         assert period["valueTexts"][period["values"].index("2026Q2")] == "2026 II kvartal"
         screenshot("api1-feedback-result.png")
 
+        evaluate("resetButton.click()")
+        assert evaluate("!getMetadata.disabled && !requestLanguage.disabled && continueToSelection.hidden")
         evaluate("""requestLanguage.value='en';
           requestLanguage.dispatchEvent(new Event('change', {bubbles:true}));""")
         assert evaluate("requestPath.textContent") == "/api/v1/en/stat/PA111"
-        assert evaluate("responsePath.textContent") == "/api/v1/et/stat/PA111"
         send_get()
-        wait_until("responsePath.textContent === '/api/v1/en/stat/PA111'")
+        assert evaluate("responsePath.textContent") == "/api/v1/en/stat/PA111"
         assert evaluate("JSON.parse(responseOutput.textContent)") == snapshots["en"]
         assert evaluate("liveResponse.href") == "https://andmed.stat.ee/api/v1/en/stat/PA111"
+        assert evaluate("getMetadata.disabled && requestLanguage.disabled")
+        evaluate("""(() => {
+          indicatorSelect.value = 'GR_W_D5';
+          indicatorSelect.dispatchEvent(new Event('change', {bubbles:true}));
+          activitySelect.value = 'P';
+          activitySelect.dispatchEvent(new Event('change', {bubbles:true}));
+          clearPeriods.click();
+        })()""")
 
         assert evaluate("""indicatorSelect.value === 'GR_W_D5' && activitySelect.value === 'P'
           && !periodOptions.querySelector('input:checked')""")
@@ -197,7 +223,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-api1-chrome-") as profile:
         assert evaluate("selectionTaskCount.textContent") == "Ülesanne 3 / 3"
         select_for_task("NR_EMPL", "F", ["2025Q1", "2025Q2", "2025Q3", "2025Q4"])
         assert evaluate("""!quizSection.hidden && progressValue.textContent === '67%'
-          && !selectionComplete.hidden && valueCount.textContent === '= 4 väärtust'""")
+          && !selectionComplete.hidden && continueToSelection.hidden && valueCount.textContent === '= 4 väärtust'""")
         evaluate("readingSection.scrollIntoView({block:'start', behavior:'instant'})")
         screenshot("api1-selection-desktop.png")
 
@@ -220,13 +246,14 @@ with tempfile.TemporaryDirectory(prefix="andmep-api1-chrome-") as profile:
         evaluate("resetButton.click()")
         assert evaluate("""requestLanguage.value === 'et' && progressValue.textContent === '0%'
           && stageCard.hidden && readingSection.hidden && quizSection.hidden
+          && !getMetadata.disabled && !requestLanguage.disabled
           && selectionTaskCount.textContent === 'Ülesanne 1 / 3'""")
         send_get()
         assert evaluate("JSON.parse(responseOutput.textContent)") == snapshots["et"]
         assert evaluate("indicatorSelect.value === 'GR_W_AVG' && activitySelect.value === 'TOTAL' && valueCount.textContent === '= 3 väärtust'")
         click_visible("#checkSelection")
         assert evaluate("!nextSelectionTask.hidden && readingFeedback.classList.contains('success')")
-        print("API 1 passed in both languages, including immediate default validation, period hints and mobile reset.")
+        print("API 1 passed in both languages, including request lock, failed-request retry, ordered tasks and reset.")
     finally:
         process.terminate()
         process.wait(timeout=10)

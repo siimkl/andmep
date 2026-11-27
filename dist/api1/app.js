@@ -93,13 +93,12 @@
 
   function updateProgress() {
     const done = completedSteps === stepTitles.length;
-    const active = completedSteps + 1;
     const progress = Math.round(completedSteps / stepTitles.length * 100) + "%";
     $("#progressValue").textContent = progress;
     $("#progressBar").style.width = progress;
     $("#progressText").textContent = done ? "Harjutus lõpetatud" : stepTitles[completedSteps];
     $("#completedCount").textContent = completedSteps;
-    $("#currentStepLabel").textContent = done ? "3 / 3 SAMMU TEHTUD" : "SAMM " + active + " / 3";
+    $("#continueToSelection").hidden = completedSteps !== 1;
     $$(".get-steps .step").forEach((step, index) => {
       const current = index === completedSteps && !done;
       step.classList.toggle("active", current);
@@ -123,11 +122,19 @@
     return new Promise(resolve => window.setTimeout(resolve, 450));
   }
 
+  function updateRequestAvailability() {
+    const sent = pendingResponse !== null || completedSteps > 0;
+    const disabled = running || sent;
+    requestButton.disabled = disabled;
+    requestLanguage.disabled = disabled;
+    requestButton.textContent = sent ? "GET-päring tehtud" : "Saada GET-päring";
+  }
+
   async function sendGet() {
-    if (running || flowDialog.open) return;
+    if (requestButton.disabled || flowDialog.open) return;
     const language = requestLanguage.value;
     running = true;
-    requestButton.disabled = true;
+    updateRequestAvailability();
     flowClose.disabled = true;
     requestError.hidden = true;
     $("#flowDialogResult").textContent = "";
@@ -151,7 +158,7 @@
       requestError.hidden = false;
     } finally {
       running = false;
-      requestButton.disabled = false;
+      updateRequestAvailability();
       flowStage.classList.remove("sending", "returning");
     }
   }
@@ -166,7 +173,6 @@
 
   function revealResponse() {
     if (!pendingResponse) return;
-    const keepSelection = response !== null;
     response = pendingResponse;
     pendingResponse = null;
     $("#responsePath").textContent = new URL(response.address).pathname;
@@ -175,9 +181,10 @@
     renderJson();
     stageCard.hidden = false;
     $(".lab-grid").classList.remove("result-pending");
-    renderSelectionChoices(keepSelection);
+    renderSelectionChoices();
     readingSection.hidden = false;
-    completedSteps = Math.max(1, completedSteps);
+    completedSteps = 1;
+    updateRequestAvailability();
     updateProgress();
     $("#responseTitle").focus({ preventScroll: true });
     stageCard.scrollIntoView({ block: "nearest" });
@@ -195,14 +202,14 @@
     if (variable.values.includes(code)) select.value = code;
   }
 
-  function renderSelectionChoices(keepSelection) {
+  function renderSelectionChoices() {
     const [indicator, activity, period] = ["Näitaja", "Tegevusala", "Vaatlusperiood"].map(code =>
       response.body.variables.find(variable => variable.code === code)
     );
     const initial = selectionTasks[0];
-    const checkedPeriods = new Set(keepSelection ? selectedPeriods() : initial.periods);
-    fillSelect(indicatorSelect, indicator, keepSelection ? indicatorSelect.value : initial.indicator);
-    fillSelect(activitySelect, activity, keepSelection ? activitySelect.value : initial.activity);
+    const checkedPeriods = new Set(initial.periods);
+    fillSelect(indicatorSelect, indicator, initial.indicator);
+    fillSelect(activitySelect, activity, initial.activity);
 
     const years = new Map();
     period.values.forEach((code, index) => {
@@ -392,6 +399,7 @@
     $("#quizQuestion").hidden = false;
     $("#quizSummary").hidden = true;
     updateRequest();
+    updateRequestAvailability();
     updateProgress();
     window.scrollTo({ top: 0 });
   }

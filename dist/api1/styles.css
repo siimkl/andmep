@@ -2263,6 +2263,22 @@ footer { padding-top: 24px; }
 .get-action {
   margin-top: .75rem;
 }
+#getMetadata:disabled {
+  border-color: #c2ced9;
+  color: #38546b;
+  background: #edf2f6;
+  box-shadow: none;
+  cursor: default;
+}
+.get-request-actions a {
+  display: inline-block;
+  margin-top: .75rem;
+  color: #174b81;
+  font-weight: 700;
+}
+.get-request-actions a[hidden] {
+  display: none;
+}
 .get-response-address {
   display: grid;
   gap: .25rem;
@@ -2296,6 +2312,7 @@ footer { padding-top: 24px; }
   margin: 1rem 0;
   padding: .85rem 1rem;
   border: 1px solid #c4d5e0;
+  border-inline-start: 4px solid #245c9b;
   border-radius: 9px;
   background: #f5f9fb;
 }
@@ -2303,9 +2320,21 @@ footer { padding-top: 24px; }
 .selection-task h3 {
   margin: 0;
 }
-.selection-task p {
-  margin-bottom: .25rem;
+.selection-task-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .35rem .8rem;
+  margin-bottom: .6rem;
   color: #38546b;
+}
+.selection-task .selection-task-count {
+  padding: .3rem .65rem;
+  border-radius: 6px;
+  color: #fff;
+  background: #174b81;
+  font-size: 1.125rem;
+  font-weight: 800;
 }
 #periodField {
   min-width: 0;
