@@ -1036,7 +1036,7 @@
     els.indicatorSelect.selectedIndex = 0;
     els.activitySelect.selectedIndex = 0;
     els.getMetadata.disabled = false;
-    els.getMetadata.querySelector("span").textContent = "Ava tabeli kirjeldus (GET)";
+    els.getMetadata.querySelector("span").textContent = "Saada GET-päring";
     els.sendRequest.querySelector("span").textContent = "Saada andmepäring (POST)";
     els.requestFeedback.hidden = true;
     els.rResult.hidden = true;

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Harjutus Statistikaameti API GET-päringu koostamiseks ja tabeli kirjelduse lugemiseks JSON-vastusest.">
   <title>API 1 · GET-päring Statistikaameti API-s</title>
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=6">
   <link rel="stylesheet" href="../api-common.css?v=16">
   <link rel="stylesheet" href="../readability.css?v=3">
 </head>
@@ -29,14 +29,14 @@
     <section class="briefing-card" aria-labelledby="task-title">
       <div>
         <h2 id="task-title">Praktikumi ülesanne</h2>
-        <p>Statistikaameti tabeli PA111 kirjeldusest on vaja leida kolme valiku koodid. Need on <strong>keskmine brutokuupalk</strong>, <strong>kõik tegevusalad</strong> ja <strong>2026. aasta II kvartal</strong>.</p>
+        <p>Statistikaameti tabeli PA111 metaandmete põhjal koostatakse kolm andmevalikut. Igas ülesandes tuleb leida sobiv näitaja, tegevusala ja vaatlusperioodid.</p>
         <p class="briefing-context">Ühe tabeli näitel saab jälgida, kuidas päringu aadress ja vastuses olevad väljad omavahel seostuvad. Brauser kuvab varem salvestatud GET-vastuse.</p>
       </div>
     </section>
 
     <ol class="stepper get-steps" aria-label="Harjutuse sammud">
       <li class="step active" data-step="1" aria-current="step"><span>1</span><div><b>GET-päring</b></div></li>
-      <li class="step" data-step="2"><span>2</span><div><b>Vastuse lugemine</b></div></li>
+      <li class="step" data-step="2"><span>2</span><div><b>Andmevalik</b></div></li>
       <li class="step" data-step="3"><span>3</span><div><b>Lühitest</b></div></li>
     </ol>
 
@@ -94,21 +94,40 @@ Accept: application/json</pre>
     </dialog>
 
     <section class="card get-exercise" id="readingSection" aria-labelledby="readingTitle" hidden>
-      <h2 id="readingTitle">Koodide leidmine vastusest</h2>
-      <p>Vali iga nimetuse juurde kood, mille leiad vastavast JSON-i muutujast.</p>
+      <h2 id="readingTitle">Andmevalik</h2>
+      <p>Näitaja, tegevusala ja vaatlusperioodide valikud pärinevad GET-vastuse metaandmetest. Valikute muutmisel uuenevad all kuvatud koodid ja kombinatsioonide arv.</p>
+      <p class="selection-source-note"><b>Metaandmetest leitud</b><span id="selectionCounts"></span></p>
       <form id="readingForm">
-        <div class="get-code-fields">
-          <label class="select-label" for="indicatorCode"><span>Keskmine brutokuupalk</span><select id="indicatorCode" required><option value="">Vali näitaja kood</option><option>NR_EMPL</option><option>GR_W_AVG</option><option>GR_W_D5</option></select></label>
-          <label class="select-label" for="activityCode"><span>Kõik tegevusalad</span><select id="activityCode" required><option value="">Vali tegevusala kood</option><option>P</option><option>F</option><option>TOTAL</option></select></label>
-          <label class="select-label" for="periodCode"><span>2026. aasta II kvartal</span><select id="periodCode" required><option value="">Vali vaatlusperioodi kood</option><option>2026Q1</option><option>2025Q2</option><option>2026Q2</option></select></label>
+        <div class="selection-task" id="selectionTask">
+          <p id="selectionTaskCount"></p>
+          <h3 id="selectionTaskPrompt" tabindex="-1"></h3>
         </div>
-        <button class="primary-button get-action" id="checkCodes" type="submit">Kontrolli koode</button>
-        <p id="readingFeedback" class="feedback" role="status" hidden></p>
+        <p id="selectionComplete" role="status" hidden>Kolm andmevaliku ülesannet on tehtud. Andmevalikuid saab edasi katsetada.</p>
+        <div class="get-code-fields">
+          <label class="select-label" for="indicatorSelect"><span>Näitaja</span><select id="indicatorSelect"></select></label>
+          <label class="select-label" for="activitySelect"><span>Tegevusala</span><select id="activitySelect"></select></label>
+        </div>
+        <fieldset class="period-group" id="periodField">
+          <legend>Vaatlusperiood</legend>
+          <div class="check-pills" id="periodOptions"></div>
+        </fieldset>
+        <dl class="get-selection-codes" aria-label="Valitud koodid">
+          <div><dt>Näitaja kood</dt><dd><code id="selectedIndicatorCode"></code></dd></div>
+          <div><dt>Tegevusala kood</dt><dd><code id="selectedActivityCode"></code></dd></div>
+          <div><dt>Perioodide koodid</dt><dd><code id="selectedPeriodCodes"></code></dd></div>
+        </dl>
+        <div class="selection-math" role="status"><span id="selectionMath"></span><b id="valueCount"></b></div>
+        <p class="get-selection-note">Arv näitab, mitmele tabeli lahtrile valik vastab.</p>
+        <div id="selectionActions">
+          <button class="primary-button get-action" id="checkSelection" type="submit">Kontrolli valikut</button>
+          <p id="readingFeedback" class="feedback" role="status" hidden></p>
+          <button class="quiz-next" id="nextSelectionTask" type="button" hidden>Järgmine ülesanne</button>
+        </div>
       </form>
     </section>
 
     <section class="card get-exercise practice-suite" id="quizSection" aria-labelledby="practiceTitle" hidden>
-      <h2 id="practiceTitle">GET-päringu lühitest</h2>
+      <h2 id="practiceTitle" tabindex="-1">GET-päringu lühitest</h2>
       <div id="quizQuestion">
         <p class="get-question-count" id="quizCount"></p>
         <h3 id="quizPrompt" tabindex="-1"></h3>
@@ -153,6 +172,6 @@ Accept: application/json</pre>
     </footer>
   </main>
   <script src="../api-nav.js"></script>
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>

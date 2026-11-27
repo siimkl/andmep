@@ -101,6 +101,20 @@ with tempfile.TemporaryDirectory(prefix="andmep-api1-chrome-") as profile:
         assert evaluate("progressValue.textContent") == "33%"
         assert evaluate("JSON.parse(responseOutput.textContent)") == snapshots["et"]
         assert evaluate("liveResponse.href") == "https://andmed.stat.ee/api/v1/et/stat/PA111"
+        assert evaluate("""indicatorSelect.options.length === 12 && activitySelect.options.length === 20
+          && periodOptions.querySelectorAll('input').length === 22 && periodOptions.children.length === 6""")
+        assert evaluate("selectionCounts.textContent") == "12 näitajat · 20 tegevusala · 22 vaatlusperioodi"
+        assert evaluate("selectionMath.textContent + ' ' + valueCount.textContent") == "1 × 1 × 3 = 3 väärtust"
+        assert evaluate("selectedPeriodCodes.textContent") == "2024Q2, 2025Q2, 2026Q2"
+        evaluate("""(() => {
+          indicatorSelect.value = 'GR_W_D5';
+          indicatorSelect.dispatchEvent(new Event('change', {bubbles:true}));
+          activitySelect.value = 'P';
+          activitySelect.dispatchEvent(new Event('change', {bubbles:true}));
+          [...periodOptions.querySelectorAll('input:checked')].forEach(input => input.click());
+        })()""")
+        assert evaluate("selectedPeriodCodes.textContent") == "Valik puudub"
+        assert evaluate("selectionMath.textContent") == "1 × 1 × 0"
         evaluate("""responsePart.value='Vaatlusperiood';
           responsePart.dispatchEvent(new Event('change', {bubbles:true}));""")
         period = evaluate("JSON.parse(responseOutput.textContent)")
@@ -116,11 +130,44 @@ with tempfile.TemporaryDirectory(prefix="andmep-api1-chrome-") as profile:
         assert evaluate("JSON.parse(responseOutput.textContent)") == snapshots["en"]
         assert evaluate("liveResponse.href") == "https://andmed.stat.ee/api/v1/en/stat/PA111"
 
-        evaluate("indicatorCode.value='NR_EMPL'; activityCode.value='TOTAL'; periodCode.value='2026Q2'; checkCodes.click()")
-        assert evaluate("quizSection.hidden && indicatorCode.getAttribute('aria-invalid') === 'true'")
-        assert "Näitaja" in evaluate("readingFeedback.textContent")
-        evaluate("indicatorCode.value='GR_W_AVG'; checkCodes.click()")
-        assert evaluate("!quizSection.hidden && progressValue.textContent === '67%' && indicatorCode.disabled")
+        assert evaluate("""indicatorSelect.value === 'GR_W_D5' && activitySelect.value === 'P'
+          && !periodOptions.querySelector('input:checked')""")
+        assert evaluate("indicatorSelect.selectedOptions[0].textContent") == (
+            snapshots["en"]["variables"][0]["valueTexts"][6] + " · GR_W_D5"
+        )
+
+        evaluate("checkSelection.click()")
+        assert evaluate("""quizSection.hidden && nextSelectionTask.hidden
+          && indicatorSelect.getAttribute('aria-invalid') === 'true'
+          && periodField.getAttribute('aria-invalid') === 'true'""")
+        assert "näitajat" in evaluate("readingFeedback.textContent")
+
+        def select_for_task(indicator, activity, periods):
+            assert evaluate(f"""(([indicator, activity, periods]) => {{
+              indicatorSelect.value = indicator;
+              indicatorSelect.dispatchEvent(new Event('change', {{bubbles:true}}));
+              activitySelect.value = activity;
+              activitySelect.dispatchEvent(new Event('change', {{bubbles:true}}));
+              for (const input of periodOptions.querySelectorAll('input')) {{
+                if (input.checked !== periods.includes(input.value)) input.click();
+              }}
+              return selectedPeriodCodes.textContent === periods.join(', ');
+            }})({json.dumps([indicator, activity, periods])})""")
+            evaluate("checkSelection.click()")
+
+        select_for_task("GR_W_AVG", "TOTAL", ["2026Q2"])
+        assert evaluate("!nextSelectionTask.hidden && valueCount.textContent === '= 1 väärtus'")
+        evaluate("nextSelectionTask.click()")
+        assert evaluate("selectionTaskCount.textContent") == "Ülesanne 2 / 3"
+        select_for_task("GR_W_D5", "P", ["2025Q2", "2026Q2"])
+        assert evaluate("!nextSelectionTask.hidden && valueCount.textContent === '= 2 väärtust'")
+        evaluate("nextSelectionTask.click()")
+        assert evaluate("selectionTaskCount.textContent") == "Ülesanne 3 / 3"
+        select_for_task("NR_EMPL", "F", ["2025Q1", "2025Q2", "2025Q3", "2025Q4"])
+        assert evaluate("""!quizSection.hidden && progressValue.textContent === '67%'
+          && !selectionComplete.hidden && valueCount.textContent === '= 4 väärtust'""")
+        evaluate("readingSection.scrollIntoView({block:'start', behavior:'instant'})")
+        screenshot("api1-selection-desktop.png")
 
         evaluate("quizOptions.children[1].click()")
         assert evaluate("!quizFeedback.hidden && !quizNext.hidden && quizCount.textContent === 'Küsimus 1 / 3'")
@@ -135,16 +182,17 @@ with tempfile.TemporaryDirectory(prefix="andmep-api1-chrome-") as profile:
 
         command("Emulation.setDeviceMetricsOverride", {"width": 390, "height": 844, "deviceScaleFactor": 1, "mobile": True})
         assert evaluate("document.documentElement.scrollWidth <= innerWidth")
-        evaluate("stageCard.scrollIntoView({block:'start', behavior:'instant'})")
-        screenshot("api1-feedback-mobile.png")
+        evaluate("readingSection.scrollIntoView({block:'start', behavior:'instant'})")
+        screenshot("api1-selection-mobile.png")
 
         evaluate("resetButton.click()")
         assert evaluate("""requestLanguage.value === 'et' && progressValue.textContent === '0%'
           && stageCard.hidden && readingSection.hidden && quizSection.hidden
-          && !indicatorCode.disabled && indicatorCode.value === ''""")
+          && selectionTaskCount.textContent === 'Ülesanne 1 / 3'""")
         send_get()
         assert evaluate("JSON.parse(responseOutput.textContent)") == snapshots["et"]
-        print("API 1 GET flow passed in both response languages, including metadata reading, quiz and reset.")
+        assert evaluate("indicatorSelect.value === 'GR_W_AVG' && activitySelect.value === 'TOTAL' && valueCount.textContent === '= 3 väärtust'")
+        print("API 1 GET flow passed in both languages, with dynamic choices, three selection tasks, quiz and reset.")
     finally:
         process.terminate()
         process.wait(timeout=10)

@@ -16,15 +16,35 @@
   const readingSection = $("#readingSection");
   const readingForm = $("#readingForm");
   const readingFeedback = $("#readingFeedback");
+  const indicatorSelect = $("#indicatorSelect");
+  const activitySelect = $("#activitySelect");
+  const periodField = $("#periodField");
+  const nextSelectionTask = $("#nextSelectionTask");
   const quizSection = $("#quizSection");
   const quizOptions = $("#quizOptions");
   const quizFeedback = $("#quizFeedback");
   const quizNext = $("#quizNext");
 
-  const codeChecks = [
-    { field: $("#indicatorCode"), code: "GR_W_AVG", variable: "Näitaja" },
-    { field: $("#activityCode"), code: "TOTAL", variable: "Tegevusala" },
-    { field: $("#periodCode"), code: "2026Q2", variable: "Vaatlusperiood" }
+  const defaultPeriods = new Set(["2024Q2", "2025Q2", "2026Q2"]);
+  const selectionTasks = [
+    {
+      prompt: "Vali kõigi tegevusalade keskmine brutokuupalk 2026. aasta II kvartalis.",
+      indicator: "GR_W_AVG",
+      activity: "TOTAL",
+      periods: ["2026Q2"]
+    },
+    {
+      prompt: "Vali hariduse tegevusala brutokuupalga mediaan 2025. ja 2026. aasta II kvartalis.",
+      indicator: "GR_W_D5",
+      activity: "P",
+      periods: ["2025Q2", "2026Q2"]
+    },
+    {
+      prompt: "Vali ehituse tegevusala töötajate arv 2025. aasta kõigis kvartalites.",
+      indicator: "NR_EMPL",
+      activity: "F",
+      periods: ["2025Q1", "2025Q2", "2025Q3", "2025Q4"]
+    }
   ];
   const quiz = [
     {
@@ -47,12 +67,13 @@
     }
   ];
 
-  const stepTitles = ["1. GET-päring", "2. Vastuse lugemine", "3. Lühitest"];
+  const stepTitles = ["1. GET-päring", "2. Andmevalik", "3. Lühitest"];
   let savedMetadata;
   let response = null;
   let pendingResponse = null;
   let running = false;
   let completedSteps = 0;
+  let selectionTaskIndex = 0;
   let quizIndex = 0;
   let quizScore = 0;
   let answered = false;
@@ -143,6 +164,7 @@
 
   function revealResponse() {
     if (!pendingResponse) return;
+    const keepSelection = response !== null;
     response = pendingResponse;
     pendingResponse = null;
     $("#responsePath").textContent = new URL(response.address).pathname;
@@ -151,6 +173,7 @@
     renderJson();
     stageCard.hidden = false;
     $(".lab-grid").classList.remove("result-pending");
+    renderSelectionChoices(keepSelection);
     readingSection.hidden = false;
     completedSteps = Math.max(1, completedSteps);
     updateProgress();
@@ -158,28 +181,125 @@
     stageCard.scrollIntoView({ block: "nearest" });
   }
 
-  function checkCodes(event) {
-    event.preventDefault();
-    if (!response || completedSteps >= 2) return;
-    const mismatches = codeChecks.filter(({ field, code }) => {
-      const wrong = field.value !== code;
-      field.setAttribute("aria-invalid", String(wrong));
-      return wrong;
+  function selectedPeriods() {
+    return $$("#periodOptions input:checked").map(input => input.value);
+  }
+
+  function fillSelect(select, variable, keepSelection) {
+    const previous = keepSelection ? select.value : variable.values[0];
+    const options = variable.values.map((value, index) => {
+      return new Option(variable.valueTexts[index] + " · " + value, value);
     });
+    select.replaceChildren(...options);
+    if (variable.values.includes(previous)) select.value = previous;
+  }
+
+  function renderSelectionChoices(keepSelection) {
+    const [indicator, activity, period] = ["Näitaja", "Tegevusala", "Vaatlusperiood"].map(code =>
+      response.body.variables.find(variable => variable.code === code)
+    );
+    const checkedPeriods = keepSelection ? new Set(selectedPeriods()) : defaultPeriods;
+    fillSelect(indicatorSelect, indicator, keepSelection);
+    fillSelect(activitySelect, activity, keepSelection);
+
+    const years = new Map();
+    period.values.forEach((code, index) => {
+      const year = code.slice(0, 4);
+      if (!years.has(year)) years.set(year, []);
+      years.get(year).push({ code, name: period.valueTexts[index] });
+    });
+    const groups = [...years].map(([year, periods]) => {
+      const group = document.createElement("div");
+      group.className = "period-year";
+      const heading = document.createElement("b");
+      heading.textContent = year;
+      const grid = document.createElement("div");
+      grid.className = "period-year-grid";
+
+      periods.forEach(({ code, name }) => {
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.value = code;
+        input.checked = checkedPeriods.has(code);
+        input.setAttribute("aria-label", name);
+        const text = document.createElement("span");
+        text.className = "period-label";
+        text.textContent = name.replace(year + " ", "").replace("kvartal", "kv");
+        label.append(input, text);
+        grid.append(label);
+      });
+
+      group.append(heading, grid);
+      return group;
+    });
+    $("#periodOptions").replaceChildren(...groups);
+    $("#selectionCounts").textContent = indicator.values.length + " näitajat · " + activity.values.length
+      + " tegevusala · " + period.values.length + " vaatlusperioodi";
+    updateSelectionSummary();
+  }
+
+  function updateSelectionSummary() {
+    const periods = selectedPeriods();
+    const count = periods.length;
+    $("#selectedIndicatorCode").textContent = indicatorSelect.value;
+    $("#selectedActivityCode").textContent = activitySelect.value;
+    $("#selectedPeriodCodes").textContent = count ? periods.join(", ") : "Valik puudub";
+    $("#selectionMath").textContent = "1 × 1 × " + count;
+    $("#valueCount").textContent = "= " + count + (count === 1 ? " väärtus" : " väärtust");
+  }
+
+  function clearSelectionFeedback() {
+    for (const field of [indicatorSelect, activitySelect, periodField]) field.removeAttribute("aria-invalid");
+    readingFeedback.hidden = true;
+    nextSelectionTask.hidden = true;
+  }
+
+  function renderSelectionTask() {
+    clearSelectionFeedback();
+    const task = selectionTasks[selectionTaskIndex];
+    $("#selectionTask").hidden = !task;
+    $("#selectionActions").hidden = !task;
+    $("#selectionComplete").hidden = Boolean(task);
+    if (!task) return;
+    $("#selectionTaskCount").textContent = "Ülesanne " + (selectionTaskIndex + 1) + " / " + selectionTasks.length;
+    $("#selectionTaskPrompt").textContent = task.prompt;
+  }
+
+  function checkSelection(event) {
+    event.preventDefault();
+    const task = selectionTasks[selectionTaskIndex];
+    if (!response || !task) return;
+    const periods = selectedPeriods();
+    const checks = [
+      { field: indicatorSelect, label: "näitajat", correct: indicatorSelect.value === task.indicator },
+      { field: activitySelect, label: "tegevusala", correct: activitySelect.value === task.activity },
+      { field: periodField, label: "vaatlusperioode",
+        correct: periods.length === task.periods.length && task.periods.every(code => periods.includes(code)) }
+    ];
+    checks.forEach(({ field, correct }) => field.setAttribute("aria-invalid", String(!correct)));
+    const mismatches = checks.filter(check => !check.correct);
     readingFeedback.hidden = false;
-    readingFeedback.className = mismatches.length ? "feedback error" : "feedback success";
     if (mismatches.length) {
-      const variables = mismatches.map(({ variable }) => "„" + variable + "”").join(", ");
-      readingFeedback.textContent = "Vaata JSON-is uuesti järgmisi muutujaid: " + variables + ". Kood asub nimetusega samal kohal väljal values.";
+      readingFeedback.className = "feedback error";
+      const fields = new Intl.ListFormat("et").format(mismatches.map(check => check.label));
+      readingFeedback.textContent = "Kontrolli uuesti " + fields + ".";
+      nextSelectionTask.hidden = true;
       return;
     }
-    readingFeedback.textContent = "Kõik kolm koodi vastavad tabeli kirjeldusele.";
-    codeChecks.forEach(({ field }) => { field.disabled = true; });
-    $("#checkCodes").disabled = true;
+    if (selectionTaskIndex + 1 < selectionTasks.length) {
+      readingFeedback.className = "feedback success";
+      readingFeedback.textContent = "Valitud näitaja, tegevusala ja perioodid vastavad ülesandele.";
+      nextSelectionTask.hidden = false;
+      return;
+    }
+    selectionTaskIndex++;
+    renderSelectionTask();
     quizSection.hidden = false;
     completedSteps = 2;
     updateProgress();
     renderQuestion();
+    $("#practiceTitle").focus();
   }
 
   function renderQuestion() {
@@ -238,6 +358,7 @@
     response = null;
     pendingResponse = null;
     completedSteps = 0;
+    selectionTaskIndex = 0;
     quizIndex = 0;
     quizScore = 0;
     answered = false;
@@ -247,13 +368,7 @@
     stageCard.hidden = true;
     $(".lab-grid").classList.add("result-pending");
     readingSection.hidden = true;
-    readingFeedback.hidden = true;
-    readingForm.reset();
-    codeChecks.forEach(({ field }) => {
-      field.disabled = false;
-      field.removeAttribute("aria-invalid");
-    });
-    $("#checkCodes").disabled = false;
+    renderSelectionTask();
     quizSection.hidden = true;
     $("#quizQuestion").hidden = false;
     $("#quizSummary").hidden = true;
@@ -277,8 +392,18 @@
   });
   flowDialog.addEventListener("close", revealResponse);
   responsePart.addEventListener("change", renderJson);
-  readingForm.addEventListener("submit", checkCodes);
-  codeChecks.forEach(({ field }) => field.addEventListener("change", () => field.removeAttribute("aria-invalid")));
+  readingForm.addEventListener("submit", checkSelection);
+  readingForm.addEventListener("change", () => {
+    updateSelectionSummary();
+    clearSelectionFeedback();
+  });
+  nextSelectionTask.addEventListener("click", () => {
+    if (nextSelectionTask.hidden) return;
+    selectionTaskIndex++;
+    renderSelectionTask();
+    $("#selectionTaskPrompt").focus();
+  });
+  renderSelectionTask();
   quizOptions.addEventListener("click", chooseAnswer);
   quizNext.addEventListener("click", nextQuestion);
   $("#resetButton").addEventListener("click", reset);

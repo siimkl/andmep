@@ -418,6 +418,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
                 assert state["heading"] == "GET-päring Statistikaameti API-s"
                 assert evaluate("readingSection.hidden && quizSection.hidden")
             elif route == "api2":
+                assert evaluate("getMetadata.textContent.trim()") == "Saada GET-päring"
                 evaluate("document.querySelector('#getMetadata').click()")
                 revealed = json.loads(evaluate("JSON.stringify({hidden:document.querySelector('.stage-card').hidden,pending:document.querySelector('.lab-grid').classList.contains('result-pending')})"))
                 assert revealed == {"hidden": False, "pending": False}, {route: revealed}

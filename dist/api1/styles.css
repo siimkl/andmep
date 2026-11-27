@@ -2283,9 +2283,79 @@ footer { padding-top: 24px; }
 }
 .get-code-fields {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: .75rem;
 }
+.get-exercise .selection-source-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .25rem .6rem;
+  margin-bottom: 1rem;
+}
+.selection-task {
+  margin: 1rem 0;
+  padding: .85rem 1rem;
+  border: 1px solid #c4d5e0;
+  border-radius: 9px;
+  background: #f5f9fb;
+}
+.selection-task p,
+.selection-task h3 {
+  margin: 0;
+}
+.selection-task p {
+  margin-bottom: .25rem;
+  color: #38546b;
+}
+#periodField {
+  min-width: 0;
+  margin-inline: 0;
+  padding: .75rem;
+  border: 1px solid #c4d5e0;
+  border-radius: 9px;
+}
+#periodField legend {
+  padding: 0 .3rem;
+  color: #102f55;
+  font-weight: 700;
+}
+.get-exercise #periodOptions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.get-exercise .period-label {
+  min-height: 44px;
+}
+.get-exercise .check-pills input:checked + span {
+  border-color: #5587b0;
+  color: #102f55;
+  background: #e4f0fb;
+  font-weight: 700;
+}
+.get-exercise .check-pills input:focus-visible + span {
+  outline: 2px solid #245c9b;
+  outline-offset: 2px;
+}
+.get-exercise select[aria-invalid="true"], #periodField[aria-invalid="true"] {
+  border-color: #ad4f3d;
+}
+.get-selection-codes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem 1.6rem;
+  margin: 1rem 0;
+  color: #38546b;
+}
+.get-selection-codes dt { font-weight: 700; }
+.get-selection-codes dd {
+  margin: .2rem 0 0;
+  overflow-wrap: anywhere;
+}
+.get-selection-codes > div { min-width: 0; }
+.get-exercise .selection-math {
+  justify-content: flex-start;
+  gap: .7rem;
+}
+.get-selection-note { color: #38546b; }
 .get-exercise .primary-button {
   width: fit-content;
 }
@@ -2327,10 +2397,11 @@ footer { padding-top: 24px; }
 
 @media (max-width: 1040px) {
   .get-lab { grid-template-columns: minmax(0, 1fr); }
+  .get-exercise #periodOptions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 760px) {
   .get-steps { grid-template-columns: minmax(0, 1fr); }
   .get-steps .step { min-height: 44px; }
-  .get-code-fields { grid-template-columns: minmax(0, 1fr); }
+  .get-code-fields, .get-exercise #periodOptions { grid-template-columns: minmax(0, 1fr); }
   .get-response .terminal pre { white-space: pre-wrap; overflow-wrap: anywhere; }
 }
