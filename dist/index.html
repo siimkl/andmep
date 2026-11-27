@@ -3,110 +3,73 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Andmepädevuse viis interaktiivset praktikumi: API-päringud, R, tehisaru API, veebikraapimine ja AI treeningandmed.">
-  <title>Andmepädevus · interaktiivsed praktikumid</title>
-  <link rel="stylesheet" href="landing.css?v=6">
+  <meta name="description" content="Andmepädevuse praktikumid käsitlevad API kaudu andmete pärimist, andmetöötlust R-is, veebikraapimist ja treeningandmete märgendamist.">
+  <title>Andmepädevuse praktikumid</title>
+  <link rel="stylesheet" href="landing.css?v=7">
   <link rel="stylesheet" href="api-common.css?v=15">
   <link rel="stylesheet" href="readability.css?v=4">
 </head>
 <body>
   <main class="launcher">
-    <header class="launcher-hero">
-      <div class="brand"><span aria-hidden="true"></span><a class="api-home-link" href="./" aria-label="Mine Andmepädevuse avalehele" aria-current="page">ANDMEPÄDEVUS</a> <span class="brand-suffix" aria-hidden="true">· PRAKTIKUMID</span></div>
-      <div class="hero-grid">
-        <div>
-          <p class="kicker">VIIS INTERAKTIIVSET PRAKTIKUMI</p>
-          <h1>Vali teema, millest alustada.</h1>
-          <p class="intro">Õpi API-päringuid, andmetöötlust R-is, tehisaru API kasutamist, veebikraapimist ja treeningandmete märgendamist. API-teekond koosneb kolmest järjestikusest praktikumist; ülejäänud kahte saad läbida eraldi.</p>
-        </div>
-        <div class="sequence" aria-label="Andmepädevuse õpiteed">
-          <section class="path-section" aria-labelledby="apiPathTitle">
-            <div class="path-heading"><b id="apiPathTitle">API ÕPITEEKOND</b><small>Läbi soovituslikult selles järjekorras</small></div>
-            <div class="api-path">
-              <a class="path-card path-api1" href="./api1/"><strong>API 1</strong><small>Statistikaameti andmete pärimine API kaudu</small></a><i aria-hidden="true"></i>
-              <a class="path-card path-api2" href="./api2/"><strong>API 2</strong><small>Küsi API-andmed ja töötle neid R-is</small></a><i aria-hidden="true"></i>
-              <a class="path-card path-api3" href="./api3/"><strong>API 3</strong><small>Saada R-is arvutatud tulemus keelemudelile</small></a>
-            </div>
-          </section>
-          <section class="path-section standalone-section" aria-labelledby="standalonePathTitle">
-            <div class="path-heading"><b id="standalonePathTitle">TEISED ANDMETÖÖ PRAKTIKUMID</b><small>Neid saad läbida API-teekonnast sõltumatult</small></div>
-            <div class="standalone-path">
-              <a class="path-card path-scraping" href="./kraapimine/"><strong>Veebikraapimine</strong><small>Leia HTML-ist andmed ja koosta kontrollitud tabel</small></a>
-              <a class="path-card path-ai" href="./ai-andmetoo/"><strong>AI-andmetöö</strong><small>Märgenda juhtumid ja vaata mõju mudeli soovitustele</small></a>
-            </div>
-          </section>
-        </div>
-      </div>
+    <header class="page-intro">
+      <h1>Andmepädevuse praktikumid</h1>
+      <p>Viis brauseris läbitavat harjutust käsitlevad andmete hankimist, töötlemist ja kasutamist.</p>
     </header>
 
-    <section class="chooser" aria-labelledby="chooseTitle">
-      <div class="chooser-head">
-        <div><span class="step-label">VALI PRAKTIKUM</span><h2 id="chooseTitle">Millise praktikumi valid?</h2></div>
-        <p>Praktikumi saad hiljem vahetada iga mooduli päises.</p>
-      </div>
+    <nav class="practicums" aria-label="Praktikumide loend">
+      <section class="practicum-group" aria-labelledby="api-practicums">
+        <header class="group-intro">
+          <h2 id="api-practicums">API-praktikumid</h2>
+          <p>Neid kolme praktikumi on soovitatav läbida esitatud järjekorras.</p>
+        </header>
+        <ol class="practicum-list" role="list">
+          <li>
+            <a class="practicum-link" href="./api1/" aria-labelledby="api1-title">
+              <h3 id="api1-title"><span class="module-code">API 1</span> <span class="practicum-title">API kaudu andmete pärimise näide</span></h3>
+              <p>Statistikaameti tabeli PA111 näitel koostatakse GET- ja POST-päring ning kontrollitakse JSON-vastuse sisu ja ühikut.</p>
+              <span class="duration">Umbes 20 min</span>
+            </a>
+          </li>
+          <li>
+            <a class="practicum-link" href="./api2/" aria-labelledby="api2-title">
+              <h3 id="api2-title"><span class="module-code">API 2</span> <span class="practicum-title">API-andmete töötlemine R-is</span></h3>
+              <p>Statistikaameti API-st saadud palgaandmed töödeldakse R-is. Palgamuutus arvutatakse ja esitatakse joonisel.</p>
+              <span class="duration">Umbes 20 min</span>
+            </a>
+          </li>
+          <li>
+            <a class="practicum-link" href="./api3/" aria-labelledby="api3-title">
+              <h3 id="api3-title"><span class="module-code">API 3</span> <span class="practicum-title">Keelemudeli kasutamine API kaudu</span></h3>
+              <p>R-is arvutatud palgamuutus saadetakse Gemini API kaudu keelemudelile. Mudeli tõlgendust võrreldakse lähteandmetega.</p>
+              <span class="duration">Umbes 20 min</span>
+            </a>
+          </li>
+        </ol>
+      </section>
 
-      <nav class="api-options" aria-label="Andmepädevuse praktikumid">
-        <a class="api-card" href="./api1/">
-          <span class="card-body">
-            <span class="api-number">01</span>
-            <span class="level">ALUSTA SIIT · PÕHITASE</span>
-            <strong>API 1</strong>
-            <b>API kaudu andmete pärimise näide</b>
-            <small>Statistikaameti tabeli kirjeldus, GET- ja POST-päring, JSON-vastus ning tulemuse sisuline kontroll.</small>
-            <em>≈ 20 min</em>
-            <span class="card-arrow" aria-hidden="true">→</span>
-          </span>
-        </a>
-
-        <a class="api-card" href="./api2/">
-          <span class="card-body">
-            <span class="api-number">02</span>
-            <span class="level">JÄRGMINE SAMM · RSTUDIO</span>
-            <strong>API 2</strong>
-            <b>Töötle API-andmeid RStudios</b>
-            <small>Küsi andmed Statistikaametist, töötle neid R-is ja visualiseeri muutust.</small>
-            <em>≈ 20 min</em>
-            <span class="card-arrow" aria-hidden="true">→</span>
-          </span>
-        </a>
-
-        <a class="api-card" href="./api3/">
-          <span class="card-body">
-            <span class="api-number">03</span>
-            <span class="level">EDASIJÕUDNUTELE · TEHISARU</span>
-            <strong>API 3</strong>
-            <b>Ühenda tehisaru API oma rakendusega</b>
-            <small>Saada R-is arvutatud tulemus Gemini API kaudu mudelile ja kontrolli saadud tõlgendust.</small>
-            <em>≈ 20 min</em>
-            <span class="card-arrow" aria-hidden="true">→</span>
-          </span>
-        </a>
-
-        <a class="api-card" href="./kraapimine/">
-          <span class="card-body">
-            <span class="api-number">04</span>
-            <span class="level">ANDMETE KOGUMINE · R + RVEST</span>
-            <strong>Veebikraapimine</strong>
-            <b>Muuda veebileht kontrollitud andmetabeliks</b>
-            <small>Hinda kraapimise sobivust, leia HTML-ist õiged selektorid, kogu R-is andmed ja kontrolli tulemust.</small>
-            <em>≈ 30 min</em>
-            <span class="card-arrow" aria-hidden="true">→</span>
-          </span>
-        </a>
-
-        <a class="api-card" href="./ai-andmetoo/">
-          <span class="card-body">
-            <span class="api-number">05</span>
-            <span class="level">AI ANDMETÖÖ · MÄRGENDAMINE</span>
-            <strong>Kes õpetab tehisaru?</strong>
-            <b>Märgenda juhtumid ja vaata mõju mudelile</b>
-            <small>Vali andmed ja märgendid, koosta juhis ning vaata, kuidas treeningandmed muudavad mudeli soovitusi.</small>
-            <em>≈ 20–25 min</em>
-            <span class="card-arrow" aria-hidden="true">→</span>
-          </span>
-        </a>
-      </nav>
-    </section>
+      <section class="practicum-group" aria-labelledby="other-practicums">
+        <header class="group-intro">
+          <h2 id="other-practicums">Muud praktikumid</h2>
+          <p>Neid saab läbida API-praktikumidest sõltumatult.</p>
+        </header>
+        <ul class="practicum-list" role="list">
+          <li>
+            <a class="practicum-link" href="./kraapimine/" aria-labelledby="scraping-title">
+              <h3 id="scraping-title"><span class="practicum-title">Veebikraapimine R-is</span></h3>
+              <p>R-i paketiga <code>rvest</code> kogutakse näidisveebist 20 tsitaati, kontrollitakse andmeid ja salvestatakse tabel CSV-failina.</p>
+              <span class="duration">Umbes 30 min</span>
+            </a>
+          </li>
+          <li>
+            <a class="practicum-link" href="./ai-andmetoo/" aria-labelledby="labeling-title">
+              <h3 id="labeling-title"><span class="practicum-title">Treeningandmete märgendamine</span></h3>
+              <p>Koostatakse märgendamisjuhis, märgendatakse tööotsijate näidiskirjed ning uuritakse märgendite mõju mudeli soovitustele.</p>
+              <span class="duration">20–25 min</span>
+            </a>
+          </li>
+        </ul>
+      </section>
+    </nav>
 
     <footer class="site-footer">
       <div class="footer-author">
@@ -134,7 +97,7 @@
           <span>Tööotsijate andmed on väljamõeldud. Rakendus ei tee väliseid API-päringuid.</span>
         </div>
       </div>
-      <div class="footer-note"><small>Metoodiline märkus</small><span><b>Interaktiivsed õppesimulatsioonid.</b> API-praktikumid kasutavad Statistikaameti tabeli PA111 näidet, veebikraapimine harjutuslehte <code>quotes.toscrape.com</code> ja AI-andmetöö sünteetilisi juhtumeid.</span></div>
+      <div class="footer-note"><small>Harjutuste andmeallikad</small><span>API-praktikumide palgaandmed pärinevad Statistikaameti tabelist PA111 ja veebikraapimise harjutus kasutab näidisveebi <code>quotes.toscrape.com</code>.</span></div>
     </footer>
   </main>
 </body>

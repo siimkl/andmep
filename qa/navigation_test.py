@@ -93,10 +93,10 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
             for event_type in ("mousePressed", "mouseReleased"):
                 command("Input.dispatchMouseEvent", {"type": event_type, "button": "left", "clickCount": 1, **point})
 
-        def open_practicum_card(route):
+        def open_practicum(route):
             command("Page.navigate", {"url": URL})
             wait_for_path("/")
-            click_element(f'.api-card[href="./{route}/"]')
+            click_element(f'.practicum-link[href="./{route}/"]')
             wait_for_path(f"/{route}/")
 
         def assert_shared_footer(columns):
@@ -162,23 +162,19 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
 
         landing = json.loads(evaluate("""JSON.stringify({
           title: document.title,
-          heading: document.querySelector('.hero-grid h1').textContent.trim(),
-          cards: [...document.querySelectorAll('a.api-card')].map(card => card.getAttribute('href')),
-          hasSelectionStep: Boolean(document.querySelector('.start-panel, .api-card input')),
-          mapLinks: document.querySelectorAll('.sequence .path-card').length,
-          apiPathLinks: document.querySelectorAll('.api-path .path-card').length,
-          standaloneLinks: document.querySelectorAll('.standalone-path .path-card').length,
+          heading: document.querySelector('.page-intro h1').textContent.trim(),
+          links: [...document.querySelectorAll('main a')].map(link => link.getAttribute('href')),
+          orderedLinks: document.querySelectorAll('.practicums ol .practicum-link').length,
+          independentLinks: document.querySelectorAll('.practicums ul .practicum-link').length,
           footerDetails: document.querySelectorAll('.site-footer .footer-detail').length,
           overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth
         })"""))
         assert landing == {
-            "title": "Andmepädevus · interaktiivsed praktikumid",
-            "heading": "Vali teema, millest alustada.",
-            "cards": ["./api1/", "./api2/", "./api3/", "./kraapimine/", "./ai-andmetoo/"],
-            "hasSelectionStep": False,
-            "mapLinks": 5,
-            "apiPathLinks": 3,
-            "standaloneLinks": 2,
+            "title": "Andmepädevuse praktikumid",
+            "heading": "Andmepädevuse praktikumid",
+            "links": ["./api1/", "./api2/", "./api3/", "./kraapimine/", "./ai-andmetoo/"],
+            "orderedLinks": 3,
+            "independentLinks": 2,
             "footerDetails": 4,
             "overflow": False,
         }, landing
@@ -197,7 +193,7 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
         }
         module_states = {}
         for route, selected in modules.items():
-            open_practicum_card(route)
+            open_practicum(route)
             assert_shared_footer(4)
             state = json.loads(evaluate("""JSON.stringify({
               selected: document.querySelector('.api-version-select').value,
@@ -609,18 +605,18 @@ with tempfile.TemporaryDirectory(prefix="andmep-chrome-") as profile:
         wait_for_path("/")
         mobile = json.loads(evaluate("""JSON.stringify({
           width: document.documentElement.clientWidth,
-          cards: document.querySelectorAll('.api-card').length,
-          columns: getComputedStyle(document.querySelector('.api-options')).gridTemplateColumns.split(' ').length,
+          links: document.querySelectorAll('.practicum-link').length,
+          columns: getComputedStyle(document.querySelector('.practicum-group')).gridTemplateColumns.split(' ').length,
           overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
-          cardsFit: [...document.querySelectorAll('.api-card')].every(card => card.getBoundingClientRect().right <= innerWidth)
+          linksFit: [...document.querySelectorAll('.practicum-link')].every(link => link.getBoundingClientRect().right <= innerWidth)
         })"""))
-        assert mobile == {"width": 390, "cards": 5, "columns": 1, "overflow": False, "cardsFit": True}, mobile
+        assert mobile == {"width": 390, "links": 5, "columns": 1, "overflow": False, "linksFit": True}, mobile
         assert_shared_footer(1)
         screenshot("landing-mobile.png")
 
         mobile_modules = {}
         for route in modules:
-            open_practicum_card(route)
+            open_practicum(route)
             assert_shared_footer(1)
             state = json.loads(evaluate("""JSON.stringify({
               overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
